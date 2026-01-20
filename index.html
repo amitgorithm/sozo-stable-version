@@ -782,6 +782,7 @@ const MENU = {
     {key:'reports', label:'History', icon:'fa-file-medical'}
   ],
   doctor: [
+    {key:'home', label:'Home', icon:'fa-home'},
     {key:'dashboard', label:'Dashboard', icon:'fa-chart-line'},
     {key:'appointments', label:'Appointments/ Schedules', icon:'fa-calendar-check', children: [
       {key:'schedule', label:'Today\'s Schedule'},
@@ -791,12 +792,6 @@ const MENU = {
     {key:'patientdetails', label:'Patient Details', icon:'fa-user-injured', children: [
       {key:'patients', label:'My Patients'},
       {key:'reports', label:'Patient Reports'}
-    ]},
-    {key:'wellness', label:'Medical Assessment', icon:'fa-spa', children: [
-      {key:'fnon', label:'FNON Assessment'},
-      {key:'brainmap', label:'Brain Mapping'},
-      {key:'prs', label:'PRS Assessment'},
-      {key:'finalreport', label:'Final Report'}
     ]},
     {key:'eshop', label:'Medical E-Shop', icon:'fa-cart-shopping'},
     {key:'learning', label:'Learning & Dev', icon:'fa-graduation-cap'},
@@ -14375,12 +14370,45 @@ const PRS_QUESTIONNAIRES = {
 
 function renderPRSLanding() {
   const area = document.getElementById('contentArea');
+  const patientContext = globalState.prsPatientContext || {};
+  const hasPatient = patientContext.patientId && globalSelectedPatientId;
+  
   area.innerHTML = `
     <div class="p-8">
+    
+    ${getAssessmentNavigation('prs')}
+    
+    ${hasPatient ? `
+    <!-- Patient Navigation Section -->
+    <div class="card p-4 mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-600">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-users text-green-600 text-xl"></i>
+          <div>
+            <label class="text-xs font-bold text-green-900 uppercase mb-1 block">Navigate to Patient</label>
+            <select id="patientNavigationSelectPRS" class="input-royal pr-10 font-bold border-green-300 text-green-600 focus:border-green-500 focus:ring-green-500">
+              ${sampleData.patients.map(pt => `
+                <option value="${pt.id}" ${pt.id === globalSelectedPatientId ? 'selected' : ''}>${pt.name} (${pt.id})</option>
+              `).join('')}
+            </select>
+          </div>
+        </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Back to Patient History
+        </button>
+      </div>
+    </div>
+    ` : ''}
+    
     <div class="flex flex-col gap-6">
-      <div>
-        <h2 class="text-3xl font-black text-slate-900">PRS Assessment</h2>
-        <p class="text-slate-600 mt-1">Select a condition to start your assessment</p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-black text-slate-900">PRS Assessment</h2>
+          <p class="text-slate-600 mt-1">Select a condition to start your assessment</p>
+        </div>
+        <button onclick="loadSection('finalreport')" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition">
+          Next: Final Report <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
       </div>
 
       <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -14400,6 +14428,25 @@ function renderPRSLanding() {
     </div>
     </div>
   `;
+  
+  // Add event listener for patient navigation
+  setTimeout(() => {
+    const patientNavSelectPRS = document.getElementById('patientNavigationSelectPRS');
+    if (patientNavSelectPRS) {
+      patientNavSelectPRS.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            // Reload the PRS page with new patient
+            renderPRSDoctor();
+          }
+        }
+      });
+    }
+  }, 50);
 }
 
 function renderPRSForm(conditionId) {
@@ -14744,15 +14791,20 @@ function renderPRSForm(conditionId) {
         })()}
 
         <!-- Submit Button -->
-        <div class="flex items-center gap-3 flex-wrap">
-          <button type="submit" id="prsSubmit" class="bg-gradient-to-r from-sozo-600 to-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50">
-            Submit Assessment
-          </button>
-          <button type="button" id="prsResetBtn" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-bold hover:bg-slate-300 transition">
-            Reset Answers
-          </button>
-          <button type="reset" onclick="renderPRSLanding()" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-bold hover:bg-slate-300 transition">
-            Cancel
+        <div class="flex items-center gap-3 flex-wrap justify-between">
+          <div class="flex items-center gap-3 flex-wrap">
+            <button type="submit" id="prsSubmit" class="bg-gradient-to-r from-sozo-600 to-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50">
+              Submit Assessment
+            </button>
+            <button type="button" id="prsResetBtn" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-bold hover:bg-slate-300 transition">
+              Reset Answers
+            </button>
+            <button type="reset" onclick="renderPRSLanding()" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-bold hover:bg-slate-300 transition">
+              Cancel
+            </button>
+          </div>
+          <button type="button" onclick="loadSection('finalreport')" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition">
+            Next: Final Report <i class="fa-solid fa-arrow-right ml-2"></i>
           </button>
         </div>
       </form>
@@ -15473,6 +15525,32 @@ function renderFinalReport() {
     } : null;
 
   area.innerHTML = `
+    ${getAssessmentNavigation('finalreport')}
+    
+    <!-- Patient Navigation Section (Doctor Only) -->
+    ${(currentRole === 'doctor' || currentRole === 'admin') ? `
+      <div class="mb-6 print:hidden">
+        <div class="card p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-l-amber-600">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-users text-amber-600 text-xl"></i>
+              <div>
+                <label class="text-xs font-bold text-amber-900 uppercase mb-1 block">Navigate to Patient</label>
+                <select id="patientNavigationSelectFinal" class="input-royal pr-10 font-bold border-amber-300 text-amber-600 focus:border-amber-500 focus:ring-amber-500">
+                  ${sampleData.patients.map(pt => `
+                    <option value="${pt.id}" ${pt.id === globalSelectedPatientId ? 'selected' : ''}>${pt.name} (${pt.id})</option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+            <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm">
+              <i class="fa-solid fa-arrow-left mr-2"></i>Back to Patient History
+            </button>
+          </div>
+        </div>
+      </div>
+    ` : ''}
+    
     <div id="finalReportContent" class="p-8 bg-white w-full">
     
     <!-- Header with Logo and Contact -->
@@ -15846,6 +15924,23 @@ function renderFinalReport() {
   populateFinalReportFields(p.id);
   
   setTimeout(() => {
+    // Patient Navigation Dropdown for Final Report
+    const patientNavSelectFinal = document.getElementById('patientNavigationSelectFinal');
+    if (patientNavSelectFinal) {
+      patientNavSelectFinal.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            // Reload the Final Report page with new patient
+            renderFinalReport();
+          }
+        }
+      });
+    }
+    
     const saveBtn = document.getElementById('saveFinalReportBtn');
     if (saveBtn) {
       saveBtn.addEventListener('click', () => {
@@ -15896,7 +15991,287 @@ function renderDoctor(key) {
   const d = users.doctor;
   const area = document.getElementById('contentArea');
 
-  if(key === 'dashboard') {
+  if(key === 'home') {
+    const today = new Date().toDateString();
+    const allAppts = sampleData.appointments;
+    const todayAppts = allAppts.filter(a => a.date === new Date().toLocaleDateString());
+    const nextAppt = allAppts.find(a => a.status === 'Scheduled');
+    const pendingFNON = 2; // Could be calculated from actual data
+    const todayRevenue = 2000;
+    const appointmentsLeftToday = todayAppts.filter(a => a.status !== 'Completed').length;
+    
+    area.innerHTML = `
+      <div class="p-6 bg-slate-50 min-h-screen">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-3xl font-bold text-slate-900 mb-1">Welcome back, ${d.name} 👋</h1>
+          <p class="text-slate-600">Here's everything you need for today's clinic</p>
+        </div>
+        <!-- Top Section: Next Appointment + Workshop (Side by Side) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <!-- Up Next Card -->
+          <div>
+            ${nextAppt ? `
+            <div class="bg-white rounded-xl p-6 shadow-lg relative overflow-hidden h-full border border-slate-200">
+              <div class="absolute top-0 left-0 w-24 h-24 bg-blue-100 opacity-30 rounded-full -translate-x-6 -translate-y-6"></div>
+              <div class="relative z-10">
+                <div class="inline-block bg-blue-100 px-2 py-1 rounded-full text-xs font-semibold mb-3 text-blue-700">
+                  Up Next
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-xl font-bold mb-1 text-slate-900">${nextAppt.patientName} <i class="fa-solid fa-eye text-sm ml-2"></i></h3>
+                    <span class="inline-block bg-blue-100 px-2 py-1 rounded-full text-xs text-blue-700">
+                      ${nextAppt.type}
+                    </span>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-3xl font-bold mb-2 text-slate-900">${nextAppt.time}</div>
+                    <button onclick="alert('Starting visit with ${nextAppt.patientName}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">
+                      Start Visit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ` : `
+            <div class="bg-gradient-to-br from-slate-300 to-slate-400 rounded-2xl p-6 text-white shadow-lg h-full flex items-center justify-center">
+              <div class="text-center">
+                <i class="fa-solid fa-calendar-check text-6xl mb-4 opacity-50"></i>
+                <p class="text-xl font-semibold">No upcoming appointments</p>
+              </div>
+            </div>
+            `}
+          </div>
+            
+          <!-- Upcoming Workshop Card -->
+          <div class="bg-white rounded-xl p-6 shadow-lg relative overflow-hidden border border-slate-200">
+            <div class="absolute top-0 left-0 w-24 h-24 bg-orange-100 opacity-30 rounded-full -translate-x-6 -translate-y-6"></div>
+            <div class="relative z-10">
+              <div class="inline-block bg-orange-100 px-2 py-1 rounded-full text-xs font-semibold mb-3 text-orange-700">
+                Upcoming Workshop
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-xl font-bold mb-1 text-slate-900">FNON Methodology Certification <i class="fa-solid fa-chalkboard-teacher text-sm ml-2"></i></h3>
+                  <span class="inline-block bg-orange-100 px-2 py-1 rounded-full text-xs text-orange-700">
+                    Advanced Training
+                  </span>
+                </div>
+                <div class="text-right">
+                  <div class="text-3xl font-bold mb-2 text-slate-900">Feb 15</div>
+                  <button onclick="loadSection('workshops')" class="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-700 transition text-sm">
+                    Register Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Cards (Below) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <!-- Appointments Left Today -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-calendar-days text-purple-600 text-xl"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-slate-900">${appointmentsLeftToday}<span class="text-lg text-slate-400">/12</span></div>
+                <div class="text-sm text-slate-500">Appointments Left Today</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending FNON -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-clipboard-list text-red-600 text-xl"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-slate-900">${pendingFNON}</div>
+                <div class="text-sm text-slate-500">Pending FNON</div>
+              </div>
+            </div>
+            <button onclick="loadSection('mypatients')" class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+              Review Now <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+
+          <!-- Today's Revenue -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-dollar-sign text-green-600 text-xl"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-slate-900">$${todayRevenue}</div>
+                <div class="text-sm text-slate-500">Today's Revenue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <!-- Header with Tabs -->
+          <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+              <div class="flex items-center gap-4">
+                <button onclick="filterAppointments('today')" class="appointment-filter-btn active px-4 py-2 rounded-lg font-semibold text-sm transition">
+                  Today's Appointments <span class="ml-2 bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">12</span>
+                </button>
+                <button onclick="filterAppointments('all')" class="appointment-filter-btn px-4 py-2 rounded-lg font-semibold text-sm transition">
+                  All Appointments <span class="ml-2 bg-slate-300 text-slate-700 px-2 py-0.5 rounded-full text-xs">120</span>
+                </button>
+              </div>
+              <button onclick="loadSection('allappointments'); setTimeout(() => { const btn = document.getElementById('docApptNewBtn'); if(btn) btn.click(); }, 100);" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                <i class="fa-solid fa-plus mr-2"></i>Appointment
+              </button>
+            </div>
+          </div>
+
+          <!-- Appointments Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
+                    <button class="flex items-center gap-2 hover:text-slate-900">
+                      Time <i class="fa-solid fa-sort text-xs"></i>
+                    </button>
+                  </th>
+                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
+                    <button class="flex items-center gap-2 hover:text-slate-900">
+                      Patient <i class="fa-solid fa-sort text-xs"></i>
+                    </button>
+                  </th>
+                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
+                    <button class="flex items-center gap-2 hover:text-slate-900">
+                      Type <i class="fa-solid fa-filter text-xs"></i>
+                    </button>
+                  </th>
+                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
+                    <button class="flex items-center gap-2 hover:text-slate-900">
+                      Status <i class="fa-solid fa-filter text-xs"></i>
+                    </button>
+                  </th>
+                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">Room</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentsTableBody">
+                ${allAppts.slice(0, 6).map((apt, idx) => `
+                  <tr class="border-b border-slate-100 hover:bg-slate-50 transition ${idx === 1 ? 'bg-blue-50' : ''}">
+                    <td class="py-4 px-6">
+                      <span class="font-semibold text-slate-900">${apt.time}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          ${apt.patientName.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <span class="font-medium text-slate-900">${apt.patientName} <i class="fa-solid fa-eye text-slate-400 text-xs ml-1"></i></span>
+                      </div>
+                    </td>
+                    <td class="py-4 px-6">
+                      <span class="text-sm text-slate-700">${apt.type}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                      ${apt.status === 'Completed' ? 
+                        '<span class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-check"></i> Completed</span>' : 
+                        idx === 1 ? 
+                        '<span class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-clock"></i> Up Next</span> <button class="ml-2 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700">Start Visit</button>' :
+                        apt.status === 'Cancelled' ?
+                        '<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-xmark"></i> Cancelled</span>' :
+                        '<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-regular fa-clock"></i> Scheduled</span>'
+                      }
+                    </td>
+                    <td class="py-4 px-6">
+                      <span class="text-sm font-medium text-slate-700">${apt.room || '101'}</span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Alerts Section (Right Side) -->
+        <div class="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-slate-900">Alerts</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <i class="fa-solid fa-clipboard-list text-orange-600 text-lg mt-1"></i>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-900 mb-1">FNON overdue for 7+ days</p>
+                <p class="text-xs text-slate-600">24 Sept, 2025 | 05:21 PM</p>
+              </div>
+              <button onclick="loadSection('mypatients')" class="text-blue-600 hover:text-blue-700 font-semibold text-sm whitespace-nowrap">
+                Review Now
+              </button>
+            </div>
+            
+            <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <i class="fa-solid fa-calendar-xmark text-red-600 text-lg mt-1"></i>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-900 mb-1">3 Missed Appointments today</p>
+                <p class="text-xs text-slate-600">24 Sept, 2025 | 05:21 PM</p>
+              </div>
+              <button onclick="loadSection('schedule')" class="text-blue-600 hover:text-blue-700 font-semibold text-sm whitespace-nowrap">
+                Check No Shows
+              </button>
+            </div>
+            
+            <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <i class="fa-solid fa-book text-blue-600 text-lg mt-1"></i>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-900 mb-1">You're left with 23mins of FNON Methodology Certification</p>
+                <p class="text-xs text-slate-600">24 Sept, 2025 | 05:21 PM</p>
+              </div>
+              <button onclick="alert('Opening certification course')" class="text-blue-600 hover:text-blue-700 font-semibold text-sm whitespace-nowrap">
+                Watch Now
+              </button>
+            </div>
+            
+            <div class="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <i class="fa-solid fa-clipboard-list text-orange-600 text-lg mt-1"></i>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-900 mb-1">FNON overdue for 7+ days</p>
+                <p class="text-xs text-slate-600">24 Sept, 2025 | 05:21 PM</p>
+              </div>
+              <button onclick="loadSection('mypatients')" class="text-blue-600 hover:text-blue-700 font-semibold text-sm whitespace-nowrap">
+                Review Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add styles for filter buttons
+    setTimeout(() => {
+      const style = document.createElement('style');
+      style.textContent = `
+        .appointment-filter-btn {
+          color: #64748b;
+          background: transparent;
+        }
+        .appointment-filter-btn:hover {
+          background: #f1f5f9;
+        }
+        .appointment-filter-btn.active {
+          color: #1e40af;
+          background: #eff6ff;
+        }
+      `;
+      document.head.appendChild(style);
+    }, 10);
+  }
+  else if(key === 'dashboard') {
     const patientsCount = 2000; // Active patients count
     const apptsCount = 3600; // Total appointments
     const today = new Date().toDateString();
@@ -15975,7 +16350,7 @@ function renderDoctor(key) {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div onclick="loadSection('fnon')" class="card p-8 cursor-pointer hover:border-blue-400 hover:shadow-xl group transition">
           <div class="flex items-center gap-5">
             <div class="bg-blue-100 text-blue-600 p-4 rounded-xl group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all"><i class="fa-solid fa-list-check text-2xl"></i></div>
@@ -15993,6 +16368,36 @@ function renderDoctor(key) {
               <p class="text-sm text-slate-600">Order devices for your clinic</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="font-bold text-lg text-slate-900">Upcoming Workshops</h3>
+            <p class="text-xs text-slate-500 mt-1">Professional development and training opportunities</p>
+          </div>
+          <button onclick="loadSection('workshops')" class="btn-secondary text-sm">View All</button>
+        </div>
+        <div class="space-y-3">
+          ${sampleData.workshops.filter(w => w.status === 'Upcoming').slice(0, 4).map(w => `
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-lg hover:bg-orange-50 transition cursor-pointer border border-slate-200 hover:border-orange-300">
+              <div class="bg-orange-100 text-orange-600 p-3 rounded-lg flex-shrink-0">
+                <i class="fa-solid fa-chalkboard-teacher text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-slate-900 text-sm truncate">${w.title}</h4>
+                <p class="text-xs text-slate-600 mt-1">${w.instructor} • ${w.location}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="font-bold text-slate-900 text-sm">${w.date}</div>
+                <div class="text-xs text-slate-500">${w.time}</div>
+              </div>
+              <div class="flex-shrink-0">
+                <span class="badge badge-sozo">${w.registered}/${w.capacity}</span>
+              </div>
+            </div>
+          `).join('')}
         </div>
       </div>
       </div>
@@ -17025,8 +17430,21 @@ function renderDoctor(key) {
       const npSave = document.getElementById('npSave');
       const npCancel = document.getElementById('npCancel');
 
-      // Function to show patient details
+      // Function to navigate to patient history
       function showPatientDetails(patientId) {
+        const patient = sampleData.patients.find(p => p.id === patientId);
+        if (!patient) return;
+        
+        // Set global patient ID for assessments
+        globalSelectedPatientId = patient.id;
+        globalState.currentPatient = patient;
+        
+        // Navigate to patient history section
+        loadSection('patienthistory');
+      }
+      
+      // Old modal function - keeping structure but unused
+      function _oldShowPatientDetailsModal(patientId) {
         const patient = sampleData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
@@ -17034,147 +17452,80 @@ function renderDoctor(key) {
         const detailsContent = document.getElementById('patientDetailsContent');
         
         detailsContent.innerHTML = `
-          <!-- Personal Information -->
+          <!-- Patient Header -->
+          <div class="mb-8 text-center">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 shadow-lg">
+              ${patient.name.split(' ').map(n => n[0]).join('')}
+            </div>
+            <h4 class="font-bold text-2xl text-slate-900">${patient.name}</h4>
+            <p class="text-slate-600 text-sm mt-1">Patient ID: ${patient.id}</p>
+            <p class="text-slate-500 text-sm">${patient.condition || 'N/A'} • ${patient.country}</p>
+          </div>
+
+          <!-- Assessment Buttons -->
           <div class="mb-6">
-            <h4 class="font-bold text-lg mb-4 text-sozo-600 border-b-2 border-sozo-200 pb-2 flex items-center gap-2">
-              <i class="fa-solid fa-user"></i> Personal Information
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Patient ID</label>
-                <input type="text" value="${patient.id}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Full Name</label>
-                <input type="text" value="${patient.name}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Date of Birth</label>
-                <input type="text" value="${patient.dob || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Sex</label>
-                <input type="text" value="${patient.sex || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Identity Number</label>
-                <input type="text" value="${patient.identityNumber || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">AMKA</label>
-                <input type="text" value="${patient.amka || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">TRN</label>
-                <input type="text" value="${patient.trn || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Mother's Name</label>
-                <input type="text" value="${patient.motherName || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Father's Name</label>
-                <input type="text" value="${patient.fatherName || 'N/A'}" class="input-royal" readonly />
-              </div>
+            <h5 class="font-bold text-lg mb-4 text-sozo-600 text-center">Select Assessment Type</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- FNON Assessment -->
+              <button onclick="document.getElementById('patientDetailsModal').classList.add('hidden'); loadSection('fnon');" 
+                      class="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl hover:shadow-xl hover:border-blue-400 transition-all duration-300">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-list-check text-2xl"></i>
+                  </div>
+                  <div class="text-center">
+                    <h6 class="font-bold text-lg text-slate-900">FNON Assessment</h6>
+                    <p class="text-xs text-slate-600 mt-1">Functional Network Analysis</p>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Brain Mapping -->
+              <button onclick="document.getElementById('patientDetailsModal').classList.add('hidden'); loadSection('brainmap');" 
+                      class="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl hover:shadow-xl hover:border-purple-400 transition-all duration-300">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-16 h-16 rounded-full bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-brain text-2xl"></i>
+                  </div>
+                  <div class="text-center">
+                    <h6 class="font-bold text-lg text-slate-900">Brain Mapping</h6>
+                    <p class="text-xs text-slate-600 mt-1">EEG & Neural Imaging</p>
+                  </div>
+                </div>
+              </button>
+
+              <!-- PRS Assessment -->
+              <button onclick="document.getElementById('patientDetailsModal').classList.add('hidden'); loadSection('prs');" 
+                      class="group p-6 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl hover:shadow-xl hover:border-green-400 transition-all duration-300">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-16 h-16 rounded-full bg-green-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-clipboard-check text-2xl"></i>
+                  </div>
+                  <div class="text-center">
+                    <h6 class="font-bold text-lg text-slate-900">PRS Assessment</h6>
+                    <p class="text-xs text-slate-600 mt-1">Patient Reported Symptoms</p>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Final Report -->
+              <button onclick="document.getElementById('patientDetailsModal').classList.add('hidden'); loadSection('finalreport');" 
+                      class="group p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl hover:shadow-xl hover:border-orange-400 transition-all duration-300">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-16 h-16 rounded-full bg-orange-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-file-medical text-2xl"></i>
+                  </div>
+                  <div class="text-center">
+                    <h6 class="font-bold text-lg text-slate-900">Final Report</h6>
+                    <p class="text-xs text-slate-600 mt-1">Comprehensive Analysis</p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
 
-          <!-- Contact Information -->
-          <div class="mb-6">
-            <h4 class="font-bold text-lg mb-4 text-sozo-600 border-b-2 border-sozo-200 pb-2 flex items-center gap-2">
-              <i class="fa-solid fa-address-book"></i> Contact Information
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Email</label>
-                <input type="text" value="${patient.email || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Phone</label>
-                <input type="text" value="${patient.phone || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Mobile</label>
-                <input type="text" value="${patient.mobile || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Work Phone</label>
-                <input type="text" value="${patient.workPhone || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Country</label>
-                <input type="text" value="${patient.country}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">City</label>
-                <input type="text" value="${patient.city || 'N/A'}" class="input-royal" readonly />
-              </div>
-            </div>
-          </div>
-
-          <!-- Medical Information -->
-          <div class="mb-6">
-            <h4 class="font-bold text-lg mb-4 text-sozo-600 border-b-2 border-sozo-200 pb-2 flex items-center gap-2">
-              <i class="fa-solid fa-heart-pulse"></i> Medical Information
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Condition</label>
-                <input type="text" value="${patient.condition || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Health Score</label>
-                <input type="text" value="${patient.healthScore || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Status</label>
-                <input type="text" value="${patient.status || 'Active'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Last Visit</label>
-                <input type="text" value="${patient.lastVisit}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">First Visit</label>
-                <input type="text" value="${patient.firstVisitDate || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Cancer Patient</label>
-                <input type="text" value="${patient.cancerPatient || 'No'}" class="input-royal" readonly />
-              </div>
-            </div>
-          </div>
-
-          <!-- Additional Information -->
-          <div class="mb-6">
-            <h4 class="font-bold text-lg mb-4 text-sozo-600 border-b-2 border-sozo-200 pb-2 flex items-center gap-2">
-              <i class="fa-solid fa-circle-info"></i> Additional Information
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Subscription</label>
-                <input type="text" value="${patient.subscription || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Occupation Category</label>
-                <input type="text" value="${patient.occupationCategory || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Job Title</label>
-                <input type="text" value="${patient.jobTitle || 'N/A'}" class="input-royal" readonly />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Patient Category</label>
-                <input type="text" value="${patient.patientCategory || 'N/A'}" class="input-royal" readonly />
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-3 mt-6 justify-end">
-            <button onclick="globalSelectedPatientId='${patient.id}'; document.getElementById('patientDetailsModal').classList.add('hidden'); loadSection('fnon');" class="bg-sozo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-sozo-700">
-              <i class="fa-solid fa-file-medical mr-2"></i>View Assessment
-            </button>
-            <button id="closePatientDetailsBtn" class="border-2 border-slate-300 text-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-100">
+          <div class="flex justify-center mt-6">
+            <button id="closePatientDetailsBtn" class="border-2 border-slate-300 text-slate-700 px-8 py-2 rounded-lg font-bold hover:bg-slate-100">
               Close
             </button>
           </div>
@@ -17322,8 +17673,205 @@ function renderDoctor(key) {
       });
     }, 50);
   }
+  else if (key === 'patienthistory') {
+    const patient = globalState.currentPatient;
+    if (!patient) {
+      area.innerHTML = `
+        <div class="p-8">
+          <div class="card p-8 text-center">
+            <i class="fa-solid fa-user-slash text-6xl text-slate-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-slate-700 mb-2">No Patient Selected</h3>
+            <p class="text-slate-500 mb-4">Please select a patient from the patients list</p>
+            <button onclick="loadSection('patients')" class="btn-primary">Go to Patients</button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    area.innerHTML = `
+      <div class="p-8">
+        <!-- Patient Header -->
+        <div class="mb-6 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button onclick="loadSection('patients')" class="text-slate-600 hover:text-slate-900 transition">
+              <i class="fa-solid fa-arrow-left text-xl"></i>
+            </button>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+              ${patient.name.split(' ').map(n => n[0]).join('')}
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-slate-900">${patient.name}</h2>
+              <p class="text-slate-600">ID: ${patient.id} • ${patient.condition || 'N/A'} • ${patient.country}</p>
+            </div>
+          </div>
+          <span class="badge ${patient.status === 'Active' ? 'badge-success' : 'badge-danger'} text-lg px-4 py-2">${patient.status || 'Active'}</span>
+        </div>
+
+        <!-- Patient Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="card p-4 border-l-4 border-l-blue-500">
+            <p class="text-xs font-bold text-slate-500 uppercase mb-1">Health Score</p>
+            <p class="text-3xl font-black text-blue-600">${patient.healthScore || 'N/A'}</p>
+          </div>
+          <div class="card p-4 border-l-4 border-l-green-500">
+            <p class="text-xs font-bold text-slate-500 uppercase mb-1">Last Visit</p>
+            <p class="text-lg font-bold text-green-600">${patient.lastVisit}</p>
+          </div>
+          <div class="card p-4 border-l-4 border-l-purple-500">
+            <p class="text-xs font-bold text-slate-500 uppercase mb-1">Age / Sex</p>
+            <p class="text-lg font-bold text-purple-600">${patient.age || 'N/A'} / ${patient.sex || 'N/A'}</p>
+          </div>
+          <div class="card p-4 border-l-4 border-l-orange-500">
+            <p class="text-xs font-bold text-slate-500 uppercase mb-1">Subscription</p>
+            <p class="text-lg font-bold text-orange-600">${patient.subscription || 'N/A'}</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions - Assessment Buttons -->
+        <div class="card p-6 mb-6">
+          <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-stethoscope mr-2"></i>Quick Actions - Start Assessment</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button onclick="loadSection('fnon');" class="group p-4 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl hover:shadow-lg hover:border-blue-400 transition-all">
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-list-check text-xl"></i>
+                </div>
+                <div class="text-center">
+                  <h6 class="font-bold text-sm text-slate-900">FNON</h6>
+                  <p class="text-xs text-slate-600">Network Analysis</p>
+                </div>
+              </div>
+            </button>
+
+            <button onclick="loadSection('brainmap');" class="group p-4 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl hover:shadow-lg hover:border-purple-400 transition-all">
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-brain text-xl"></i>
+                </div>
+                <div class="text-center">
+                  <h6 class="font-bold text-sm text-slate-900">Brain Mapping</h6>
+                  <p class="text-xs text-slate-600">EEG Imaging</p>
+                </div>
+              </div>
+            </button>
+
+            <button onclick="loadSection('prs');" class="group p-4 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl hover:shadow-lg hover:border-green-400 transition-all">
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-green-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-clipboard-check text-xl"></i>
+                </div>
+                <div class="text-center">
+                  <h6 class="font-bold text-sm text-slate-900">PRS</h6>
+                  <p class="text-xs text-slate-600">Symptoms</p>
+                </div>
+              </div>
+            </button>
+
+            <button onclick="loadSection('finalreport');" class="group p-4 bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl hover:shadow-lg hover:border-orange-400 transition-all">
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-file-medical text-xl"></i>
+                </div>
+                <div class="text-center">
+                  <h6 class="font-bold text-sm text-slate-900">Final Report</h6>
+                  <p class="text-xs text-slate-600">Comprehensive</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Medical History -->
+        <div class="card p-6 mb-6">
+          <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Medical History</h3>
+          <div class="space-y-3">
+            ${patientReports.filter(r => r.patient === patient.name).slice(0, 8).map(report => `
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition border border-slate-200">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-lg ${
+                    report.type.includes('FNON') ? 'bg-blue-100 text-blue-600' :
+                    report.type.includes('Brain') || report.type.includes('MRI') || report.type.includes('CT') ? 'bg-purple-100 text-purple-600' :
+                    report.type.includes('PRS') ? 'bg-green-100 text-green-600' :
+                    report.type.includes('Blood') || report.type.includes('ECG') ? 'bg-red-100 text-red-600' :
+                    'bg-slate-100 text-slate-600'
+                  } flex items-center justify-center font-bold">
+                    <i class="fa-solid ${
+                      report.type.includes('FNON') ? 'fa-list-check' :
+                      report.type.includes('Brain') || report.type.includes('MRI') ? 'fa-brain' :
+                      report.type.includes('PRS') ? 'fa-clipboard-check' :
+                      report.type.includes('Blood') ? 'fa-droplet' :
+                      report.type.includes('ECG') ? 'fa-heart-pulse' :
+                      report.type.includes('X-Ray') || report.type.includes('CT') ? 'fa-x-ray' :
+                      'fa-file-medical'
+                    }"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-900">${report.type}</h4>
+                    <p class="text-xs text-slate-500">ID: ${report.id} • Doctor: ${report.doctor}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-bold text-slate-900">${report.date}</p>
+                  <span class="badge ${
+                    report.status === 'Finalized' ? 'badge-success' :
+                    report.status === 'Pending' ? 'badge-warning' :
+                    'badge-info'
+                  } text-xs">${report.status}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Patient Details -->
+        <div class="card p-6">
+          <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-user mr-2"></i>Patient Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.name}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Date of Birth</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.dob || 'N/A'}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Gender</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.gender || patient.sex || 'N/A'}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Email</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.email}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Phone</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.mobile || patient.phone || 'N/A'}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Country</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.country}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">City</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.city || 'N/A'}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">Identity Number</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.identityNumber || 'N/A'}</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 uppercase">First Visit</label>
+              <p class="text-sm font-semibold text-slate-900 mt-1">${patient.firstVisitDate || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
   else if (key === 'fnon') renderFNON();
   else if (key === 'brainmap') renderBrainMap();
+  else if (key === 'brainmapping') renderBrainMap();
   else if (key === 'prs') renderPRSDoctor();
   else if (key === 'finalreport') {
     // Admin renders final report using shared function
@@ -18345,6 +18893,42 @@ function clearReportFilters() {
   document.getElementById('filterPatient').dispatchEvent(new Event('input'));
 }
 
+// Assessment Navigation Helper
+function getAssessmentNavigation(currentAssessment) {
+  const assessments = [
+    { id: 'fnon', label: 'FNON', icon: 'fa-clipboard-check', color: 'bg-blue-600' },
+    { id: 'brainmapping', label: 'Brain Mapping', icon: 'fa-brain', color: 'bg-purple-600' },
+    { id: 'prs', label: 'PRS', icon: 'fa-clipboard-list', color: 'bg-green-600' },
+    { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
+  ];
+  
+  return `
+    <div class="mb-6 bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-route text-slate-500"></i>
+          <span class="text-sm font-bold text-slate-600">Assessment Navigation:</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          ${assessments.map(assess => `
+            <button 
+              onclick="loadSection('${assess.id}')" 
+              class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+                assess.id === currentAssessment 
+                  ? assess.color + ' text-white shadow-md' 
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }"
+              ${assess.id === currentAssessment ? 'disabled' : ''}
+            >
+              <i class="fa-solid ${assess.icon} mr-2"></i>${assess.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // -- FNON MODULE LOGIC --
 function renderFNON() {
   const area = document.getElementById('contentArea');
@@ -18353,68 +18937,108 @@ function renderFNON() {
     const ap = getActivePatient();
     if(ap?.id) globalSelectedPatientId = ap.id;
   }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
   area.innerHTML = `
     <div class="p-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
-      <p class="text-slate-500">Functional Network of Neurons Checklist</p>
-    </div>
-
-    <div class="card p-6 mb-8 border-l-4 border-l-sozo-600 bg-gradient-to-r from-orange-50 to-slate-50" style="${currentRole==='patient'?'display:none':''}">
-      <h3 class="font-bold text-xl mb-4 text-slate-900"><i class="fa-solid fa-user-doctor mr-2"></i>Assessment Context</h3>
-      <div class="mb-4">
-        <label class="block font-bold text-sozo-900 mb-2">Smart Patient Search <span class="text-red-600">*</span></label>
+    
+    ${getAssessmentNavigation('fnon')}
+    
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
+        <p class="text-slate-500">Functional Network of Neurons Checklist</p>
+      </div>
+      ${currentRole !== 'patient' ? `
+      <div class="flex items-center gap-3">
         <div class="relative">
-          <input 
-            type="text" 
-            id="patientSearchInput" 
-            class="input-royal w-full" 
-            placeholder="Type patient name to search..." 
-            autocomplete="off"
-          />
-          <i class="fa-solid fa-magnifying-glass absolute right-4 top-3 text-slate-400"></i>
-          <div id="patientSearchDropdown" class="search-dropdown hidden"></div>
+          <select id="patientNavigationSelect" class="input-royal pr-10 font-bold text-slate-900 bg-white border-2 border-orange-300">
+            <option value="">Select Patient...</option>
+            ${sampleData.patients.map(p => `
+              <option value="${p.id}" ${globalState.currentPatient?.id === p.id ? 'selected' : ''}>
+                ${p.name} (${p.id})
+              </option>
+            `).join('')}
+          </select>
+          <i class="fa-solid fa-user-group absolute right-3 top-3 text-orange-600 pointer-events-none"></i>
         </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm" title="Back to Patient History">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Patient View
+        </button>
       </div>
-      
-      <!-- Doctor Information -->
-      <div class="bg-slate-100 p-4 rounded-lg mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase mb-2">Doctor Information</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-slate-600">Name</label>
-            <input id="doctorNameInput" class="input-royal bg-white text-sm" value="${globalState.currentDoctor.name}" readonly />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600">Email</label>
-            <input id="doctorEmailInput" class="input-royal bg-white text-sm" value="${globalState.currentDoctor.email}" readonly />
-          </div>
-        </div>
-      </div>
-      
-      <!-- Patient Information (Auto-populated) -->
-      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <p class="text-xs font-bold text-blue-900 uppercase mb-2"><i class="fa-solid fa-user mr-1"></i>Patient Information (Auto-populated)</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label class="text-xs font-bold text-blue-700">Patient Name</label>
-            <input id="patientNameInput" class="input-royal bg-white text-sm font-bold" value="${globalState.currentPatient?.name || 'Not Selected'}" readonly />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-blue-700">Email ID</label>
-            <input id="patientEmailInput" class="input-royal bg-white text-sm" value="${globalState.currentPatient?.email || 'N/A'}" readonly />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-blue-700">Country</label>
-            <input id="patientCountryInput" class="input-royal bg-white text-sm" value="${globalState.currentPatient?.country || 'N/A'}" readonly />
-          </div>
-        </div>
-      </div>
-      
-      <button id="resetFNONForm" class="btn-secondary mt-4 text-sm"><i class="fa-solid fa-rotate-left mr-2"></i>Reset Form</button>
+      ` : ''}
     </div>
 
-    <div id="fnonContent" class="${globalSelectedPatientId || globalState.currentPatient || currentRole === 'admin' ?'':'hidden'}">
+    ${globalState.currentPatient && currentRole !== 'patient' ? `
+    <!-- Auto-populated Patient Context -->
+    <div class="card p-6 mb-8 border-l-4 border-l-blue-600 bg-gradient-to-r from-blue-50 to-slate-50">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-xl text-slate-900"><i class="fa-solid fa-user-check mr-2"></i>Patient Context (Auto-populated)</h3>
+        <button id="resetFNONForm" class="btn-secondary text-sm"><i class="fa-solid fa-rotate-left mr-2"></i>Change Patient</button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Patient Information -->
+        <div class="bg-white p-4 rounded-lg border border-blue-200">
+          <p class="text-xs font-bold text-blue-900 uppercase mb-3"><i class="fa-solid fa-user mr-1"></i>Patient Information</p>
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Name:</span>
+              <span class="text-sm font-bold text-slate-900">${globalState.currentPatient.name}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Patient ID:</span>
+              <span class="text-sm font-mono text-slate-900">${globalState.currentPatient.id}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Email:</span>
+              <span class="text-sm text-slate-900">${globalState.currentPatient.email}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Country:</span>
+              <span class="text-sm text-slate-900">${globalState.currentPatient.country}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Condition:</span>
+              <span class="text-sm font-bold text-orange-600">${globalState.currentPatient.condition || 'N/A'}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Doctor Information -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200">
+          <p class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-user-doctor mr-1"></i>Doctor Information</p>
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Name:</span>
+              <span class="text-sm font-bold text-slate-900">${globalState.currentDoctor.name}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Email:</span>
+              <span class="text-sm text-slate-900">${globalState.currentDoctor.email}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Clinic:</span>
+              <span class="text-sm text-slate-900">${globalState.currentDoctor.clinic}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-600">Date:</span>
+              <span class="text-sm font-bold text-slate-900">${new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    <div id="fnonContent" class="${globalState.currentPatient || currentRole === 'admin' ?'':'hidden'}">
       <!-- Admin Management Panel (Only for Admin role) -->
       ${currentRole === 'admin' ? `
       <div class="card p-6 mb-8 border-l-4 border-l-indigo-600 bg-gradient-to-r from-indigo-50 to-slate-50">
@@ -18537,6 +19161,23 @@ function renderFNON() {
   if(globalSelectedPatientId) updateRefTable();
 
   setTimeout(() => {
+    // Patient Navigation Dropdown
+    const patientNavSelect = document.getElementById('patientNavigationSelect');
+    if (patientNavSelect) {
+      patientNavSelect.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            // Reload the current assessment page with new patient
+            renderFNON();
+          }
+        }
+      });
+    }
+    
     // Smart Patient Search functionality
     const searchInput = document.getElementById('patientSearchInput');
     const searchDropdown = document.getElementById('patientSearchDropdown');
@@ -18695,17 +19336,15 @@ function renderFNON() {
 
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
-        if (patientNameInput) patientNameInput.value = '';
-        if (searchDropdown) searchDropdown.classList.add('hidden');
         globalSelectedPatientId = null;
         globalState.currentPatient = null;
-        document.getElementById('fnonContent').classList.add('hidden');
         // Reset all radio buttons
         document.querySelectorAll('input[type="radio"]').forEach(r => {
           if (r.value === '0') r.checked = true;
         });
         sampleData.fnon.sectionA.forEach((_, i) => calcFNON(i));
+        // Navigate back to patients list
+        loadSection('patients');
       });
     }
 
@@ -19219,9 +19858,32 @@ function renderBrainMap() {
   
   const p = globalSelectedPatientId ? getActivePatient() : { name: 'No Patient Selected', email: 'N/A', country: 'N/A', id: 'N/A' };
   area.innerHTML = `
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-slate-900"><i class="fa-solid fa-brain mr-2 text-sozo-600"></i>Brain Mapping Assessment</h2>
-      <p class="text-slate-600">Upload .easy or .nedf files for quantitative EEG analysis</p>
+    <div class="p-8">
+    ${getAssessmentNavigation('brainmapping')}
+    
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900"><i class="fa-solid fa-brain mr-2 text-sozo-600"></i>Brain Mapping Assessment</h2>
+        <p class="text-slate-600">Upload .easy or .nedf files for quantitative EEG analysis</p>
+      </div>
+      ${currentRole !== 'patient' && currentRole !== 'admin' ? `
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <select id="patientNavigationSelectBrain" class="input-royal pr-10 font-bold text-slate-900 bg-white border-2 border-purple-300">
+            <option value="">Select Patient...</option>
+            ${sampleData.patients.map(pt => `
+              <option value="${pt.id}" ${globalState.currentPatient?.id === pt.id ? 'selected' : ''}>
+                ${pt.name} (${pt.id})
+              </option>
+            `).join('')}
+          </select>
+          <i class="fa-solid fa-user-group absolute right-3 top-3 text-purple-600 pointer-events-none"></i>
+        </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm" title="Back to Patient History">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Patient View
+        </button>
+      </div>
+      ` : ''}
     </div>
     
     ${currentRole === 'admin' ? `
@@ -19300,10 +19962,17 @@ function renderBrainMap() {
         <input type="file" id="doctorBrainFile" accept=".easy,.nedf,.pdf" class="hidden" />
       </div>
 
-      <div class="flex gap-3 flex-wrap items-center">
-        <button id="doctorBrainUploadBtn" class="bg-sozo-600 text-white px-4 py-2 rounded-lg font-bold">Upload</button>
-        <span id="doctorBrainError" class="text-sm text-red-600"></span>
-        <span id="doctorBrainSuccess" class="text-sm text-green-600"></span>
+      <div class="flex gap-3 flex-wrap items-center justify-between">
+        <div class="flex gap-3 items-center">
+          <button id="doctorBrainUploadBtn" class="bg-sozo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-sozo-700 transition">
+            <i class="fa-solid fa-upload mr-2"></i>Upload
+          </button>
+          <span id="doctorBrainError" class="text-sm text-red-600"></span>
+          <span id="doctorBrainSuccess" class="text-sm text-green-600"></span>
+        </div>
+        <button onclick="loadSection('prs')" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-purple-700 transition">
+          Next: PRS Assessment <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
       </div>
 
       <!-- Upload History Section -->
@@ -19342,9 +20011,27 @@ function renderBrainMap() {
     })()}
 
     <div id="doctorBottomMsg" class="fixed bottom-3 right-3 hidden bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">Files uploaded successfully</div>
+    </div>
   `;
 
   setTimeout(() => {
+    // Patient Navigation Dropdown for Brain Mapping
+    const patientNavSelectBrain = document.getElementById('patientNavigationSelectBrain');
+    if (patientNavSelectBrain) {
+      patientNavSelectBrain.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            // Reload the Brain Mapping page with new patient
+            renderBrainMap();
+          }
+        }
+      });
+    }
+    
     const drop = document.getElementById('doctorBrainDrop');
     const fileInput = document.getElementById('doctorBrainFile');
     const uploadBtn = document.getElementById('doctorBrainUploadBtn');
@@ -19646,40 +20333,13 @@ function renderPRSDoctor() {
   
   const p = globalSelectedPatientId ? getActivePatient() : { name: 'No Patient Selected', email: 'N/A', country: 'N/A', id: 'N/A' };
   
-  // Add patient context banner before PRS landing
-  const contextBanner = `
-    <div class="mb-6">
-      <div class="card p-6 bg-gradient-to-r from-purple-50 to-slate-50 border-l-4 border-l-purple-600">
-        <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-clipboard-check mr-2"></i>PRS Assessment Context (Auto-populated)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-slate-100 p-3 rounded-lg">
-            <p class="text-xs font-bold text-slate-500 uppercase mb-2">Doctor</p>
-            <p class="font-bold text-sm">${getDoctorDisplay()}</p>
-            <p class="text-xs font-mono text-slate-600">${globalState.currentDoctor.email}</p>
-          </div>
-          <div class="bg-purple-100 p-3 rounded-lg border border-purple-300">
-            <p class="text-xs font-bold text-purple-900 uppercase mb-2"><i class="fa-solid fa-user mr-1"></i>Patient</p>
-            <p class="font-bold text-sm text-purple-900">${p.name}</p>
-            <p class="text-xs font-mono text-purple-700">${p.email || 'N/A'}</p>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-lg border border-blue-300">
-            <p class="text-xs font-bold text-blue-900 uppercase mb-2"><i class="fa-solid fa-location-dot mr-1"></i>Location</p>
-            <p class="font-bold text-sm text-blue-900">${p.country || 'N/A'}</p>
-            <p class="text-xs text-blue-700">Patient ID: ${p.id}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  // Store patient info for PRS landing to use
+  globalState.prsPatientContext = {
+    patientId: globalSelectedPatientId,
+    patient: p
+  };
   
-  // Inject context banner and then render PRS landing
-  setTimeout(() => {
-    const contentArea = document.getElementById('contentArea');
-    const existingContent = contentArea.innerHTML;
-    contentArea.innerHTML = contextBanner + existingContent;
-  }, 50);
-  
-  // Reuse patient PRS system but with active patient context
+  // Render PRS landing with navigation
   renderPRSLanding();
 }
 
@@ -26466,6 +27126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 500);
 });
+
 </script>
 </body>
 </html>
