@@ -476,14 +476,72 @@
         { id: 6, name: 'Brain Stim Device', price: 2499, desc: 'tDCS/tACS neuromodulation', icon: 'fa-brain' }
       ],
       appointments: [
-        { id:'APT-001', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2025-01-15', time:'10:00 AM', type:'FNON Assessment', location:'Berlin, Germany', status:'Scheduled', notes:'Initial neurological assessment' },
-        { id:'APT-002', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. Sarah Smith', docId:'D-005', date:'2025-01-16', time:'2:00 PM', type:'Brain Mapping', location:'London, UK', status:'Scheduled', notes:'Follow-up brain mapping session' },
-        { id:'APT-003', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. Rajesh Patel', docId:'D-006', date:'2025-01-17', time:'11:30 AM', type:'PRS Assessment', location:'Sydney, Australia', status:'Completed', notes:'Completed assessment' },
-        { id:'APT-004', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2025-01-18', time:'3:00 PM', type:'FNON Assessment', location:'Berlin, Germany', status:'Scheduled', notes:'Routine check-up' },
-        { id:'APT-005', patientName:'Noah Brown', patientId:'P-005', doctorName:'Dr. Maria Gomez', docId:'D-004', date:'2025-01-19', time:'9:30 AM', type:'Brain Mapping', location:'New York, USA', status:'Rescheduled', notes:'Moved from Jan 12' },
-        { id:'APT-006', patientName:'Sophia Martinez', patientId:'P-006', doctorName:'Dr. Sarah Smith', docId:'D-005', date:'2025-01-20', time:'1:00 PM', type:'Final Report Review', location:'London, UK', status:'Scheduled', notes:'Review treatment outcomes' },
-        { id:'APT-007', patientName:'Oliver Davis', patientId:'P-007', doctorName:'Dr. Lee', docId:'D-003', date:'2025-01-21', time:'4:00 PM', type:'FNON Assessment', location:'Tokyo, Japan', status:'Scheduled', notes:'Initial consultation' },
-        { id:'APT-008', patientName:'Isabella Garcia', patientId:'P-008', doctorName:'Dr. Rajesh Patel', docId:'D-006', date:'2025-01-22', time:'10:30 AM', type:'Brain Mapping', location:'Sydney, Australia', status:'Completed', notes:'Assessment completed successfully' }
+        // Historical appointments
+        { id:'APT-001', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2025-01-15', time:'10:00 AM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'Initial neurological assessment', room:'101' },
+        { id:'APT-002', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. Sarah Smith', docId:'D-005', date:'2025-01-16', time:'2:00 PM', duration: 45, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Follow-up brain mapping session', room:'205' },
+        { id:'APT-003', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. Rajesh Patel', docId:'D-006', date:'2025-01-17', time:'11:30 AM', duration: 60, type:'PRS Assessment', location:'Ward', status:'Completed', notes:'Completed assessment', room:'102' },
+        { id:'APT-004', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2025-01-18', time:'3:00 PM', duration: 30, type:'FNON Assessment', location:'Online', status:'Scheduled', notes:'Routine check-up', room:'304' },
+        { id:'APT-005', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. Maria Gomez', docId:'D-004', date:'2025-01-19', time:'9:30 AM', duration: 45, type:'Brain Mapping', location:'OPD', status:'Rescheduled', notes:'Moved from Jan 12', room:'101' },
+        { id:'APT-006', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. Sarah Smith', docId:'D-005', date:'2025-01-20', time:'1:00 PM', duration: 30, type:'Final Report Review', location:'OPD', status:'Scheduled', notes:'Review treatment outcomes', room:'205' },
+        { id:'APT-007', patientName:'James Wilson', patientId:'P-007', doctorName:'Dr. Lee', docId:'D-003', date:'2025-01-21', time:'4:00 PM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'Initial consultation', room:'102' },
+        { id:'APT-008', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. Rajesh Patel', docId:'D-006', date:'2025-01-22', time:'10:30 AM', duration: 45, type:'Brain Mapping', location:'Ward', status:'Completed', notes:'Assessment completed successfully', room:'304' },
+        
+        // Today's appointments (January 22, 2026) - spread throughout the day with varied durations and locations
+        { id:'APT-009', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'08:00 AM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Completed', notes:'Morning assessment completed', room:'101' },
+        { id:'APT-010', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'09:00 AM', duration: 30, type:'Follow-up Consultation', location:'Online', status:'Completed', notes:'Follow-up visit', room:'102' },
+        { id:'APT-011', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'10:00 AM', duration: 90, type:'Brain Mapping', location:'OPD', status:'Completed', notes:'Brain mapping session completed', room:'205' },
+        { id:'APT-012', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'10:30 AM', duration: 45, type:'PRS Assessment', location:'OPD', status:'Completed', notes:'PRS evaluation completed', room:'101' },
+        { id:'APT-013', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'11:30 AM', duration: 30, type:'Treatment Review', location:'Ward', status:'Completed', notes:'Treatment progress reviewed', room:'304' },
+        { id:'APT-014', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'01:00 PM', duration: 60, type:'Initial Consultation', location:'OPD', status:'Completed', notes:'Initial consultation completed', room:'102' },
+        { id:'APT-015', patientName:'James Wilson', patientId:'P-007', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'02:00 PM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Completed', notes:'FNON assessment completed', room:'205' },
+        { id:'APT-016', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'02:30 PM', duration: 45, type:'Brain Mapping', location:'Online', status:'Scheduled', notes:'Brain mapping follow-up', room:'101' },
+        { id:'APT-017', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'03:30 PM', duration: 30, type:'Doctor Notes Review', location:'OPD', status:'Scheduled', notes:'Review doctors notes', room:'304' },
+        { id:'APT-018', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'04:30 PM', duration: 45, type:'Treatment Plan Discussion', location:'Ward', status:'Scheduled', notes:'Discuss ongoing treatment', room:'102' },
+        { id:'APT-019', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'05:00 PM', duration: 30, type:'Final Report Review', location:'OPD', status:'Scheduled', notes:'Final assessment review', room:'205' },
+        { id:'APT-020', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-22', time:'05:30 PM', duration: 30, type:'Follow-up', location:'Online', status:'Scheduled', notes:'End of day follow-up', room:'101' },
+        
+        // January 23, 2026 (Tomorrow)
+        { id:'APT-021', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'08:30 AM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'Initial FNON evaluation', room:'101' },
+        { id:'APT-022', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'10:00 AM', duration: 45, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Brain mapping procedure', room:'205' },
+        { id:'APT-023', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'11:00 AM', duration: 30, type:'Follow-up', location:'Online', status:'Scheduled', notes:'Quick check-in session', room:'102' },
+        { id:'APT-024', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'02:00 PM', duration: 60, type:'PRS Assessment', location:'OPD', status:'Scheduled', notes:'Comprehensive PRS evaluation', room:'304' },
+        { id:'APT-025', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'03:30 PM', duration: 45, type:'Treatment Review', location:'Ward', status:'Scheduled', notes:'Review treatment outcomes', room:'101' },
+        { id:'APT-026', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-23', time:'04:30 PM', duration: 30, type:'Consultation', location:'OPD', status:'Scheduled', notes:'General consultation', room:'205' },
+        
+        // January 24, 2026
+        { id:'APT-027', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-24', time:'09:00 AM', duration: 60, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Follow-up brain mapping', room:'101' },
+        { id:'APT-028', patientName:'James Wilson', patientId:'P-007', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-24', time:'10:30 AM', duration: 45, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'FNON follow-up assessment', room:'205' },
+        { id:'APT-029', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-24', time:'01:00 PM', duration: 30, type:'Doctor Notes Review', location:'Online', status:'Scheduled', notes:'Review clinical notes', room:'102' },
+        { id:'APT-030', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-24', time:'02:00 PM', duration: 60, type:'Treatment Plan Discussion', location:'OPD', status:'Scheduled', notes:'Discuss new treatment options', room:'304' },
+        { id:'APT-031', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-24', time:'03:30 PM', duration: 45, type:'PRS Assessment', location:'Ward', status:'Scheduled', notes:'PRS evaluation session', room:'101' },
+        
+        // January 25, 2026
+        { id:'APT-032', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-25', time:'08:00 AM', duration: 60, type:'Initial Consultation', location:'OPD', status:'Scheduled', notes:'New patient consultation', room:'205' },
+        { id:'APT-033', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-25', time:'09:30 AM', duration: 45, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Brain mapping session', room:'101' },
+        { id:'APT-034', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-25', time:'11:00 AM', duration: 30, type:'Follow-up', location:'Online', status:'Scheduled', notes:'Online follow-up consultation', room:'102' },
+        { id:'APT-035', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-25', time:'02:00 PM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'Complete FNON assessment', room:'304' },
+        { id:'APT-036', patientName:'James Wilson', patientId:'P-007', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-25', time:'03:30 PM', duration: 45, type:'Treatment Review', location:'Ward', status:'Scheduled', notes:'Review ongoing treatment', room:'101' },
+        
+        // January 26, 2026
+        { id:'APT-037', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-26', time:'09:00 AM', duration: 60, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Comprehensive brain mapping', room:'205' },
+        { id:'APT-038', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-26', time:'10:30 AM', duration: 30, type:'Follow-up', location:'Online', status:'Scheduled', notes:'Virtual follow-up session', room:'102' },
+        { id:'APT-039', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-26', time:'01:00 PM', duration: 45, type:'Final Report Review', location:'OPD', status:'Scheduled', notes:'Final report discussion', room:'101' },
+        { id:'APT-040', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-26', time:'02:30 PM', duration: 60, type:'PRS Assessment', location:'OPD', status:'Scheduled', notes:'PRS detailed evaluation', room:'304' },
+        { id:'APT-041', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-26', time:'04:00 PM', duration: 30, type:'Consultation', location:'Ward', status:'Scheduled', notes:'Brief consultation', room:'205' },
+        
+        // January 27, 2026
+        { id:'APT-042', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-27', time:'08:30 AM', duration: 60, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'Morning FNON assessment', room:'101' },
+        { id:'APT-043', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-27', time:'10:00 AM', duration: 45, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Brain mapping procedure', room:'205' },
+        { id:'APT-044', patientName:'James Wilson', patientId:'P-007', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-27', time:'11:30 AM', duration: 30, type:'Treatment Plan Discussion', location:'Online', status:'Scheduled', notes:'Discuss treatment adjustments', room:'102' },
+        { id:'APT-045', patientName:'Oliver Brown', patientId:'P-005', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-27', time:'02:00 PM', duration: 60, type:'Follow-up Consultation', location:'OPD', status:'Scheduled', notes:'Follow-up on previous assessment', room:'304' },
+        { id:'APT-046', patientName:'Sophie Martin', patientId:'P-006', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-27', time:'03:30 PM', duration: 45, type:'Doctor Notes Review', location:'Ward', status:'Scheduled', notes:'Review medical notes', room:'101' },
+        
+        // January 28, 2026
+        { id:'APT-047', patientName:'Alex Johnson', patientId:'P-001', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'09:00 AM', duration: 60, type:'Brain Mapping', location:'OPD', status:'Scheduled', notes:'Weekly brain mapping session', room:'205' },
+        { id:'APT-048', patientName:'Isabella Rodriguez', patientId:'P-008', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'10:30 AM', duration: 45, type:'FNON Assessment', location:'OPD', status:'Scheduled', notes:'FNON evaluation', room:'101' },
+        { id:'APT-049', patientName:'Maria Gomez', patientId:'P-002', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'01:00 PM', duration: 30, type:'Follow-up', location:'Online', status:'Scheduled', notes:'Virtual check-in', room:'102' },
+        { id:'APT-050', patientName:'Liam Smith', patientId:'P-003', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'02:00 PM', duration: 60, type:'PRS Assessment', location:'OPD', status:'Scheduled', notes:'PRS comprehensive review', room:'304' },
+        { id:'APT-051', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'03:30 PM', duration: 45, type:'Treatment Review', location:'Ward', status:'Scheduled', notes:'End of week treatment review', room:'205' }
       ]
     };
 
@@ -547,7 +605,121 @@
       {date:'2024-11-18', patient:'Sebastian White', type:'PRS Report', doctor:'Dr. Wilson', country:'Germany', status:'Pending', id:'PR-6633'},
       {date:'2024-11-15', patient:'Harper Harris', type:'Blood Work', doctor:'Dr. Gomez', country:'Spain', status:'Finalized', id:'BW-9944'},
       {date:'2024-11-10', patient:'Jack Martin', type:'MRI', doctor:'Dr. Patel', country:'United Kingdom', status:'Finalized', id:'MR-7755'},
-      {date:'2024-11-05', patient:'Aria Thompson', type:'CT Scan', doctor:'Dr. Lee', country:'France', status:'Finalized', id:'CT-1166'}
+      {date:'2024-11-05', patient:'Aria Thompson', type:'CT Scan', doctor:'Dr. Lee', country:'France', status:'Finalized', id:'CT-1166'},
+      
+      // Maria Gomez (PAT-002) - Additional reports
+      {date:'2024-12-15', patient:'Maria Gomez', type:'FNON Report', doctor:'Dr. Wilson', country:'Spain', status:'Finalized', id:'FR-9012'},
+      {date:'2024-11-28', patient:'Maria Gomez', type:'Blood Work', doctor:'Dr. Patel', country:'Spain', status:'Finalized', id:'BW-3456'},
+      {date:'2024-11-10', patient:'Maria Gomez', type:'Brain Mapping', doctor:'Dr. Wilson', country:'Spain', status:'Finalized', id:'BM-7890'},
+      {date:'2024-10-22', patient:'Maria Gomez', type:'X-Ray', doctor:'Dr. Lee', country:'Spain', status:'Finalized', id:'XR-2345'},
+      
+      // Liam Smith (PAT-003) - Additional reports
+      {date:'2024-12-20', patient:'Liam Smith', type:'FNON Report', doctor:'Dr. Wilson', country:'UK', status:'Finalized', id:'FR-5678'},
+      {date:'2024-12-05', patient:'Liam Smith', type:'PRS Report', doctor:'Dr. Gomez', country:'UK', status:'Finalized', id:'PR-9123'},
+      {date:'2024-11-18', patient:'Liam Smith', type:'MRI', doctor:'Dr. Patel', country:'UK', status:'Finalized', id:'MR-4567'},
+      {date:'2024-10-30', patient:'Liam Smith', type:'Blood Work', doctor:'Dr. Lee', country:'UK', status:'Finalized', id:'BW-8901'},
+      
+      // Emma Chen (PAT-004) - Additional reports
+      {date:'2024-12-18', patient:'Emma Chen', type:'Brain Mapping', doctor:'Dr. Wilson', country:'USA', status:'Finalized', id:'BM-3456'},
+      {date:'2024-12-01', patient:'Emma Chen', type:'FNON Report', doctor:'Dr. Patel', country:'USA', status:'Finalized', id:'FR-7890'},
+      {date:'2024-11-15', patient:'Emma Chen', type:'ECG Report', doctor:'Dr. Lee', country:'USA', status:'Finalized', id:'EC-1234'},
+      {date:'2024-10-28', patient:'Emma Chen', type:'CT Scan', doctor:'Dr. Gomez', country:'USA', status:'Finalized', id:'CT-5678'},
+      
+      // Oliver Brown (PAT-005) - Additional reports
+      {date:'2024-12-10', patient:'Oliver Brown', type:'FNON Report', doctor:'Dr. Wilson', country:'Australia', status:'Finalized', id:'FR-2345'},
+      {date:'2024-11-25', patient:'Oliver Brown', type:'Blood Work', doctor:'Dr. Patel', country:'Australia', status:'Finalized', id:'BW-6789'},
+      {date:'2024-11-08', patient:'Oliver Brown', type:'X-Ray', doctor:'Dr. Lee', country:'Australia', status:'Finalized', id:'XR-0123'},
+      {date:'2024-10-20', patient:'Oliver Brown', type:'PRS Report', doctor:'Dr. Gomez', country:'Australia', status:'Finalized', id:'PR-4567'},
+      
+      // Sophie Martin (PAT-006) - Additional reports
+      {date:'2024-12-22', patient:'Sophie Martin', type:'Brain Mapping', doctor:'Dr. Wilson', country:'France', status:'Finalized', id:'BM-8901'},
+      {date:'2024-12-08', patient:'Sophie Martin', type:'FNON Report', doctor:'Dr. Patel', country:'France', status:'Finalized', id:'FR-2345'},
+      {date:'2024-11-20', patient:'Sophie Martin', type:'MRI', doctor:'Dr. Lee', country:'France', status:'Finalized', id:'MR-6789'},
+      {date:'2024-11-02', patient:'Sophie Martin', type:'Blood Work', doctor:'Dr. Gomez', country:'France', status:'Finalized', id:'BW-0123'},
+      
+      // James Wilson (PAT-007) - Additional reports
+      {date:'2024-12-16', patient:'James Wilson', type:'FNON Report', doctor:'Dr. Wilson', country:'Canada', status:'Finalized', id:'FR-4567'},
+      {date:'2024-11-30', patient:'James Wilson', type:'PRS Report', doctor:'Dr. Patel', country:'Canada', status:'Finalized', id:'PR-8901'},
+      {date:'2024-11-12', patient:'James Wilson', type:'Brain Mapping', doctor:'Dr. Lee', country:'Canada', status:'Finalized', id:'BM-2345'},
+      {date:'2024-10-25', patient:'James Wilson', type:'ECG Report', doctor:'Dr. Gomez', country:'Canada', status:'Finalized', id:'EC-6789'},
+      
+      // Isabella Rodriguez (PAT-008) - Additional reports
+      {date:'2024-12-19', patient:'Isabella Rodriguez', type:'FNON Report', doctor:'Dr. Wilson', country:'Mexico', status:'Finalized', id:'FR-0123'},
+      {date:'2024-12-02', patient:'Isabella Rodriguez', type:'X-Ray', doctor:'Dr. Patel', country:'Mexico', status:'Finalized', id:'XR-4567'},
+      {date:'2024-11-14', patient:'Isabella Rodriguez', type:'Blood Work', doctor:'Dr. Lee', country:'Mexico', status:'Finalized', id:'BW-8901'},
+      {date:'2024-10-27', patient:'Isabella Rodriguez', type:'MRI', doctor:'Dr. Gomez', country:'Mexico', status:'Finalized', id:'MR-2345'},
+      
+      // Noah Anderson (PAT-009) - New reports
+      {date:'2024-12-21', patient:'Noah Anderson', type:'FNON Report', doctor:'Dr. Wilson', country:'Sweden', status:'Finalized', id:'FR-6789'},
+      {date:'2024-12-04', patient:'Noah Anderson', type:'Brain Mapping', doctor:'Dr. Patel', country:'Sweden', status:'Finalized', id:'BM-0123'},
+      {date:'2024-11-16', patient:'Noah Anderson', type:'PRS Report', doctor:'Dr. Lee', country:'Sweden', status:'Finalized', id:'PR-4567'},
+      {date:'2024-10-29', patient:'Noah Anderson', type:'CT Scan', doctor:'Dr. Gomez', country:'Sweden', status:'Finalized', id:'CT-8901'},
+      
+      // Mia Taylor (PAT-010) - New reports
+      {date:'2024-12-23', patient:'Mia Taylor', type:'FNON Report', doctor:'Dr. Wilson', country:'Ireland', status:'Finalized', id:'FR-2345'},
+      {date:'2024-12-07', patient:'Mia Taylor', type:'Blood Work', doctor:'Dr. Patel', country:'Ireland', status:'Finalized', id:'BW-6789'},
+      {date:'2024-11-19', patient:'Mia Taylor', type:'Brain Mapping', doctor:'Dr. Lee', country:'Ireland', status:'Finalized', id:'BM-0123'},
+      {date:'2024-11-01', patient:'Mia Taylor', type:'X-Ray', doctor:'Dr. Gomez', country:'Ireland', status:'Finalized', id:'XR-4567'},
+      
+      // Ethan White (PAT-011) - New reports
+      {date:'2024-12-11', patient:'Ethan White', type:'FNON Report', doctor:'Dr. Wilson', country:'Netherlands', status:'Finalized', id:'FR-8901'},
+      {date:'2024-11-23', patient:'Ethan White', type:'PRS Report', doctor:'Dr. Patel', country:'Netherlands', status:'Finalized', id:'PR-2345'},
+      {date:'2024-11-05', patient:'Ethan White', type:'MRI', doctor:'Dr. Lee', country:'Netherlands', status:'Finalized', id:'MR-6789'},
+      {date:'2024-10-18', patient:'Ethan White', type:'Blood Work', doctor:'Dr. Gomez', country:'Netherlands', status:'Finalized', id:'BW-0123'},
+      
+      // Ava Martinez (PAT-012) - New reports
+      {date:'2024-12-14', patient:'Ava Martinez', type:'Brain Mapping', doctor:'Dr. Wilson', country:'Portugal', status:'Finalized', id:'BM-4567'},
+      {date:'2024-11-26', patient:'Ava Martinez', type:'FNON Report', doctor:'Dr. Patel', country:'Portugal', status:'Finalized', id:'FR-8901'},
+      {date:'2024-11-08', patient:'Ava Martinez', type:'CT Scan', doctor:'Dr. Lee', country:'Portugal', status:'Finalized', id:'CT-2345'},
+      {date:'2024-10-21', patient:'Ava Martinez', type:'ECG Report', doctor:'Dr. Gomez', country:'Portugal', status:'Finalized', id:'EC-6789'},
+      
+      // William Garcia (PAT-013) - New reports
+      {date:'2024-12-17', patient:'William Garcia', type:'FNON Report', doctor:'Dr. Wilson', country:'Italy', status:'Finalized', id:'FR-0123'},
+      {date:'2024-11-29', patient:'William Garcia', type:'PRS Report', doctor:'Dr. Patel', country:'Italy', status:'Finalized', id:'PR-4567'},
+      {date:'2024-11-11', patient:'William Garcia', type:'Blood Work', doctor:'Dr. Lee', country:'Italy', status:'Finalized', id:'BW-8901'},
+      {date:'2024-10-24', patient:'William Garcia', type:'Brain Mapping', doctor:'Dr. Gomez', country:'Italy', status:'Finalized', id:'BM-2345'},
+      
+      // Charlotte Lee (PAT-014) - New reports
+      {date:'2024-12-25', patient:'Charlotte Lee', type:'FNON Report', doctor:'Dr. Wilson', country:'Singapore', status:'Finalized', id:'FR-6789'},
+      {date:'2024-12-09', patient:'Charlotte Lee', type:'MRI', doctor:'Dr. Patel', country:'Singapore', status:'Finalized', id:'MR-0123'},
+      {date:'2024-11-21', patient:'Charlotte Lee', type:'X-Ray', doctor:'Dr. Lee', country:'Singapore', status:'Finalized', id:'XR-4567'},
+      {date:'2024-11-03', patient:'Charlotte Lee', type:'Blood Work', doctor:'Dr. Gomez', country:'Singapore', status:'Finalized', id:'BW-8901'},
+      
+      // Benjamin Kim (PAT-015) - New reports
+      {date:'2024-12-13', patient:'Benjamin Kim', type:'Brain Mapping', doctor:'Dr. Wilson', country:'South Korea', status:'Finalized', id:'BM-2345'},
+      {date:'2024-11-24', patient:'Benjamin Kim', type:'FNON Report', doctor:'Dr. Patel', country:'South Korea', status:'Finalized', id:'FR-6789'},
+      {date:'2024-11-06', patient:'Benjamin Kim', type:'PRS Report', doctor:'Dr. Lee', country:'South Korea', status:'Finalized', id:'PR-0123'},
+      {date:'2024-10-19', patient:'Benjamin Kim', type:'CT Scan', doctor:'Dr. Gomez', country:'South Korea', status:'Finalized', id:'CT-4567'},
+      
+      // Amelia Patel (PAT-016) - New reports
+      {date:'2024-12-20', patient:'Amelia Patel', type:'FNON Report', doctor:'Dr. Wilson', country:'India', status:'Finalized', id:'FR-8901'},
+      {date:'2024-12-03', patient:'Amelia Patel', type:'Brain Mapping', doctor:'Dr. Patel', country:'India', status:'Finalized', id:'BM-2345'},
+      {date:'2024-11-15', patient:'Amelia Patel', type:'Blood Work', doctor:'Dr. Lee', country:'India', status:'Finalized', id:'BW-6789'},
+      {date:'2024-10-28', patient:'Amelia Patel', type:'ECG Report', doctor:'Dr. Gomez', country:'India', status:'Finalized', id:'EC-0123'},
+      
+      // Lucas Silva (PAT-017) - New reports
+      {date:'2024-12-18', patient:'Lucas Silva', type:'FNON Report', doctor:'Dr. Wilson', country:'Brazil', status:'Finalized', id:'FR-4567'},
+      {date:'2024-11-30', patient:'Lucas Silva', type:'PRS Report', doctor:'Dr. Patel', country:'Brazil', status:'Finalized', id:'PR-8901'},
+      {date:'2024-11-12', patient:'Lucas Silva', type:'MRI', doctor:'Dr. Lee', country:'Brazil', status:'Finalized', id:'MR-2345'},
+      {date:'2024-10-25', patient:'Lucas Silva', type:'X-Ray', doctor:'Dr. Gomez', country:'Brazil', status:'Finalized', id:'XR-6789'},
+      
+      // Harper Nguyen (PAT-018) - New reports
+      {date:'2024-12-24', patient:'Harper Nguyen', type:'Brain Mapping', doctor:'Dr. Wilson', country:'Vietnam', status:'Finalized', id:'BM-0123'},
+      {date:'2024-12-06', patient:'Harper Nguyen', type:'FNON Report', doctor:'Dr. Patel', country:'Vietnam', status:'Finalized', id:'FR-4567'},
+      {date:'2024-11-18', patient:'Harper Nguyen', type:'Blood Work', doctor:'Dr. Lee', country:'Vietnam', status:'Finalized', id:'BW-8901'},
+      {date:'2024-10-31', patient:'Harper Nguyen', type:'CT Scan', doctor:'Dr. Gomez', country:'Vietnam', status:'Finalized', id:'CT-2345'},
+      
+      // Alexander Berg (PAT-019) - New reports
+      {date:'2024-12-16', patient:'Alexander Berg', type:'FNON Report', doctor:'Dr. Wilson', country:'Norway', status:'Finalized', id:'FR-6789'},
+      {date:'2024-11-28', patient:'Alexander Berg', type:'PRS Report', doctor:'Dr. Patel', country:'Norway', status:'Finalized', id:'PR-0123'},
+      {date:'2024-11-10', patient:'Alexander Berg', type:'Brain Mapping', doctor:'Dr. Lee', country:'Norway', status:'Finalized', id:'BM-4567'},
+      {date:'2024-10-23', patient:'Alexander Berg', type:'ECG Report', doctor:'Dr. Gomez', country:'Norway', status:'Finalized', id:'EC-8901'},
+      
+      // Sofia Kowalski (PAT-020) - New reports
+      {date:'2024-12-26', patient:'Sofia Kowalski', type:'FNON Report', doctor:'Dr. Wilson', country:'Poland', status:'Finalized', id:'FR-2345'},
+      {date:'2024-12-08', patient:'Sofia Kowalski', type:'Brain Mapping', doctor:'Dr. Patel', country:'Poland', status:'Finalized', id:'BM-6789'},
+      {date:'2024-11-20', patient:'Sofia Kowalski', type:'MRI', doctor:'Dr. Lee', country:'Poland', status:'Finalized', id:'MR-0123'},
+      {date:'2024-11-02', patient:'Sofia Kowalski', type:'Blood Work', doctor:'Dr. Gomez', country:'Poland', status:'Finalized', id:'BW-4567'}
     ];
     const patientBilling = [
         {date:'2024-12-26', description:'Subscription • Sozo Premium', amount:2.00, status:'Paid', method:'Visa •••• 4242', cardType:'Credit', invoice:'INV-1201', dueDate:'2025-01-26'},
@@ -926,7 +1098,7 @@ function updateProgressBadges() {
   // Also color main doctor menu items for assessment pages
   document.querySelectorAll('.nav-item').forEach(el => {
     const key = el.dataset.key;
-    if(['fnon','brainmap','prs','finalreport'].includes(key)) {
+    if(['fnon','brainmap','prs','doctornotes','finalreport'].includes(key)) {
       const status = assessmentProgress[key==='brainmap'?'brain':key];
       if(status) {
         const bg = status==='completed' ? '#bbf7d0' : status==='in-progress' ? '#bfdbfe' : '#fecdd3';
@@ -934,6 +1106,681 @@ function updateProgressBadges() {
       }
     }
   });
+}
+
+// Helper function to generate calendar time slots with appointments
+function generateTimeSlots(appointments) {
+  const timeSlots = [
+    '08:00 AM', '08:30 AM', '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
+    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM',
+    '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM',
+    '05:00 PM', '05:30 PM', '06:00 PM'
+  ];
+  
+  // Filter today's appointments
+  const today = new Date().toLocaleDateString();
+  const todayAppts = appointments.filter(a => {
+    const aptDate = new Date(a.date).toLocaleDateString();
+    return aptDate === today || !a.date; // Include appointments without dates for demo
+  });
+  
+  let html = '';
+  
+  timeSlots.forEach((timeSlot, index) => {
+    // Find appointments for this time slot
+    const slotAppts = todayAppts.filter(apt => apt.time === timeSlot);
+    
+    html += `
+      <div class="flex gap-4 hover:bg-slate-50 rounded-lg transition" style="min-height: 80px;">
+        <!-- Time Column -->
+        <div class="w-24 flex-shrink-0 pt-2">
+          <span class="text-sm font-semibold text-slate-600">${timeSlot}</span>
+        </div>
+        
+        <!-- Appointments Column -->
+        <div class="flex-1 border-l-2 border-slate-200 pl-4 pb-4">
+          ${slotAppts.length > 0 ? slotAppts.map((apt, idx) => {
+            // Determine status styling
+            let statusColor = 'blue';
+            let statusBg = 'bg-blue-50';
+            let statusBorder = 'border-blue-300';
+            let statusText = 'text-blue-700';
+            let statusIcon = 'fa-clock';
+            
+            if (apt.status === 'Completed') {
+              statusColor = 'green';
+              statusBg = 'bg-green-50';
+              statusBorder = 'border-green-300';
+              statusText = 'text-green-700';
+              statusIcon = 'fa-circle-check';
+            } else if (apt.status === 'Cancelled') {
+              statusColor = 'red';
+              statusBg = 'bg-red-50';
+              statusBorder = 'border-red-300';
+              statusText = 'text-red-700';
+              statusIcon = 'fa-circle-xmark';
+            } else if (apt.status === 'Rescheduled') {
+              statusColor = 'orange';
+              statusBg = 'bg-orange-50';
+              statusBorder = 'border-orange-300';
+              statusText = 'text-orange-700';
+              statusIcon = 'fa-calendar';
+            }
+            
+            // Check if this is the next appointment
+            const isUpNext = idx === 0 && index < 10 && apt.status === 'Scheduled';
+            if (isUpNext) {
+              statusBg = 'bg-gradient-to-r from-blue-500 to-purple-600';
+              statusBorder = 'border-blue-400';
+            }
+            
+            return `
+              <div class="${isUpNext ? statusBg + ' text-white' : statusBg + ' border-l-4 ' + statusBorder} rounded-lg p-4 shadow-sm mb-2 hover:shadow-md transition cursor-pointer">
+                <!-- Patient Info -->
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-3 flex-1">
+                    <!-- Avatar -->
+                    <div class="w-10 h-10 rounded-full ${isUpNext ? 'bg-white/20' : 'bg-gradient-to-br from-purple-400 to-pink-400'} flex items-center justify-center ${isUpNext ? 'text-white' : 'text-white'} text-sm font-bold flex-shrink-0">
+                      ${apt.patientName.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    
+                    <!-- Details -->
+                    <div class="flex-1 min-w-0">
+                      <div onclick="startVisit('${apt.patientId}')" class="font-bold ${isUpNext ? 'text-white' : 'text-slate-900'} hover:underline cursor-pointer text-base">
+                        ${apt.patientName}
+                      </div>
+                      <div class="${isUpNext ? 'text-white/90' : 'text-slate-600'} text-sm mt-1">
+                        <i class="fa-solid fa-stethoscope mr-1"></i>${apt.type}
+                      </div>
+                      <div class="${isUpNext ? 'text-white/80' : 'text-slate-500'} text-xs mt-1">
+                        <i class="fa-solid fa-door-open mr-1"></i>Room ${apt.room || '101'}
+                        ${apt.location ? ` • <i class="fa-solid fa-location-dot ml-2 mr-1"></i>${apt.location}` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Status Badge and Actions -->
+                  <div class="flex flex-col items-end gap-2">
+                    ${isUpNext ? `
+                      <span class="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold">
+                        <i class="fa-solid fa-bolt"></i> Up Next
+                      </span>
+                      <button onclick="startVisit('${apt.patientId}')" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-video mr-1"></i>Start Visit
+                      </button>
+                    ` : apt.status === 'Completed' ? `
+                      <span class="inline-flex items-center gap-1 bg-green-100 ${statusText} px-3 py-1 rounded-full text-xs font-semibold">
+                        <i class="fa-solid ${statusIcon}"></i> ${apt.status}
+                      </span>
+                      <button onclick="startVisit('${apt.patientId}')" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+                        <i class="fa-solid fa-notes-medical mr-1"></i>View Notes
+                      </button>
+                    ` : apt.status === 'Cancelled' ? `
+                      <span class="inline-flex items-center gap-1 bg-red-100 ${statusText} px-3 py-1 rounded-full text-xs font-semibold">
+                        <i class="fa-solid ${statusIcon}"></i> ${apt.status}
+                      </span>
+                    ` : `
+                      <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold">
+                        <i class="fa-solid ${statusIcon}"></i> ${apt.status}
+                      </span>
+                      <button onclick="startVisit('${apt.patientId}')" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+                        <i class="fa-solid fa-eye mr-1"></i>View Details
+                      </button>
+                    `}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('') : `
+            <div class="h-full flex items-center text-slate-400 text-sm italic pt-2">
+              No appointments
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+  });
+  
+  return html;
+}
+
+// ==========================================
+// TEAMS-LIKE CALENDAR SYSTEM
+// ==========================================
+
+// Global calendar state
+const calendarState = {
+  currentView: 'week', // week view only
+  currentDate: new Date(),
+  zoomLevel: 100,
+  hourHeight: 80, // pixels per hour
+  minHourHeight: 40,
+  maxHourHeight: 160
+};
+
+// Switch calendar view (week view only)
+function switchCalendarView(view) {
+  calendarState.currentView = 'week';
+  renderTeamsCalendar();
+}
+
+// Zoom calendar in/out
+function zoomCalendar(direction) {
+  if (direction === 'in' && calendarState.hourHeight < calendarState.maxHourHeight) {
+    calendarState.hourHeight += 20;
+    calendarState.zoomLevel += 25;
+  } else if (direction === 'out' && calendarState.hourHeight > calendarState.minHourHeight) {
+    calendarState.hourHeight -= 20;
+    calendarState.zoomLevel -= 25;
+  }
+  
+  document.getElementById('zoomLevel').textContent = calendarState.zoomLevel + '%';
+  renderTeamsCalendar();
+}
+
+// Get current week date range
+function getWeekDateRange() {
+  const date = new Date(calendarState.currentDate);
+  const day = date.getDay();
+  const diff = date.getDate() - day; // Get Sunday
+  
+  const weekStart = new Date(date.setDate(diff));
+  const weekEnd = new Date(date.setDate(diff + 6)); // Get Saturday
+  
+  const options = { month: 'short', day: 'numeric' };
+  const startStr = weekStart.toLocaleDateString('en-US', options);
+  const endStr = weekEnd.toLocaleDateString('en-US', options);
+  
+  return `${startStr} - ${endStr}`;
+}
+
+// Update week display in navigation
+function updateWeekDisplay() {
+  const weekRangeElement = document.getElementById('weekDateRange');
+  if (weekRangeElement) {
+    weekRangeElement.textContent = getWeekDateRange();
+  }
+}
+
+// Navigate calendar (prev/next week)
+function navigateCalendar(direction) {
+  const date = calendarState.currentDate;
+  
+  if (direction === 'prev') {
+    date.setDate(date.getDate() - 7);
+  } else if (direction === 'next') {
+    date.setDate(date.getDate() + 7);
+  } else if (direction === 'today') {
+    calendarState.currentDate = new Date();
+  }
+  
+  renderTeamsCalendar();
+  updateWeekDisplay();
+}
+
+// Convert time string to minutes since midnight
+function timeToMinutes(timeStr) {
+  if (!timeStr) return 0;
+  const [time, period] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+  
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  
+  return hours * 60 + (minutes || 0);
+}
+
+// Get appointment color based on status and type
+function getAppointmentColor(status, type, location) {
+  const colors = {
+    'Completed': { bg: '#10b981', border: '#059669', text: '#ffffff' },
+    'Scheduled': { bg: '#3b82f6', border: '#2563eb', text: '#ffffff' },
+    'Cancelled': { bg: '#ef4444', border: '#dc2626', text: '#ffffff' },
+    'Rescheduled': { bg: '#f59e0b', border: '#d97706', text: '#ffffff' },
+    'Pending': { bg: '#8b5cf6', border: '#7c3aed', text: '#ffffff' }
+  };
+  
+  // Priority: status color
+  return colors[status] || colors['Scheduled'];
+}
+
+// Render the Teams-like calendar (week view only)
+function renderTeamsCalendar() {
+  const container = document.getElementById('calendarTimelineContainer');
+  if (!container) return;
+  
+  const hourHeight = calendarState.hourHeight;
+  
+  // Get appointments
+  const appointments = sampleData.appointments || [];
+  
+  // Generate week view timeline
+  renderWeekView(container, appointments, hourHeight);
+  
+  // Update week display
+  updateWeekDisplay();
+}
+
+// Render Day View
+function renderDayView(container, appointments, hourHeight) {
+  const currentDate = calendarState.currentDate;
+  const dateStr = currentDate.toLocaleDateString();
+  
+  // Filter appointments for current date
+  const dayAppointments = appointments.filter(apt => {
+    if (!apt.date) return false;
+    const aptDate = new Date(apt.date).toLocaleDateString();
+    return aptDate === dateStr;
+  });
+  
+  // Generate hours (6 AM to 8 PM)
+  const startHour = 6;
+  const endHour = 20;
+  const hours = [];
+  for (let h = startHour; h <= endHour; h++) {
+    hours.push(h);
+  }
+  
+  // Get current time for time indicator
+  const now = new Date();
+  const isToday = now.toLocaleDateString() === dateStr;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentTimeTop = ((currentMinutes - startHour * 60) / 60) * hourHeight;
+  
+  let html = `
+    <div style="position: relative; min-height: ${(endHour - startHour + 1) * hourHeight}px;">
+      <!-- Time Grid -->
+      <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 80px; background: white; border-right: 2px solid #e2e8f0; z-index: 2;">
+        ${hours.map((h, idx) => {
+          const hour12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+          const period = h >= 12 ? 'PM' : 'AM';
+          return `
+            <div style="height: ${hourHeight}px; border-bottom: 1px solid #e2e8f0; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #64748b;">
+              ${hour12}:00 ${period}
+            </div>
+          `;
+        }).join('')}
+      </div>
+      
+      <!-- Hour Grid Lines -->
+      <div style="position: absolute; left: 80px; right: 0; top: 0; bottom: 0;">
+        ${hours.map((h, idx) => `
+          <div style="height: ${hourHeight}px; border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'};"></div>
+        `).join('')}
+      </div>
+      
+      <!-- Current Time Indicator (Red Line) -->
+      ${isToday && currentTimeTop >= 0 ? `
+        <div style="position: absolute; left: 0; right: 0; top: ${currentTimeTop}px; z-index: 5; pointer-events: none;">
+          <div style="height: 2px; background: #ef4444; box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);"></div>
+          <div style="position: absolute; left: 10px; top: -8px; width: 16px; height: 16px; background: #ef4444; border-radius: 50%; border: 2px solid white;"></div>
+        </div>
+      ` : ''}
+      
+      <!-- Appointments -->
+      <div style="position: absolute; left: 80px; right: 0; top: 0; bottom: 0; padding: 0 12px;">
+        ${dayAppointments.map((apt, idx) => {
+          const startMinutes = timeToMinutes(apt.time);
+          const top = ((startMinutes - startHour * 60) / 60) * hourHeight;
+          const duration = apt.duration || 30; // default 30 minutes
+          const height = (duration / 60) * hourHeight - 4;
+          const color = getAppointmentColor(apt.status, apt.type, apt.location);
+          
+          // Check for overlapping appointments
+          const overlapping = dayAppointments.filter(a => {
+            const aStart = timeToMinutes(a.time);
+            const aEnd = aStart + (a.duration || 30);
+            const bStart = startMinutes;
+            const bEnd = bStart + duration;
+            return a !== apt && ((aStart < bEnd && aEnd > bStart));
+          });
+          
+          const overlapIndex = overlapping.findIndex(a => dayAppointments.indexOf(a) < idx);
+          const totalOverlaps = overlapping.length + 1;
+          const width = `calc(${100 / totalOverlaps}% - 8px)`;
+          const left = `${(overlapIndex + 1) * (100 / totalOverlaps)}%`;
+          
+          return `
+            <div 
+              onclick="showAppointmentDetails('${apt.id}')"
+              style="
+                position: absolute;
+                top: ${top}px;
+                left: ${overlapping.length > 0 ? left : '0'};
+                width: ${overlapping.length > 0 ? width : 'calc(100% - 8px)'};
+                height: ${height}px;
+                min-height: 60px;
+                background: ${color.bg};
+                border-left: 4px solid ${color.border};
+                border-radius: 6px;
+                padding: 8px 10px;
+                cursor: pointer;
+                overflow: hidden;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: all 0.2s;
+                z-index: 3;
+              "
+              onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.transform='scale(1.02)'; this.style.zIndex='4';"
+              onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'; this.style.transform='scale(1)'; this.style.zIndex='3';"
+              title="${apt.patientName} - ${apt.type}"
+            >
+              <div style="color: ${color.text}; font-weight: 700; font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${apt.patientName}
+              </div>
+              <div style="color: ${color.text}; opacity: 0.95; font-size: 11px; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${apt.type}</span>
+              </div>
+              <div style="color: ${color.text}; opacity: 0.9; font-size: 11px; display: flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>${apt.location || 'Room ' + (apt.room || '101')}</span>
+              </div>
+              ${height > 80 ? `
+                <div style="color: ${color.text}; opacity: 0.85; font-size: 10px; margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.3);">
+                  <i class="fa-solid fa-clock"></i> ${apt.time} • ${duration} min
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+  
+  // Auto-scroll to current time
+  if (isToday && currentTimeTop > 0) {
+    setTimeout(() => {
+      container.scrollTop = Math.max(0, currentTimeTop - 200);
+    }, 100);
+  }
+}
+
+// Render Week View
+function renderWeekView(container, appointments, hourHeight) {
+  const currentDate = new Date(calendarState.currentDate);
+  
+  // Get start of week (Sunday)
+  const dayOfWeek = currentDate.getDay();
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setDate(currentDate.getDate() - dayOfWeek);
+  
+  // Generate week days
+  const weekDays = [];
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(startOfWeek);
+    day.setDate(startOfWeek.getDate() + i);
+    weekDays.push(day);
+  }
+  
+  // Generate hours (6 AM to 8 PM)
+  const startHour = 6;
+  const endHour = 20;
+  const hours = [];
+  for (let h = startHour; h <= endHour; h++) {
+    hours.push(h);
+  }
+  
+  // Get current time for time indicator
+  const now = new Date();
+  const todayStr = now.toLocaleDateString();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentTimeTop = ((currentMinutes - startHour * 60) / 60) * hourHeight;
+  
+  const dayWidth = 'calc((100% - 80px) / 7)';
+  
+  let html = `
+    <div style="position: relative; min-height: ${(endHour - startHour + 1) * hourHeight + 60}px;">
+      <!-- Header with Days -->
+      <div style="position: sticky; top: 0; z-index: 10; background: white; border-bottom: 2px solid #e2e8f0; display: flex;">
+        <div style="width: 80px; padding: 12px; border-right: 2px solid #e2e8f0; font-size: 11px; font-weight: 600; color: #94a3b8; text-align: center;">
+          GMT${now.getTimezoneOffset() / -60}
+        </div>
+        ${weekDays.map(day => {
+          const isToday = day.toLocaleDateString() === todayStr;
+          return `
+            <div style="flex: 1; padding: 12px; text-align: center; border-right: 1px solid #e2e8f0; ${isToday ? 'background: #eff6ff;' : ''}">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">
+                ${day.toLocaleDateString('en-US', { weekday: 'short' })}
+              </div>
+              <div style="font-size: 20px; font-weight: 700; color: ${isToday ? '#3b82f6' : '#1e293b'}; margin-top: 4px;">
+                ${day.getDate()}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      
+      <!-- Time Grid and Hour Lines -->
+      <div style="display: flex; position: relative;">
+        <!-- Time Column -->
+        <div style="width: 80px; background: white; border-right: 2px solid #e2e8f0;">
+          ${hours.map(h => {
+            const hour12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+            const period = h >= 12 ? 'PM' : 'AM';
+            return `
+              <div style="height: ${hourHeight}px; border-bottom: 1px solid #e2e8f0; padding: 8px 8px; font-size: 11px; font-weight: 600; color: #64748b; text-align: center;">
+                ${hour12} ${period}
+              </div>
+            `;
+          }).join('')}
+        </div>
+        
+        <!-- Days Grid -->
+        <div style="flex: 1; position: relative;">
+          <!-- Hour Grid Lines -->
+          ${hours.map((h, idx) => `
+            <div style="position: absolute; left: 0; right: 0; top: ${idx * hourHeight}px; height: ${hourHeight}px; border-bottom: 1px solid #e2e8f0; display: flex;">
+              ${weekDays.map((day, dayIdx) => `
+                <div style="flex: 1; border-right: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'};"></div>
+              `).join('')}
+            </div>
+          `).join('')}
+          
+          <!-- Current Time Indicators -->
+          ${weekDays.map((day, dayIdx) => {
+            const isToday = day.toLocaleDateString() === todayStr;
+            if (!isToday || currentTimeTop < 0) return '';
+            
+            const leftPos = (dayIdx / 7) * 100;
+            const width = (1 / 7) * 100;
+            
+            return `
+              <div style="position: absolute; left: ${leftPos}%; width: ${width}%; top: ${currentTimeTop}px; z-index: 5; pointer-events: none;">
+                <div style="height: 2px; background: #ef4444; box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);"></div>
+                <div style="position: absolute; left: 4px; top: -8px; width: 16px; height: 16px; background: #ef4444; border-radius: 50%; border: 2px solid white;"></div>
+              </div>
+            `;
+          }).join('')}
+          
+          <!-- Appointments for each day -->
+          ${weekDays.map((day, dayIdx) => {
+            const dayStr = day.toLocaleDateString();
+            const dayAppointments = appointments.filter(apt => {
+              if (!apt.date) return false;
+              const aptDate = new Date(apt.date).toLocaleDateString();
+              return aptDate === dayStr;
+            });
+            
+            const leftPos = (dayIdx / 7) * 100;
+            const width = (1 / 7) * 100;
+            
+            return dayAppointments.map((apt, idx) => {
+              const startMinutes = timeToMinutes(apt.time);
+              const top = ((startMinutes - startHour * 60) / 60) * hourHeight;
+              const duration = apt.duration || 30;
+              const height = (duration / 60) * hourHeight - 4;
+              const color = getAppointmentColor(apt.status, apt.type, apt.location);
+              
+              return `
+                <div 
+                  onclick="showAppointmentDetails('${apt.id}')"
+                  style="
+                    position: absolute;
+                    top: ${top}px;
+                    left: calc(${leftPos}% + 4px);
+                    width: calc(${width}% - 8px);
+                    height: ${height}px;
+                    min-height: 50px;
+                    background: ${color.bg};
+                    border-left: 3px solid ${color.border};
+                    border-radius: 4px;
+                    padding: 6px 8px;
+                    cursor: pointer;
+                    overflow: hidden;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    transition: all 0.2s;
+                    z-index: 3;
+                  "
+                  onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.transform='scale(1.03)'; this.style.zIndex='4';"
+                  onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'; this.style.transform='scale(1)'; this.style.zIndex='3';"
+                  title="${apt.patientName} - ${apt.type}"
+                >
+                  <div style="color: ${color.text}; font-weight: 700; font-size: 11px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${apt.patientName}
+                  </div>
+                  <div style="color: ${color.text}; opacity: 0.95; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${apt.time}
+                  </div>
+                  ${height > 60 ? `
+                    <div style="color: ${color.text}; opacity: 0.9; font-size: 9px; margin-top: 2px;">
+                      <i class="fa-solid fa-location-dot"></i> ${apt.location || 'Room ' + (apt.room || '101')}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('');
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+  
+  // Auto-scroll to current time
+  const isThisWeek = weekDays.some(day => day.toLocaleDateString() === todayStr);
+  if (isThisWeek && currentTimeTop > 0) {
+    setTimeout(() => {
+      container.scrollTop = Math.max(0, currentTimeTop - 150);
+    }, 100);
+  }
+}
+
+// Show appointment details in modal
+function showAppointmentDetails(appointmentId) {
+  const appointment = sampleData.appointments.find(a => a.id === appointmentId);
+  if (!appointment) return;
+  
+  const color = getAppointmentColor(appointment.status, appointment.type, appointment.location);
+  
+  // Create modal
+  const modal = document.createElement('div');
+  modal.id = 'appointmentModal';
+  modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);" onclick="event.stopPropagation();">
+      <!-- Header -->
+      <div style="background: ${color.bg}; color: ${color.text}; padding: 24px; border-radius: 16px 16px 0 0;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+          <h2 style="font-size: 24px; font-weight: 700; margin: 0;">${appointment.patientName}</h2>
+          <button onclick="document.getElementById('appointmentModal').remove();" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            ×
+          </button>
+        </div>
+        <div style="opacity: 0.95; font-size: 14px;">
+          <i class="fa-solid fa-calendar"></i> ${appointment.date || 'Today'} • ${appointment.time}
+        </div>
+      </div>
+      
+      <!-- Body -->
+      <div style="padding: 24px;">
+        <!-- Status -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Status</div>
+          <span style="display: inline-block; background: ${color.bg}; color: ${color.text}; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            ${appointment.status}
+          </span>
+        </div>
+        
+        <!-- Type -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+            <i class="fa-solid fa-stethoscope"></i> Appointment Type
+          </div>
+          <div style="font-size: 15px; color: #1e293b; font-weight: 500;">${appointment.type}</div>
+        </div>
+        
+        <!-- Location -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+            <i class="fa-solid fa-location-dot"></i> Location
+          </div>
+          <div style="font-size: 15px; color: #1e293b; font-weight: 500;">
+            ${appointment.location || 'On-site'} ${appointment.room ? '• Room ' + appointment.room : ''}
+          </div>
+        </div>
+        
+        <!-- Duration -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+            <i class="fa-solid fa-clock"></i> Duration
+          </div>
+          <div style="font-size: 15px; color: #1e293b; font-weight: 500;">${appointment.duration || 30} minutes</div>
+        </div>
+        
+        <!-- Patient ID -->
+        <div style="margin-bottom: 24px;">
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+            <i class="fa-solid fa-id-card"></i> Patient ID
+          </div>
+          <div style="font-size: 15px; color: #1e293b; font-weight: 500; font-family: monospace;">${appointment.patientId}</div>
+        </div>
+        
+        <!-- Actions -->
+        <div style="display: flex; gap: 12px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+          <button onclick="document.getElementById('appointmentModal').remove(); startVisit('${appointment.patientId}');" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+            <i class="fa-solid fa-video mr-2"></i>Start Visit
+          </button>
+          <button onclick="document.getElementById('appointmentModal').remove(); startVisit('${appointment.patientId}');" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+            <i class="fa-solid fa-user mr-2"></i>View Patient
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Initialize calendar when doctor home page loads
+function initializeTeamsCalendar() {
+  setTimeout(() => {
+    renderTeamsCalendar();
+  }, 100);
+}
+
+// Function to start a visit with a patient
+function startVisit(patientId) {
+  // Convert appointment patientId format (P-001) to patient ID format (PAT-001)
+  const formattedPatientId = patientId.startsWith('P-') ? patientId.replace('P-', 'PAT-') : patientId;
+  
+  // Find the patient in the patients data
+  const patient = sampleData.patients.find(p => p.id === formattedPatientId);
+  
+  if (!patient) {
+    alert('Patient not found');
+    return;
+  }
+  
+  // Set the current patient in global state
+  globalState.currentPatient = patient;
+  
+  // Navigate to patient history section
+  loadSection('patienthistory');
 }
 
 function loadSection(key) {
@@ -15399,29 +16246,6 @@ function renderPRSForm(conditionId) {
           </div>
         </div>
 
-        <!-- Doctor Notes Card -->
-        <div class="card p-6 border border-slate-200 bg-gradient-to-r from-yellow-50 to-white">
-          <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-comment-medical mr-2"></i>Doctor's Notes & Comments</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase">Clinical Observations</label>
-              <textarea id="doctorNotes" class="input-royal min-h-32" placeholder="Enter clinical observations, assessment notes, or any relevant comments...">Patient presents with moderate cognitive decline consistent with early-stage dementia. Notable impairments in short-term memory and executive function. Patient is oriented to person and place but occasionally confused about time. Family reports increasing difficulty with daily activities and mild behavioral changes over the past 6 months. Physical examination reveals no acute neurological deficits. Patient's speech is coherent but shows occasional word-finding difficulties.</textarea>
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase">Recommendations</label>
-              <textarea id="doctorRecommendations" class="input-royal min-h-24" placeholder="Enter treatment recommendations, follow-up instructions, or medication notes...">Recommend initiating cognitive rehabilitation therapy 3 times per week. Family should be educated on dementia care strategies and home safety modifications. Patient would benefit from structured daily routines and cognitive stimulation activities. Consider referral to occupational therapy for ADL assessment. Schedule follow-up appointment in 3 months to reassess cognitive function and adjust treatment plan accordingly.</textarea>
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase">Device Suggestions</label>
-              <textarea id="doctorDeviceSuggestions" class="input-royal min-h-24" placeholder="Enter Device Suggestions">Recommend Sozo Brain Mapping device for baseline EEG assessment and ongoing monitoring of cortical activity patterns. tDCS (transcranial Direct Current Stimulation) device may be beneficial for cognitive enhancement - suggest 20-minute sessions targeting dorsolateral prefrontal cortex. Patient may also benefit from wearable activity tracker to monitor sleep patterns and daily movement. Consider smart home assistive devices including medication reminders and GPS tracking for safety.</textarea>
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase">Medication Notes</label>
-              <textarea id="doctorMedicationNotes" class="input-royal min-h-24" placeholder="Enter Medication Notes">Currently on Donepezil 5mg daily (cholinesterase inhibitor). Patient tolerating medication well with no reported side effects. Plan to increase to 10mg after 4-6 weeks if tolerated. Supplement regimen includes Vitamin B12 (1000mcg), Vitamin D (2000 IU), and Omega-3 fatty acids. Monitor for potential drug interactions with new prescriptions. Patient has no known drug allergies. Family educated on importance of medication adherence and potential side effects to watch for.</textarea>
-            </div>
-          </div>
-        </div>
-
         ${currentRole === 'admin' ? `
         <!-- Custom PRS Fields Management (Admin Only) -->
         <div class="card p-6 border border-slate-200 bg-gradient-to-r from-purple-50 to-white border-l-4 border-l-purple-600">
@@ -16215,10 +17039,12 @@ function renderFinalReport() {
     } : null;
 
   area.innerHTML = `
+    <div class="p-8">
     ${getAssessmentNavigation('finalreport')}
     
     <!-- Patient Navigation Section (Doctor Only) -->
     ${(currentRole === 'doctor' || currentRole === 'admin') ? `
+
       <div class="mb-6 print:hidden">
         <div class="card p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-l-amber-600">
           <div class="flex items-center justify-between">
@@ -16239,6 +17065,7 @@ function renderFinalReport() {
           </div>
         </div>
       </div>
+      
     ` : ''}
     
     <div id="finalReportContent" class="p-8 bg-white w-full">
@@ -16853,6 +17680,7 @@ function renderFinalReport() {
     </div>
 
   </div>
+  </div>
   `;
   
   // Render custom sections
@@ -16958,14 +17786,14 @@ function renderDoctor(key) {
                 </div>
                 <div class="flex items-center justify-between">
                   <div>
-                    <h3 class="text-xl font-bold mb-1 text-slate-900">${nextAppt.patientName} <i class="fa-solid fa-eye text-sm ml-2"></i></h3>
+                    <h3 class="text-xl font-bold mb-1 text-slate-900"><span onclick="startVisit('${nextAppt.patientId}')" class="cursor-pointer hover:text-blue-600 transition">${nextAppt.patientName}</span> <i class="fa-solid fa-eye text-sm ml-2"></i></h3>
                     <span class="inline-block bg-blue-100 px-2 py-1 rounded-full text-xs text-blue-700">
                       ${nextAppt.type}
                     </span>
                   </div>
                   <div class="text-right">
                     <div class="text-3xl font-bold mb-2 text-slate-900">${nextAppt.time}</div>
-                    <button onclick="alert('Starting visit with ${nextAppt.patientName}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">
+                    <button onclick="startVisit('${nextAppt.patientId}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">
                       Start Visit
                     </button>
                   </div>
@@ -17016,7 +17844,7 @@ function renderDoctor(key) {
                 <i class="fa-solid fa-calendar-days text-purple-600 text-xl"></i>
               </div>
               <div class="text-right">
-                <div class="text-3xl font-bold text-slate-900">${appointmentsLeftToday}<span class="text-lg text-slate-400">/12</span></div>
+                <div class="text-3xl font-bold text-slate-900">5<span class="text-lg text-slate-400">/12</span></div>
                 <div class="text-sm text-slate-500">Appointments Left Today</div>
               </div>
             </div>
@@ -17052,87 +17880,52 @@ function renderDoctor(key) {
           </div>
         </div>
 
-        <!-- Appointments Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <!-- Header with Tabs -->
-          <div class="p-6 border-b border-slate-200">
+        <!-- Teams-like Calendar View -->
+        <div id="teamsCalendar" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <!-- Header with View Controls -->
+          <div class="p-4 border-b border-slate-200">
             <div class="flex items-center justify-between flex-wrap gap-4">
               <div class="flex items-center gap-4">
-                <button onclick="filterAppointments('today')" class="appointment-filter-btn active px-4 py-2 rounded-lg font-semibold text-sm transition">
-                  Today's Appointments <span class="ml-2 bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">12</span>
-                </button>
-                <button onclick="filterAppointments('all')" class="appointment-filter-btn px-4 py-2 rounded-lg font-semibold text-sm transition">
-                  All Appointments <span class="ml-2 bg-slate-300 text-slate-700 px-2 py-0.5 rounded-full text-xs">120</span>
-                </button>
+                <div>
+                  <h3 class="text-xl font-bold text-slate-900">Calendar</h3>
+                  <p class="text-sm text-slate-500 mt-1">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                </div>
               </div>
-              <button onclick="loadSection('allappointments'); setTimeout(() => { const btn = document.getElementById('docApptNewBtn'); if(btn) btn.click(); }, 100);" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
-                <i class="fa-solid fa-plus mr-2"></i>Appointment
-              </button>
+              
+              <div class="flex items-center gap-3 flex-wrap">
+                <!-- Zoom Controls -->
+                <div class="inline-flex rounded-lg border border-slate-300 bg-slate-50 p-1">
+                  <button onclick="zoomCalendar('out')" class="px-3 py-2 text-slate-600 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <div class="px-3 py-2 text-sm font-semibold text-slate-700 border-x border-slate-300" id="zoomLevel">100%</div>
+                  <button onclick="zoomCalendar('in')" class="px-3 py-2 text-slate-600 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="inline-flex items-center gap-3">
+                  <button onclick="navigateCalendar('prev')" class="px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Previous Week">
+                    <i class="fa-solid fa-chevron-left"></i>
+                  </button>
+                  <div class="flex flex-col items-center">
+                    <div id="weekDateRange" class="text-lg font-bold text-slate-800">Jan 19 - Jan 25</div>
+                    <button onclick="navigateCalendar('today')" class="text-xs text-blue-600 hover:text-blue-700 font-semibold transition">
+                      Today
+                    </button>
+                  </div>
+                  <button onclick="navigateCalendar('next')" class="px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Next Week">
+                    <i class="fa-solid fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Appointments Table -->
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
-                    <button class="flex items-center gap-2 hover:text-slate-900">
-                      Time <i class="fa-solid fa-sort text-xs"></i>
-                    </button>
-                  </th>
-                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
-                    <button class="flex items-center gap-2 hover:text-slate-900">
-                      Patient <i class="fa-solid fa-sort text-xs"></i>
-                    </button>
-                  </th>
-                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
-                    <button class="flex items-center gap-2 hover:text-slate-900">
-                      Type <i class="fa-solid fa-filter text-xs"></i>
-                    </button>
-                  </th>
-                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">
-                    <button class="flex items-center gap-2 hover:text-slate-900">
-                      Status <i class="fa-solid fa-filter text-xs"></i>
-                    </button>
-                  </th>
-                  <th class="text-left py-3 px-6 text-sm font-semibold text-slate-600">Room</th>
-                </tr>
-              </thead>
-              <tbody id="appointmentsTableBody">
-                ${allAppts.slice(0, 6).map((apt, idx) => `
-                  <tr class="border-b border-slate-100 hover:bg-slate-50 transition ${idx === 1 ? 'bg-blue-50' : ''}">
-                    <td class="py-4 px-6">
-                      <span class="font-semibold text-slate-900">${apt.time}</span>
-                    </td>
-                    <td class="py-4 px-6">
-                      <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          ${apt.patientName.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <span class="font-medium text-slate-900">${apt.patientName} <i class="fa-solid fa-eye text-slate-400 text-xs ml-1"></i></span>
-                      </div>
-                    </td>
-                    <td class="py-4 px-6">
-                      <span class="text-sm text-slate-700">${apt.type}</span>
-                    </td>
-                    <td class="py-4 px-6">
-                      ${apt.status === 'Completed' ? 
-                        '<span class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-check"></i> Completed</span>' : 
-                        idx === 1 ? 
-                        '<span class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-clock"></i> Up Next</span> <button class="ml-2 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700">Start Visit</button>' :
-                        apt.status === 'Cancelled' ?
-                        '<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-xmark"></i> Cancelled</span>' :
-                        '<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fa-regular fa-clock"></i> Scheduled</span>'
-                      }
-                    </td>
-                    <td class="py-4 px-6">
-                      <span class="text-sm font-medium text-slate-700">${apt.room || '101'}</span>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
+          <!-- Calendar Timeline Container -->
+          <div id="calendarTimelineContainer" style="height: 650px; overflow: auto; position: relative; background: #fafafa;">
+            <!-- Calendar content will be rendered here -->
           </div>
         </div>
 
@@ -17189,6 +17982,9 @@ function renderDoctor(key) {
         </div>
       </div>
     `;
+    
+    // Initialize Teams calendar
+    initializeTeamsCalendar();
     
     // Add styles for filter buttons
     setTimeout(() => {
@@ -17675,12 +18471,6 @@ function renderDoctor(key) {
                   <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                   <input type="text" id="docApptSearch" placeholder="Search appointments..." class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-sozo-500">
               </div>
-              <button
-                id="docApptNewBtn"
-                class="bg-sozo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-sozo-700 shadow-lg shadow-sozo-500/20"
-              >
-                Schedule Appointment
-              </button>
           </div>
         </div>
 
@@ -17771,74 +18561,6 @@ function renderDoctor(key) {
         </div>
       </div>
       </div>
-
-<!-- Schedule New Appointment Modal -->
-<div id="docScheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 my-8">
-    <div class="flex items-center justify-between p-4 border-b border-slate-200 sticky top-0 bg-white">
-      <h3 class="text-lg font-bold text-slate-900">Schedule New Appointment</h3>
-      <button id="docScheduleModalClose" class="text-slate-400 hover:text-slate-600 transition">
-        <i class="fa-solid fa-times text-xl"></i>
-      </button>
-    </div>
-    <div class="p-4 overflow-y-auto" style="max-height: calc(100vh - 200px);">
-      <form id="docScheduleForm" class="space-y-3">
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Patient Name</label>
-          <input type="text" id="docSchedulePatient" class="input-royal mt-1 py-2 text-sm" placeholder="Enter patient name" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Patient ID</label>
-          <input type="text" id="docSchedulePatientId" class="input-royal mt-1 py-2 text-sm" placeholder="e.g., PT-1000" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Examination Type</label>
-          <select id="docScheduleExam" class="input-royal mt-1 py-2 text-sm" required>
-            <option value="">Select examination...</option>
-            <option value="Initial Consultation">Initial Consultation</option>
-            <option value="MRI Scan">MRI Scan</option>
-            <option value="EEG Analysis">EEG Analysis</option>
-            <option value="Follow-up">Follow-up</option>
-            <option value="Cognitive Assessment">Cognitive Assessment</option>
-            <option value="Lab Results Review">Lab Results Review</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Appointment Date</label>
-          <input type="date" id="docScheduleDate" class="input-royal mt-1 py-2 text-sm" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Appointment Time</label>
-          <input type="time" id="docScheduleTime" class="input-royal mt-1 py-2 text-sm" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Location</label>
-          <input type="text" id="docScheduleLocation" class="input-royal mt-1 py-2 text-sm" placeholder="e.g., London, UK" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Room</label>
-          <input type="text" id="docScheduleRoom" class="input-royal mt-1 py-2 text-sm" placeholder="e.g., 101, Lab A" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Phone</label>
-          <input type="tel" id="docSchedulePhone" class="input-royal mt-1 py-2 text-sm" placeholder="e.g., 555-0101" required />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase">Mobile</label>
-          <input type="tel" id="docScheduleMobile" class="input-royal mt-1 py-2 text-sm" placeholder="e.g., 555-1001" required />
-        </div>
-        <div class="flex gap-2 pt-3">
-          <button type="submit" class="flex-1 bg-sozo-600 text-white font-bold py-2 text-sm rounded-lg hover:bg-sozo-700 transition">
-            <i class="fa-solid fa-plus mr-1"></i>Schedule
-          </button>
-          <button type="button" id="docScheduleCancel" class="flex-1 border-2 border-slate-300 text-slate-700 font-bold py-2 text-sm rounded-lg hover:bg-slate-100 transition">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 <!-- Reschedule Appointment Modal -->
 <div id="docRescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -18063,99 +18785,6 @@ function renderDoctor(key) {
               currentSort = this.dataset.sort;
               render();
           });
-      });
-
-      // Schedule appointment button
-      const docApptNewBtn = document.getElementById('docApptNewBtn');
-      const scheduleModal = document.getElementById('docScheduleModal');
-      const scheduleModalClose = document.getElementById('docScheduleModalClose');
-      const scheduleCancel = document.getElementById('docScheduleCancel');
-      const scheduleForm = document.getElementById('docScheduleForm');
-      const schedulePatient = document.getElementById('docSchedulePatient');
-      const schedulePatientId = document.getElementById('docSchedulePatientId');
-      const scheduleExam = document.getElementById('docScheduleExam');
-      const scheduleDate = document.getElementById('docScheduleDate');
-      const scheduleTime = document.getElementById('docScheduleTime');
-      const scheduleLocation = document.getElementById('docScheduleLocation');
-      const scheduleRoom = document.getElementById('docScheduleRoom');
-      const schedulePhone = document.getElementById('docSchedulePhone');
-      const scheduleMobile = document.getElementById('docScheduleMobile');
-
-      // Set minimum date to today for schedule appointment
-      scheduleDate.min = new Date().toISOString().split('T')[0];
-
-      // Open schedule modal
-      if (docApptNewBtn) {
-        docApptNewBtn.addEventListener('click', () => {
-          scheduleForm.reset();
-          scheduleModal.classList.remove('hidden');
-        });
-      }
-
-      // Close schedule modal
-      scheduleModalClose.addEventListener('click', () => {
-        scheduleModal.classList.add('hidden');
-      });
-
-      scheduleCancel.addEventListener('click', () => {
-        scheduleModal.classList.add('hidden');
-      });
-
-      // Handle schedule form submission
-      scheduleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Create new appointment
-        const newDate = new Date(scheduleDate.value + 'T' + scheduleTime.value);
-        const newAppointment = {
-          id: Date.now(),
-          status: 'Scheduled',
-          date: newDate.toISOString(),
-          patientName: schedulePatient.value,
-          patientId: schedulePatientId.value,
-          location: scheduleLocation.value,
-          room: scheduleRoom.value,
-          phone: schedulePhone.value,
-          mobile: scheduleMobile.value,
-          healthProf: d.name,
-          birthDate: '1990-05-15',
-          examination: scheduleExam.value,
-          recommendedBy: 'Doctor Scheduled',
-          confirmed: 'Yes',
-          pendingAction: 'Prepare Records',
-          createdDate: new Date().toISOString()
-        };
-
-        // Add to appointments list
-        allAppointments.push(newAppointment);
-
-        // Save to localStorage
-        data.all = allAppointments;
-        localStorage.setItem(DOC_APPT_KEY, JSON.stringify(data));
-
-        // Close modal and re-render
-        scheduleModal.classList.add('hidden');
-        scheduleForm.reset();
-        render();
-
-        // Show success message
-        const successMsg = document.createElement('div');
-        successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2';
-        successMsg.innerHTML = '<i class="fa-solid fa-check-circle"></i><span>Appointment scheduled successfully!</span>';
-        document.body.appendChild(successMsg);
-
-        setTimeout(() => {
-          successMsg.style.transition = 'opacity 0.3s';
-          successMsg.style.opacity = '0';
-          setTimeout(() => successMsg.remove(), 300);
-        }, 3000);
-      });
-
-      // Close modal on outside click
-      scheduleModal.addEventListener('click', function(e) {
-        if (e.target === scheduleModal) {
-          scheduleModal.classList.add('hidden');
-        }
       });
 
       // Set minimum date to today
@@ -18669,7 +19298,7 @@ function renderDoctor(key) {
         <!-- Quick Actions - Assessment Buttons -->
         <div class="card p-6 mb-6">
           <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-stethoscope mr-2"></i>Quick Actions - Start Assessment</h3>
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
             <button onclick="loadSection('fnon');" class="group p-4 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl hover:shadow-lg hover:border-blue-400 transition-all">
               <div class="flex flex-col items-center gap-2">
                 <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -18706,6 +19335,18 @@ function renderDoctor(key) {
               </div>
             </button>
 
+            <button onclick="loadSection('doctornotes');" class="group p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 rounded-xl hover:shadow-lg hover:border-yellow-400 transition-all">
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-yellow-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-comment-medical text-xl"></i>
+                </div>
+                <div class="text-center">
+                  <h6 class="font-bold text-sm text-slate-900">Doctor's Notes</h6>
+                  <p class="text-xs text-slate-600">Clinical Notes</p>
+                </div>
+              </div>
+            </button>
+
             <button onclick="loadSection('treatmentplan');" class="group p-4 bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl hover:shadow-lg hover:border-orange-400 transition-all">
               <div class="flex flex-col items-center gap-2">
                 <div class="w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -18732,45 +19373,127 @@ function renderDoctor(key) {
           </div>
         </div>
 
-        <!-- Medical History -->
-        <div class="card p-6 mb-6">
-          <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Medical History</h3>
-          <div class="space-y-3">
-            ${patientReports.filter(r => r.patient === patient.name).slice(0, 8).map(report => `
-              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition border border-slate-200">
-                <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 rounded-lg ${
-                    report.type.includes('FNON') ? 'bg-blue-100 text-blue-600' :
-                    report.type.includes('Brain') || report.type.includes('MRI') || report.type.includes('CT') ? 'bg-purple-100 text-purple-600' :
-                    report.type.includes('PRS') ? 'bg-green-100 text-green-600' :
-                    report.type.includes('Blood') || report.type.includes('ECG') ? 'bg-red-100 text-red-600' :
-                    'bg-slate-100 text-slate-600'
-                  } flex items-center justify-center font-bold">
-                    <i class="fa-solid ${
-                      report.type.includes('FNON') ? 'fa-list-check' :
-                      report.type.includes('Brain') || report.type.includes('MRI') ? 'fa-brain' :
-                      report.type.includes('PRS') ? 'fa-clipboard-check' :
-                      report.type.includes('Blood') ? 'fa-droplet' :
-                      report.type.includes('ECG') ? 'fa-heart-pulse' :
-                      report.type.includes('X-Ray') || report.type.includes('CT') ? 'fa-x-ray' :
-                      'fa-file-medical'
-                    }"></i>
+        <!-- Medical History Grid: SOZO (50% Left) + Medications & Treatment (50% Right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          
+          <!-- Left Column: SOZO Assessments (50%) -->
+          <div class="card p-6">
+            <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-microscope mr-2 text-sozo-600"></i>SOZO Assessments</h3>
+            <div class="space-y-3">
+              ${patientReports.filter(r => r.patient === patient.name && (r.type.includes('FNON') || r.type.includes('Brain') || r.type.includes('PRS') || r.type.includes('MRI'))).slice(0, 6).map(report => `
+                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg hover:shadow-md transition border-2 border-orange-200 hover:border-orange-400 cursor-pointer">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl ${
+                      report.type.includes('FNON') ? 'bg-blue-600 text-white' :
+                      report.type.includes('Brain') || report.type.includes('MRI') ? 'bg-purple-600 text-white' :
+                      report.type.includes('PRS') ? 'bg-green-600 text-white' :
+                      'bg-slate-600 text-white'
+                    } flex items-center justify-center font-bold shadow-lg">
+                      <i class="fa-solid ${
+                        report.type.includes('FNON') ? 'fa-list-check text-lg' :
+                        report.type.includes('Brain') || report.type.includes('MRI') ? 'fa-brain text-lg' :
+                        report.type.includes('PRS') ? 'fa-clipboard-check text-lg' :
+                        'fa-file-medical text-lg'
+                      }"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-slate-900 text-base">${report.type}</h4>
+                      <p class="text-xs text-slate-600">ID: ${report.id} • Doctor: ${report.doctor}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-bold text-slate-900">${report.type}</h4>
-                    <p class="text-xs text-slate-500">ID: ${report.id} • Doctor: ${report.doctor}</p>
+                  <div class="text-right">
+                    <p class="text-sm font-bold text-slate-900">${report.date}</p>
+                    <span class="badge ${
+                      report.status === 'Finalized' ? 'badge-success' :
+                      report.status === 'Pending' ? 'badge-warning' :
+                      'badge-info'
+                    } text-xs">${report.status}</span>
                   </div>
                 </div>
-                <div class="text-right">
-                  <p class="text-sm font-bold text-slate-900">${report.date}</p>
-                  <span class="badge ${
-                    report.status === 'Finalized' ? 'badge-success' :
-                    report.status === 'Pending' ? 'badge-warning' :
-                    'badge-info'
-                  } text-xs">${report.status}</span>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Right Column: Medical History & Treatment Logs (50%) -->
+          <div class="space-y-6">
+            
+            <!-- Medical History -->
+            <div class="card p-6">
+              <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-file-medical mr-2 text-blue-600"></i>Medical History</h3>
+              <div class="grid grid-cols-1 gap-4" style="max-height: 400px; overflow-y: auto;">
+                ${[
+                  { name: 'Complete Blood Count (CBC)', result: 'Normal', orderedBy: 'Dr. James Wilson', date: '2025-12-15', status: 'Finalized', category: 'Blood Work', reportId: 'BW-2234' },
+                  { name: 'Chest X-Ray', result: 'Clear - No abnormalities', orderedBy: 'Dr. Sarah Smith', date: '2025-11-20', status: 'Finalized', category: 'Imaging', reportId: 'XR-4421' },
+                  { name: 'Lipid Panel', result: 'Borderline High Cholesterol', orderedBy: 'Dr. James Wilson', date: '2025-10-10', status: 'Finalized', category: 'Blood Work', reportId: 'BW-5512' },
+                  { name: 'ECG Report', result: 'Normal Sinus Rhythm', orderedBy: 'Dr. Sarah Smith', date: '2025-09-05', status: 'Finalized', category: 'Cardiac', reportId: 'EC-2231' },
+                  { name: 'MRI Brain', result: 'No structural abnormalities', orderedBy: 'Dr. James Wilson', date: '2025-08-22', status: 'Finalized', category: 'Imaging', reportId: 'MR-7711' },
+                  { name: 'Urinalysis', result: 'Within normal limits', orderedBy: 'Dr. Sarah Smith', date: '2025-07-18', status: 'Finalized', category: 'Lab Test', reportId: 'UA-9952' }
+                ].map(record => `
+                  <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
+                    <div class="flex items-start justify-between mb-2">
+                      <div class="flex-1">
+                        <h4 class="font-bold text-slate-900 text-base">${record.name}</h4>
+                        <p class="text-xs text-slate-600 mt-1"><span class="font-semibold">Result:</span> ${record.result}</p>
+                      </div>
+                      <span class="badge ${record.status === 'Finalized' ? 'badge-success' : 'badge-warning'} text-xs">${record.status}</span>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-blue-200">
+                      <div class="flex items-center justify-between text-xs text-slate-600 mb-2">
+                        <span><i class="fa-solid fa-user-doctor mr-1"></i>${record.orderedBy}</span>
+                        <span><i class="fa-solid fa-calendar mr-1"></i>${record.date}</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">${record.category}</span>
+                        <span class="text-xs text-slate-500 font-mono">${record.reportId}</span>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Treatment Plan Logs -->
+            <div class="card p-6">
+              <h3 class="font-bold text-lg mb-4 text-slate-900"><i class="fa-solid fa-clipboard-list mr-2 text-green-600"></i>Treatment Plan Logs</h3>
+              <div class="space-y-3" style="max-height: 400px; overflow-y: auto;">
+            ${[
+              { date: '2026-01-20', time: '10:30 AM', treatment: 'Cognitive Behavioral Therapy Session', provider: 'Dr. James Wilson', duration: '50 mins', status: 'Completed', notes: 'Patient showed improvement in anxiety management techniques' },
+              { date: '2026-01-18', time: '02:00 PM', treatment: 'Physical Therapy - Upper Body', provider: 'Dr. Sarah Smith', duration: '45 mins', status: 'Completed', notes: 'Range of motion exercises completed successfully' },
+              { date: '2026-01-15', time: '09:00 AM', treatment: 'Blood Work - Routine Check', provider: 'Lab Technician', duration: '15 mins', status: 'Completed', notes: 'Results sent to primary physician' },
+              { date: '2026-01-13', time: '11:00 AM', treatment: 'Neurological Consultation', provider: 'Dr. James Wilson', duration: '60 mins', status: 'Completed', notes: 'Follow-up scheduled for next month' },
+              { date: '2026-01-10', time: '03:30 PM', treatment: 'Medication Review', provider: 'Dr. Sarah Smith', duration: '30 mins', status: 'Completed', notes: 'Adjusted Sertraline dosage to 50mg' },
+              { date: '2026-01-22', time: '02:00 PM', treatment: 'FNON Assessment Follow-up', provider: 'Dr. James Wilson', duration: '60 mins', status: 'Scheduled', notes: 'Review previous assessment results' }
+            ].map(log => `
+              <div class="flex items-start gap-4 p-4 ${log.status === 'Completed' ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'} rounded-lg border-2 hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl ${log.status === 'Completed' ? 'bg-green-600' : 'bg-amber-600'} text-white flex items-center justify-center font-bold flex-shrink-0 shadow-lg">
+                  <i class="fa-solid ${log.status === 'Completed' ? 'fa-check' : 'fa-clock'}"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-start justify-between mb-2">
+                    <div>
+                      <h4 class="font-bold text-slate-900 text-base">${log.treatment}</h4>
+                      <p class="text-xs text-slate-600 mt-1">
+                        <i class="fa-solid fa-calendar mr-1"></i>${log.date} at ${log.time}
+                        <span class="mx-2">•</span>
+                        <i class="fa-solid fa-clock mr-1"></i>${log.duration}
+                      </p>
+                    </div>
+                    <span class="badge ${log.status === 'Completed' ? 'badge-success' : 'badge-warning'} text-xs">${log.status}</span>
+                  </div>
+                  <div class="mt-2 pt-2 border-t ${log.status === 'Completed' ? 'border-green-200' : 'border-amber-200'}">
+                    <p class="text-xs text-slate-600 mb-2">
+                      <i class="fa-solid fa-user-doctor mr-1"></i><span class="font-semibold">Provider:</span> ${log.provider}
+                    </p>
+                    <p class="text-xs text-slate-700 italic bg-white/50 p-2 rounded">
+                      <i class="fa-solid fa-note-sticky mr-1"></i>${log.notes}
+                    </p>
+                  </div>
                 </div>
               </div>
             `).join('')}
+              </div>
+            </div>
+            
           </div>
         </div>
 
@@ -18823,6 +19546,7 @@ function renderDoctor(key) {
   else if (key === 'brainmap') renderBrainMap();
   else if (key === 'brainmapping') renderBrainMap();
   else if (key === 'prs') renderPRSDoctor();
+  else if (key === 'doctornotes') renderDoctorNotes();
   else if (key === 'treatmentplan') renderTreatmentPlan();
   else if (key === 'finalreport') {
     // Admin renders final report using shared function
@@ -19850,6 +20574,7 @@ function getAssessmentNavigation(currentAssessment) {
     { id: 'fnon', label: 'FNON', icon: 'fa-clipboard-check', color: 'bg-blue-600' },
     { id: 'brainmapping', label: 'Brain Mapping', icon: 'fa-brain', color: 'bg-purple-600' },
     { id: 'prs', label: 'PRS', icon: 'fa-clipboard-list', color: 'bg-green-600' },
+    { id: 'doctornotes', label: 'Doctor\'s Notes', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
     { id: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-notes-medical', color: 'bg-orange-600' },
     { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
   ];
@@ -19875,6 +20600,101 @@ function getAssessmentNavigation(currentAssessment) {
               <i class="fa-solid ${assess.icon} mr-2"></i>${assess.label}
             </button>
           `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// -- DOCTOR'S NOTES MODULE LOGIC --
+function renderDoctorNotes() {
+  const area = document.getElementById('contentArea');
+  // For patient role, auto-select their own patient context
+  if(currentRole === 'patient' && !globalSelectedPatientId) {
+    const ap = getActivePatient();
+    if(ap?.id) globalSelectedPatientId = ap.id;
+  }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
+  const p = globalState.currentPatient || getActivePatient();
+  if (!p) {
+    area.innerHTML = `
+      <div class="p-8">
+        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+          <p class="text-yellow-800 font-bold">No patient selected</p>
+          <p class="text-sm text-yellow-700 mt-2">Please select a patient to enter doctor's notes.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="p-8">
+      ${getAssessmentNavigation('doctornotes')}
+
+      <!-- Header -->
+      <div class="mb-6 flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-black text-slate-900">Doctor's Notes & Comments</h2>
+          <p class="text-slate-600 mt-1">Clinical observations, recommendations, and medication notes for ${p.name}</p>
+        </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Back to Patient History
+        </button>
+      </div>
+
+      <!-- Patient Info Banner -->
+      <div class="card p-4 mb-6 bg-gradient-to-r from-blue-50 to-purple-50">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-lg font-bold">
+            ${p.name.split(' ').map(n => n[0]).join('')}
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900">${p.name}</h3>
+            <p class="text-sm text-slate-600">ID: ${p.id} • ${p.age} years old • ${p.condition || 'General Assessment'}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Notes Card -->
+      <div class="card p-6 border border-slate-200 bg-gradient-to-r from-yellow-50 to-white">
+        <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-comment-medical mr-2"></i>Doctor's Notes & Comments</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase">Clinical Observations</label>
+            <textarea id="doctorNotes" class="input-royal min-h-32" placeholder="Enter clinical observations, assessment notes, or any relevant comments...">Patient presents with moderate cognitive decline consistent with early-stage dementia. Notable impairments in short-term memory and executive function. Patient is oriented to person and place but occasionally confused about time. Family reports increasing difficulty with daily activities and mild behavioral changes over the past 6 months. Physical examination reveals no acute neurological deficits. Patient's speech is coherent but shows occasional word-finding difficulties.</textarea>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase">Recommendations</label>
+            <textarea id="doctorRecommendations" class="input-royal min-h-24" placeholder="Enter treatment recommendations, follow-up instructions, or medication notes...">Recommend initiating cognitive rehabilitation therapy 3 times per week. Family should be educated on dementia care strategies and home safety modifications. Patient would benefit from structured daily routines and cognitive stimulation activities. Consider referral to occupational therapy for ADL assessment. Schedule follow-up appointment in 3 months to reassess cognitive function and adjust treatment plan accordingly.</textarea>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase">Medication Notes</label>
+            <textarea id="doctorMedicationNotes" class="input-royal min-h-24" placeholder="Enter Medication Notes">Currently on Donepezil 5mg daily (cholinesterase inhibitor). Patient tolerating medication well with no reported side effects. Plan to increase to 10mg after 4-6 weeks if tolerated. Supplement regimen includes Vitamin B12 (1000mcg), Vitamin D (2000 IU), and Omega-3 fatty acids. Monitor for potential drug interactions with new prescriptions. Patient has no known drug allergies. Family educated on importance of medication adherence and potential side effects to watch for.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-between items-center mt-6">
+        <button onclick="loadSection('prs')" class="btn-secondary">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Back to PRS
+        </button>
+        <div class="flex gap-3">
+          <button onclick="alert('Draft saved successfully!')" class="bg-slate-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-700 transition">
+            <i class="fa-solid fa-save mr-2"></i>Save Draft
+          </button>
+          <button onclick="alert('Notes submitted successfully!'); loadSection('treatmentplan');" class="btn-primary px-6 py-3">
+            <i class="fa-solid fa-arrow-right mr-2"></i>Continue to Treatment Plan
+          </button>
         </div>
       </div>
     </div>
