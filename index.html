@@ -202,6 +202,8 @@
         <span class="text-slate-300">•</span>
         <span class="cursor-pointer hover:text-sozo-600 font-bold" onclick="autoFill('doctor')">Demo Doctor</span>
         <span class="text-slate-300">•</span>
+        <span class="cursor-pointer hover:text-sozo-600 font-bold" onclick="autoFill('receptionist')">Demo Receptionist</span>
+        <span class="text-slate-300">•</span>
         <span class="cursor-pointer hover:text-sozo-600 font-bold" onclick="autoFill('patient')">Demo Patient</span>
       </div>
     </div>
@@ -306,7 +308,8 @@
     const users = {
       admin: { id:'ADM-001', name:'Admin User', role:'admin', email:'admin@sozobrain.com', password:'admin123', avatar:'https://i.pravatar.cc/100?img=5' },
       doctor: { id:'DOC-001', name:'Dr. James Wilson', role:'doctor', email:'doctor@sozobrain.com', password:'doctor123', avatar:'https://i.pravatar.cc/100?img=15', clinic:'Sozo London', country:'UK' },
-      patient: { id:'PAT-001', name:'Alex Johnson', role:'patient', email:'patient@sozobrain.com', password:'patient123', avatar:'https://i.pravatar.cc/100?img=12', country:'Germany' }
+      patient: { id:'PAT-001', name:'Alex Johnson', role:'patient', email:'patient@sozobrain.com', password:'patient123', avatar:'https://i.pravatar.cc/100?img=12', country:'Germany' },
+      receptionist: { id:'REC-001', name:'Sarah Williams', role:'receptionist', email:'receptionist@sozobrain.com', password:'receptionist123', avatar:'https://i.pravatar.cc/100?img=20', clinic:'SOZO Brain Center', country:'Germany' }
     };
 
     // Global state
@@ -544,6 +547,67 @@
         { id:'APT-051', patientName:'Emma Chen', patientId:'P-004', doctorName:'Dr. James Wilson', docId:'D-001', date:'2026-01-28', time:'03:30 PM', duration: 45, type:'Treatment Review', location:'Ward', status:'Scheduled', notes:'End of week treatment review', room:'205' }
       ]
     };
+
+    // ===== RECEPTIONIST PORTAL DATA =====
+    // Appointment services/sessions with durations
+    const appointmentServices = [
+      { id: 'fnon', name: 'FNON Assessment', duration: 60, description: 'Neurological assessment' },
+      { id: 'brainmap', name: 'Brain Mapping', duration: 45, description: 'EEG brain mapping session' },
+      { id: 'prs', name: 'PRS Assessment', duration: 30, description: 'Polygenic risk score evaluation' },
+      { id: 'followup', name: 'Follow-up Consultation', duration: 30, description: 'Follow-up visit' },
+      { id: 'initialconsult', name: 'Initial Consultation', duration: 45, description: 'First-time patient consultation' },
+      { id: 'finalreport', name: 'Final Report Review', duration: 30, description: 'Review of treatment outcomes' },
+      { id: 'tms', name: 'TMS Treatment Session', duration: 40, description: 'Transcranial magnetic stimulation' }
+    ];
+
+    // Clinic locations with available doctors
+    const clinicLocations = [
+      { id: 'CLINIC-NIK', name: 'Nicosia', country: 'Cyprus', address: 'Nicosia Medical Center', doctors: ['DR-001', 'DR-002', 'DR-005'], phone: '+357-22-123456', email: 'nicosia@sozobrain.com' },
+      { id: 'CLINIC-LIM', name: 'Limassol', country: 'Cyprus', address: 'Limassol Health Complex', doctors: ['DR-003', 'DR-004'], phone: '+357-25-789012', email: 'limassol@sozobrain.com' },
+      { id: 'CLINIC-LON', name: 'London', country: 'United Kingdom', address: 'London Brain Clinic', doctors: ['DR-001', 'DR-003'], phone: '+44-20-7946-0958', email: 'london@sozobrain.com' },
+      { id: 'CLINIC-BER', name: 'Berlin', country: 'Germany', address: 'Berlin Neuroscience Hub', doctors: ['DR-002', 'DR-004', 'DR-005'], phone: '+49-30-12345678', email: 'berlin@sozobrain.com' }
+    ];
+
+    // Doctor schedules (working hours and availability per day)
+    const doctorSchedules = {
+      'DR-001': { workDays: [1,2,3,4,5], startTime: '08:00', endTime: '18:00', breakTime: '12:00-13:00', slotDuration: 30 },
+      'DR-002': { workDays: [1,2,3,4,5], startTime: '09:00', endTime: '17:00', breakTime: '13:00-14:00', slotDuration: 30 },
+      'DR-003': { workDays: [1,3,4,5], startTime: '08:30', endTime: '17:30', breakTime: '12:30-13:30', slotDuration: 30 },
+      'DR-004': { workDays: [2,3,4,5], startTime: '10:00', endTime: '18:00', breakTime: '13:00-14:00', slotDuration: 30 },
+      'DR-005': { workDays: [1,2,3,5], startTime: '09:00', endTime: '17:00', breakTime: '12:00-13:00', slotDuration: 30 }
+    };
+
+    // Global receptionist appointment store
+    let receptionist_appointments = [
+      // January 22, 2026 - Nicosia Clinic
+      { id: 'APPT-001', clinicId: 'CLINIC-NIK', doctorId: 'DR-001', patientId: 'PAT-001', patientName: 'Alex Johnson', doctorName: 'Dr. James Wilson', clinicName: 'Nicosia', date: '2026-01-22', startTime: '10:00', endTime: '11:00', service: 'fnon', room: 'Room 101', status: 'Scheduled', notes: 'Initial assessment' },
+      { id: 'APPT-005', clinicId: 'CLINIC-NIK', doctorId: 'DR-001', patientId: 'PAT-005', patientName: 'John Doe', doctorName: 'Dr. James Wilson', clinicName: 'Nicosia', date: '2026-01-22', startTime: '11:15', endTime: '11:45', service: 'prs', room: 'Room 102', status: 'Scheduled', notes: 'PRS evaluation' },
+      { id: 'APPT-006', clinicId: 'CLINIC-NIK', doctorId: 'DR-002', patientId: 'PAT-006', patientName: 'Sarah Wilson', doctorName: 'Dr. Sarah Smith', clinicName: 'Nicosia', date: '2026-01-22', startTime: '13:30', endTime: '14:30', service: 'brainmap', room: 'Room 103', status: 'Scheduled', notes: 'Brain mapping session' },
+      
+      // January 22, 2026 - Limassol Clinic
+      { id: 'APPT-002', clinicId: 'CLINIC-LIM', doctorId: 'DR-002', patientId: 'PAT-002', patientName: 'Maria Gomez', doctorName: 'Dr. Sarah Smith', clinicName: 'Limassol', date: '2026-01-22', startTime: '14:00', endTime: '14:45', service: 'brainmap', room: 'Room 201', status: 'Scheduled', notes: 'Follow-up brain mapping' },
+      { id: 'APPT-007', clinicId: 'CLINIC-LIM', doctorId: 'DR-003', patientId: 'PAT-007', patientName: 'Michael Brown', doctorName: 'Dr. Rajesh Patel', clinicName: 'Limassol', date: '2026-01-22', startTime: '15:45', endTime: '16:15', service: 'followup', room: 'Room 202', status: 'Scheduled', notes: 'Follow-up consultation' },
+      
+      // January 23, 2026
+      { id: 'APPT-003', clinicId: 'CLINIC-NIK', doctorId: 'DR-001', patientId: 'PAT-003', patientName: 'Liam Smith', doctorName: 'Dr. James Wilson', clinicName: 'Nicosia', date: '2026-01-23', startTime: '11:00', endTime: '11:30', service: 'prs', room: 'Room 102', status: 'Scheduled', notes: '' },
+      { id: 'APPT-008', clinicId: 'CLINIC-LIM', doctorId: 'DR-003', patientId: 'PAT-008', patientName: 'Jessica Lee', doctorName: 'Dr. Rajesh Patel', clinicName: 'Limassol', date: '2026-01-23', startTime: '09:30', endTime: '10:30', service: 'initialconsult', room: 'Room 201', status: 'Scheduled', notes: 'New patient consultation' },
+      { id: 'APPT-009', clinicId: 'CLINIC-LON', doctorId: 'DR-004', patientId: 'PAT-009', patientName: 'David Miller', doctorName: 'Dr. Emily Rodriguez', clinicName: 'London', date: '2026-01-23', startTime: '14:15', endTime: '14:45', service: 'tms', room: 'Room 301', status: 'Scheduled', notes: 'TMS treatment session' },
+      
+      // January 24, 2026
+      { id: 'APPT-004', clinicId: 'CLINIC-LIM', doctorId: 'DR-003', patientId: 'PAT-004', patientName: 'Emma Chen', doctorName: 'Dr. Rajesh Patel', clinicName: 'Limassol', date: '2026-01-24', startTime: '15:00', endTime: '15:30', service: 'followup', room: 'Room 203', status: 'Scheduled', notes: 'Routine check-up' },
+      { id: 'APPT-010', clinicId: 'CLINIC-NIK', doctorId: 'DR-005', patientId: 'PAT-010', patientName: 'Lisa Anderson', doctorName: 'Dr. Lisa Chen', clinicName: 'Nicosia', date: '2026-01-24', startTime: '10:45', endTime: '11:45', service: 'fnon', room: 'Room 104', status: 'Scheduled', notes: 'FNON assessment' },
+      { id: 'APPT-011', clinicId: 'CLINIC-BER', doctorId: 'DR-001', patientId: 'PAT-011', patientName: 'Robert Taylor', doctorName: 'Dr. James Wilson', clinicName: 'Berlin', date: '2026-01-24', startTime: '13:00', endTime: '14:00', service: 'brainmap', room: 'Room 401', status: 'Scheduled', notes: 'EEG brain mapping' },
+      
+      // January 25, 2026
+      { id: 'APPT-012', clinicId: 'CLINIC-LON', doctorId: 'DR-002', patientId: 'PAT-012', patientName: 'Amanda White', doctorName: 'Dr. Sarah Smith', clinicName: 'London', date: '2026-01-25', startTime: '11:30', endTime: '12:15', service: 'initialconsult', room: 'Room 302', status: 'Scheduled', notes: 'Initial consultation' },
+      { id: 'APPT-013', clinicId: 'CLINIC-BER', doctorId: 'DR-005', patientId: 'PAT-013', patientName: 'Daniel Harris', doctorName: 'Dr. Lisa Chen', clinicName: 'Berlin', date: '2026-01-25', startTime: '15:30', endTime: '16:00', service: 'prs', room: 'Room 402', status: 'Scheduled', notes: 'PRS evaluation' },
+      { id: 'APPT-014', clinicId: 'CLINIC-NIK', doctorId: 'DR-002', patientId: 'PAT-014', patientName: 'Catherine Martin', doctorName: 'Dr. Sarah Smith', clinicName: 'Nicosia', date: '2026-01-25', startTime: '09:00', endTime: '10:00', service: 'tms', room: 'Room 105', status: 'Scheduled', notes: 'TMS treatment' },
+      
+      // January 26, 2026
+      { id: 'APPT-015', clinicId: 'CLINIC-LIM', doctorId: 'DR-004', patientId: 'PAT-015', patientName: 'Kevin Davis', doctorName: 'Dr. Emily Rodriguez', clinicName: 'Limassol', date: '2026-01-26', startTime: '12:00', endTime: '13:00', service: 'fnon', room: 'Room 204', status: 'Scheduled', notes: 'Neurological assessment' },
+      { id: 'APPT-016', clinicId: 'CLINIC-BER', doctorId: 'DR-003', patientId: 'PAT-016', patientName: 'Rachel Garcia', doctorName: 'Dr. Rajesh Patel', clinicName: 'Berlin', date: '2026-01-26', startTime: '14:45', endTime: '15:30', service: 'brainmap', room: 'Room 403', status: 'Scheduled', notes: 'Follow-up brain mapping' },
+      { id: 'APPT-017', clinicId: 'CLINIC-LON', doctorId: 'DR-005', patientId: 'PAT-017', patientName: 'Thomas Jackson', doctorName: 'Dr. Lisa Chen', clinicName: 'London', date: '2026-01-26', startTime: '10:15', endTime: '11:00', service: 'followup', room: 'Room 303', status: 'Scheduled', notes: 'Routine follow-up' }
+    ];
 
     // Patient reports & appointments (demo data)
     const patientReports = [
@@ -968,6 +1032,14 @@ const MENU = {
     {key:'eshop', label:'Medical E-Shop', icon:'fa-cart-shopping'},
     {key:'learning', label:'Learning & Dev', icon:'fa-graduation-cap'},
     {key:'profile', label:'Profile & Finance', icon:'fa-user-md'}
+  ],
+  receptionist: [
+    {key:'home', label:'Calendar', icon:'fa-calendar-days'},
+    {key:'createappt', label:'Create Appointment', icon:'fa-plus-circle'},
+    {key:'manageappts', label:'Manage Appointments', icon:'fa-calendar-check'},
+    {key:'patientsearch', label:'Patient Search', icon:'fa-magnifying-glass'},
+    {key:'doctorsearch', label:'Doctor Search', icon:'fa-stethoscope'},
+    {key:'profile', label:'My Profile', icon:'fa-user-circle'}
   ],
   admin: [
     {key:'dashboard', label:'Enterprise Dashboard', icon:'fa-chart-pie'},
@@ -1808,6 +1880,7 @@ function loadSection(key) {
     // Router
     if(currentRole === 'patient') renderPatient(key);
     if(currentRole === 'doctor') renderDoctor(key);
+    if(currentRole === 'receptionist') renderReceptionist(key);
     if(currentRole === 'admin') renderAdmin(key);
   } catch(err) {
     console.error('Error in loadSection:', err);
@@ -22877,6 +22950,820 @@ function updateRevenueByDate() {
 }
 
 // ==========================================
+// 4A. RECEPTIONIST PORTAL (Appointment Booking)
+// ==========================================
+let appointmentTimeInterval = 15; // Default 15 minutes
+let selectedDoctorId = null; // Track selected doctor
+let calendarAppointmentFilter = 'all'; // Track calendar filter
+
+function renderReceptionist(key) {
+  const area = document.getElementById('contentArea');
+  const rec = currentUser || { name: 'Receptionist', id: 'REC-001' };
+
+  if(key === 'home') {
+    // Get the selected date from localStorage or use default
+    let selectedDate = localStorage.getItem('receptionistCalendarDate') || '2026-01-22';
+    
+    // Calendar view - Can be clinic-based or doctor-based
+    const today = new Date(selectedDate);
+    
+    // Determine view type: clinic-based or doctor-based
+    let clinicsToDisplay = [];
+    let calendarTitle = 'Clinic Schedules';
+    let calendarDescription = 'View clinic availability and create appointments at your preferred location';
+    
+    if (selectedDoctorId) {
+      // Doctor-based view
+      const selectedDoctor = sampleData.doctors.find(d => d.id === selectedDoctorId);
+      calendarTitle = `${selectedDoctor.name} Schedule`;
+      calendarDescription = `Viewing appointments for ${selectedDoctor.name} (${selectedDoctor.specialty})`;
+      
+      // Get clinics where this doctor works
+      clinicsToDisplay = clinicLocations.filter(clinic => clinic.doctors.includes(selectedDoctorId));
+    } else {
+      // Clinic-based view (default)
+      clinicsToDisplay = clinicLocations.slice(0, 4);
+    }
+    
+    let html = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">${calendarTitle}</h2>
+          <p class="text-slate-600 mt-1">${calendarDescription}</p>
+        </div>
+        
+        <!-- Date Navigation & Doctor Selector -->
+        <div class="card p-4 mb-6 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button class="btn-secondary px-3 py-2" onclick="receptionistChangeDate(-1)" title="Previous">&larr;</button>
+            <input type="date" id="calendarDate" value="${selectedDate}" class="input-royal py-2 px-3" onchange="receptionistChangeDate(0)">
+            <button class="btn-secondary px-3 py-2" onclick="receptionistChangeDate(1)" title="Next">&rarr;</button>
+            
+            <div style="width: 1px; height: 30px; background-color: #e2e8f0; margin: 0 8px;"></div>
+            
+            <label class="text-sm font-bold text-slate-900">Calendar:</label>
+            <select id="doctorSelect" class="input-royal py-2 px-3 w-56" onchange="selectDoctorView(this.value)">
+              <option value="">-- All Clinics --</option>
+              ${sampleData.doctors.map(d => `<option value="${d.id}" ${selectedDoctorId === d.id ? 'selected' : ''}>${d.name} (${d.specialty})</option>`).join('')}
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn-primary px-4 py-2" onclick="loadSection('createappt')">
+              <i class="fa-solid fa-plus mr-2"></i>Create Appointment
+            </button>
+          </div>
+        </div>
+        
+        <!-- Time Interval Selector Dropdown -->
+        <div class="mb-6 flex items-center gap-6">
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-bold text-slate-900">Time Interval:</label>
+            <select id="timeIntervalSelect" class="input-royal py-2 px-3 w-40" onchange="setTimeInterval(parseInt(this.value))">
+              <option value="15" ${appointmentTimeInterval === 15 ? 'selected' : ''}>15 Minutes</option>
+              <option value="30" ${appointmentTimeInterval === 30 ? 'selected' : ''}>30 Minutes</option>
+              <option value="45" ${appointmentTimeInterval === 45 ? 'selected' : ''}>45 Minutes</option>
+              <option value="60" ${appointmentTimeInterval === 60 ? 'selected' : ''}>60 Minutes</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-bold text-slate-900">Filter:</label>
+            <select id="calendarFilter" class="input-royal py-2 px-3 w-48" onchange="applyCalendarFilter(this.value)">
+              <option value="all">-- All Appointments --</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="available">Available Slots Only</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Date and Doctor Info -->
+        <div class="mb-4 px-4 py-2 text-center">
+          <p class="text-xs font-semibold" style="color: #dc2626;">
+            Date: ${selectedDate} 
+            ${selectedDoctorId ? `| ${sampleData.doctors.find(d => d.id === selectedDoctorId)?.name || 'Unknown'}` : '| All Clinics'}
+          </p>
+        </div>
+        
+        <!-- Calendar Grid -->
+        <div class="card overflow-x-auto p-0 border-0">
+          <table class="w-full" style="table-layout: fixed; min-width: 1200px;">
+            <thead>
+              <tr class="bg-slate-900 text-white">
+                <th class="px-4 py-3 text-left w-24">Time</th>
+    `;
+    
+    // Define light background colors for clinics
+    const clinicColors = {
+      'CLINIC-NIK': '#dcfce7', // Light green
+      'CLINIC-LIM': '#fee2e2', // Light red
+      'CLINIC-LON': '#fef3c7', // Light yellow
+      'CLINIC-BER': '#fed7aa'  // Light orange
+    };
+    
+    // Add clinic columns with colors
+    clinicsToDisplay.forEach(clinic => {
+      const bgColor = clinicColors[clinic.id] || '#f1f5f9';
+      html += `<th class="px-4 py-3 text-center text-sm font-bold border-l border-slate-700" style="background-color: ${bgColor}; color: #1e293b;">${clinic.name}<br><span class="text-xs font-normal">${clinic.country}</span></th>`;
+    });
+    
+    html += `
+              </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    // Time slots (dynamic intervals from 06:00 to 22:00)
+    const minuteValues = [];
+    for (let mins = 0; mins < 60; mins += appointmentTimeInterval) {
+      minuteValues.push(mins);
+    }
+    
+    for (let hour = 6; hour < 22; hour++) {
+      for (let min of minuteValues) {
+        const timeStr = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+        const slotStartMinutes = hour * 60 + min;
+        const slotEndMinutes = slotStartMinutes + appointmentTimeInterval;
+        
+        html += `<tr class="border-b border-slate-200 hover:bg-slate-50">
+          <td class="px-4 py-3 font-bold text-sm bg-slate-100 sticky left-0 z-10">${timeStr}</td>`;
+        
+        clinicsToDisplay.forEach(clinic => {
+          // Find appointment that overlaps with this time slot
+          let appt = receptionist_appointments.find(a => {
+            if (a.clinicId !== clinic.id || a.date !== selectedDate) return false;
+            if (selectedDoctorId && a.doctorId !== selectedDoctorId) return false;
+            
+            // Parse appointment times
+            const apptStartHour = parseInt(a.startTime.split(':')[0]);
+            const apptStartMin = parseInt(a.startTime.split(':')[1]);
+            const apptStartMinutes = apptStartHour * 60 + apptStartMin;
+            
+            const apptEndHour = parseInt(a.endTime.split(':')[0]);
+            const apptEndMin = parseInt(a.endTime.split(':')[1]);
+            const apptEndMinutes = apptEndHour * 60 + apptEndMin;
+            
+            // Check if appointment overlaps with this slot
+            return apptStartMinutes < slotEndMinutes && apptEndMinutes > slotStartMinutes;
+          });
+          
+          // Apply filter
+          if (appt && calendarAppointmentFilter !== 'all' && calendarAppointmentFilter !== 'available') {
+            if (appt.status.toLowerCase() !== calendarAppointmentFilter) {
+              appt = null;
+            }
+          }
+          
+          // Handle "available slots only" filter
+          if (calendarAppointmentFilter === 'available' && appt) {
+            appt = null;
+          }
+          
+          const bgColor = clinicColors[clinic.id] || '#f1f5f9';
+          
+          if(appt) {
+            const service = appointmentServices.find(s => s.id === appt.service);
+            html += `<td class="px-2 py-1 border-l border-slate-200" onclick="showAppointmentDetails('${appt.id}')" style="background-color: ${bgColor};">
+              <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded text-xs cursor-pointer hover:shadow-md transition">
+                <div class="font-bold truncate">${appt.patientName}</div>
+                <div class="text-xs">${service?.name || appt.service}</div>
+              </div>
+            </td>`;
+          } else {
+            html += `<td class="px-2 py-1 border-l border-slate-200" onclick="openCreateAppointmentModal('${clinic.id}', '${timeStr}', '${selectedDate}')" style="background-color: ${bgColor};">
+              <div class="h-12 hover:bg-blue-100 rounded border-2 border-dashed border-slate-300 cursor-pointer transition"></div>
+            </td>`;
+          }
+        });
+        
+        html += `</tr>`;
+      }
+    }
+    
+    html += `
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Legend -->
+        <div class="card p-4 mt-6">
+          <h4 class="font-bold text-sm mb-3">Legend</h4>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded"></div>
+              <span class="text-sm">Scheduled Appointment (Click to view/edit)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded"></div>
+              <span class="text-sm">Available Slot (Click to book)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    area.innerHTML = html;
+    
+  } else if(key === 'createappt') {
+    area.innerHTML = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">Create Appointment</h2>
+          <p class="text-slate-600 mt-1">Book a new appointment for a patient</p>
+        </div>
+        
+        <form onsubmit="submitNewAppointment(event)" class="card p-8">
+          <div class="grid grid-cols-2 gap-8">
+            <!-- Left Column -->
+            <div class="space-y-6">
+              <!-- Clinic Selection -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Select Clinic</label>
+                <select id="appointmentClinic" class="input-royal w-full" required onchange="updateClinicDoctors()">
+                  <option value="">-- Choose a clinic --</option>
+                  ${clinicLocations.map(c => `<option value="${c.id}">${c.name} - ${c.country}</option>`).join('')}
+                </select>
+              </div>
+              
+              <!-- Patient Search -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Patient Search</label>
+                <div class="relative">
+                  <input type="text" id="patientSearch" placeholder="Search by name, email, MRN, or ID" 
+                    class="input-royal w-full" oninput="searchPatients(this.value)">
+                  <div id="patientSearchResults" class="search-dropdown" style="display: none;">
+                  </div>
+                </div>
+                <input type="hidden" id="selectedPatientId" required>
+                <div id="selectedPatientDisplay" class="text-sm text-slate-600 mt-2"></div>
+              </div>
+              
+              <!-- Selected Patient Info -->
+              <div id="selectedPatientInfo" style="display: none;" class="bg-slate-50 p-4 rounded border border-slate-200">
+                <h4 class="font-bold text-sm mb-3">Patient Information</h4>
+                <div class="space-y-2 text-sm">
+                  <div><span class="font-bold">Name:</span> <span id="pi-name"></span></div>
+                  <div><span class="font-bold">Age:</span> <span id="pi-age"></span></div>
+                  <div><span class="font-bold">Email:</span> <span id="pi-email"></span></div>
+                  <div><span class="font-bold">Phone:</span> <span id="pi-phone"></span></div>
+                </div>
+              </div>
+              
+              <!-- Service Selection -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Service / Session Type</label>
+                <select id="appointmentService" class="input-royal w-full" required onchange="updateServiceDuration()">
+                  <option value="">-- Choose service --</option>
+                  ${appointmentServices.map(s => `<option value="${s.id}" data-duration="${s.duration}">${s.name} (${s.duration} min)</option>`).join('')}
+                </select>
+              </div>
+              
+              <!-- Duration (Auto-calculated) -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Duration</label>
+                <input type="text" id="appointmentDuration" class="input-royal w-full bg-slate-100" readonly placeholder="Auto-calculated">
+              </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="space-y-6">
+              <!-- Date Selection -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Date</label>
+                <input type="date" id="appointmentDate" class="input-royal w-full" required onchange="updateDoctorAvailability()">
+              </div>
+              
+              <!-- Doctor Selection (filtered by clinic) -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Select Doctor</label>
+                <select id="appointmentDoctor" class="input-royal w-full" required onchange="updateDoctorAvailability()">
+                  <option value="">-- Choose a doctor --</option>
+                </select>
+              </div>
+              
+              <!-- Time Selection -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Start Time</label>
+                <select id="appointmentTime" class="input-royal w-full" required>
+                  <option value="">-- Select time slot --</option>
+                </select>
+                <div id="availabilityWarning" class="text-xs text-orange-600 mt-1" style="display: none;"></div>
+              </div>
+              
+              <!-- Room Selection (optional) -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Room (Optional)</label>
+                <select id="appointmentRoom" class="input-royal w-full">
+                  <option value="">-- Auto-assign --</option>
+                  ${['Room 101', 'Room 102', 'Room 103', 'Room 201', 'Room 202', 'Room 203'].map(r => `<option value="${r}">${r}</option>`).join('')}
+                </select>
+              </div>
+              
+              <!-- Internal Notes -->
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Internal Notes (Optional)</label>
+                <textarea id="appointmentNotes" class="input-royal w-full" rows="3" placeholder="Any special notes..."></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex gap-3 mt-8 pt-6 border-t border-slate-200">
+            <button type="submit" class="btn-primary px-6 py-2">
+              <i class="fa-solid fa-calendar-plus mr-2"></i>Create Appointment
+            </button>
+            <button type="button" onclick="loadSection('home')" class="btn-secondary px-6 py-2">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+    
+    // Set today's date as default
+    document.getElementById('appointmentDate').valueAsDate = new Date('2026-01-22');
+    
+  } else if(key === 'manageappts') {
+    // Manage/view/reschedule/cancel appointments
+    area.innerHTML = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">Manage Appointments</h2>
+          <p class="text-slate-600 mt-1">View, reschedule, or cancel appointments</p>
+        </div>
+        
+        <div class="card p-6">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-200">
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Date & Time</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Patient</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Clinic</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Doctor</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Service</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Status</th>
+                <th class="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${receptionist_appointments.map(appt => {
+                const svc = appointmentServices.find(s => s.id === appt.service);
+                const doc = sampleData.doctors.find(d => d.id === appt.doctorId);
+                const clinic = clinicLocations.find(c => c.id === appt.clinicId);
+                return `
+                  <tr class="border-b border-slate-200 hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm font-bold">${appt.date} ${appt.startTime}</td>
+                    <td class="px-4 py-3 text-sm">${appt.patientName}</td>
+                    <td class="px-4 py-3 text-sm"><span class="font-semibold text-sozo-600">${clinic?.name || 'N/A'}</span><br><span class="text-xs text-slate-500">${clinic?.country || ''}</span></td>
+                    <td class="px-4 py-3 text-sm">${doc?.name || 'N/A'}</td>
+                    <td class="px-4 py-3 text-sm">${svc?.name || appt.service}</td>
+                    <td class="px-4 py-3"><span class="badge badge-info">${appt.status}</span></td>
+                    <td class="px-4 py-3 text-center">
+                      <button class="text-xs font-bold text-blue-600 hover:underline" onclick="editAppointment('${appt.id}')">Edit</button>
+                      <span class="text-slate-300">•</span>
+                      <button class="text-xs font-bold text-red-600 hover:underline" onclick="cancelAppointment('${appt.id}')">Cancel</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    
+  } else if(key === 'patientsearch') {
+    // Advanced patient search
+    area.innerHTML = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">Patient Search</h2>
+          <p class="text-slate-600 mt-1">Search and view patient information</p>
+        </div>
+        
+        <div class="card p-8">
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <input type="text" id="searchName" placeholder="Name" class="input-royal" onkeyup="performPatientSearch()">
+            <input type="text" id="searchEmail" placeholder="Email" class="input-royal" onkeyup="performPatientSearch()">
+            <input type="text" id="searchPhone" placeholder="Phone" class="input-royal" onkeyup="performPatientSearch()">
+          </div>
+          
+          <div id="patientSearchTable" class="mt-6">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-200">
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Name</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Age</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Email</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Phone</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Status</th>
+                  <th class="px-4 py-3 text-center text-xs font-bold uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sampleData.patients.map(p => `
+                  <tr class="border-b border-slate-200 hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm font-bold">${p.name}</td>
+                    <td class="px-4 py-3 text-sm">${p.age}</td>
+                    <td class="px-4 py-3 text-sm">${p.email}</td>
+                    <td class="px-4 py-3 text-sm">${p.mobile}</td>
+                    <td class="px-4 py-3"><span class="badge badge-success">${p.status}</span></td>
+                    <td class="px-4 py-3 text-center">
+                      <button class="text-xs font-bold text-blue-600 hover:underline" onclick="selectPatientForAppointment('${p.id}')">Book Appointment</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    
+  } else if(key === 'doctorsearch') {
+    // Doctor search page
+    area.innerHTML = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">Doctor Search</h2>
+          <p class="text-slate-600 mt-1">Search and view doctor information</p>
+        </div>
+        
+        <div class="card p-8">
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <input type="text" id="searchDoctorName" placeholder="Doctor Name" class="input-royal" onkeyup="performDoctorSearch()">
+            <select id="searchDoctorSpecialty" class="input-royal" onchange="performDoctorSearch()">
+              <option value="">-- All Specialties --</option>
+              <option value="Neurologist">Neurologist</option>
+              <option value="Psychiatrist">Psychiatrist</option>
+              <option value="Clinical Psychologist">Clinical Psychologist</option>
+              <option value="Neuroscientist">Neuroscientist</option>
+              <option value="Specialist">Specialist</option>
+            </select>
+            <select id="searchDoctorClinic" class="input-royal" onchange="performDoctorSearch()">
+              <option value="">-- All Clinics --</option>
+              ${clinicLocations.map(c => `<option value="${c.id}">${c.name} (${c.country})</option>`).join('')}
+            </select>
+          </div>
+          
+          <div id="doctorSearchTable" class="mt-6">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-200">
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Name</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Specialty</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Clinics</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Email</th>
+                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Phone</th>
+                  <th class="px-4 py-3 text-center text-xs font-bold uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sampleData.doctors.map(d => {
+                  const doctorClinics = clinicLocations.filter(c => c.doctors.includes(d.id));
+                  return `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                      <td class="px-4 py-3 text-sm font-bold">${d.name}</td>
+                      <td class="px-4 py-3 text-sm"><span class="badge badge-warning">${d.specialty}</span></td>
+                      <td class="px-4 py-3 text-sm">${doctorClinics.map(c => c.name).join(', ')}</td>
+                      <td class="px-4 py-3 text-sm">${d.email || 'N/A'}</td>
+                      <td class="px-4 py-3 text-sm">${d.phone || 'N/A'}</td>
+                      <td class="px-4 py-3 text-center">
+                        <button class="text-xs font-bold text-blue-600 hover:underline" onclick="viewDoctorSchedule('${d.id}')">View Schedule</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    
+  } else if(key === 'profile') {
+    // Receptionist profile
+    area.innerHTML = `
+      <div class="p-8" style="width:79rem;">
+        <div class="mb-6">
+          <h2 class="text-3xl font-black text-slate-900">My Profile</h2>
+          <p class="text-slate-600 mt-1">Receptionist information and settings</p>
+        </div>
+        
+        <div class="card p-8">
+          <div class="flex items-start gap-8">
+            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white">
+              <i class="fa-solid fa-user text-5xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-2xl font-bold text-slate-900">${rec.name}</h3>
+              <p class="text-slate-600 mt-1">Receptionist</p>
+              <div class="mt-4 space-y-2 text-sm">
+                <div><span class="font-bold">ID:</span> ${rec.id}</div>
+                <div><span class="font-bold">Email:</span> ${rec.email}</div>
+                <div><span class="font-bold">Clinic:</span> ${rec.clinic || 'SOZO Brain Center'}</div>
+                <div><span class="font-bold">Country:</span> ${rec.country || 'Germany'}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-8 pt-8 border-t border-slate-200">
+            <h4 class="font-bold text-lg mb-4">Permissions</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center gap-2"><i class="fa-solid fa-check text-green-600"></i><span>View all doctors' calendars</span></div>
+              <div class="flex items-center gap-2"><i class="fa-solid fa-check text-green-600"></i><span>Create and manage appointments</span></div>
+              <div class="flex items-center gap-2"><i class="fa-solid fa-check text-green-600"></i><span>Search and view patient demographic info</span></div>
+              <div class="flex items-center gap-2"><i class="fa-solid fa-ban text-red-600"></i><span>Cannot access patient medical records</span></div>
+              <div class="flex items-center gap-2"><i class="fa-solid fa-ban text-red-600"></i><span>Cannot modify doctor profiles or availability</span></div>
+              <div class="flex items-center gap-2"><i class="fa-solid fa-ban text-red-600"></i><span>Cannot access admin configurations</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Receptionist Helper Functions
+function searchPatients(query) {
+  const resultsDiv = document.getElementById('patientSearchResults');
+  if (!query || query.length < 2) {
+    resultsDiv.style.display = 'none';
+    return;
+  }
+  
+  const filtered = sampleData.patients.filter(p => 
+    p.name.toLowerCase().includes(query.toLowerCase()) ||
+    p.email.toLowerCase().includes(query.toLowerCase()) ||
+    (p.id && p.id.toLowerCase().includes(query.toLowerCase()))
+  );
+  
+  if (filtered.length === 0) {
+    resultsDiv.innerHTML = '<div class="px-3 py-2 text-sm text-slate-600">No patients found</div>';
+  } else {
+    resultsDiv.innerHTML = filtered.map(p => `
+      <div class="search-dropdown-item" onclick="selectReceptionistPatient('${p.id}', '${p.name}', '${p.email}', ${p.age}, '${p.mobile}')">
+        <div class="font-bold text-sm">${p.name}</div>
+        <div class="text-xs text-slate-600">${p.email} • ${p.id}</div>
+      </div>
+    `).join('');
+  }
+  resultsDiv.style.display = 'block';
+}
+
+function selectReceptionistPatient(patientId, name, email, age, phone) {
+  document.getElementById('selectedPatientId').value = patientId;
+  document.getElementById('patientSearch').value = name;
+  document.getElementById('patientSearchResults').style.display = 'none';
+  
+  // Show patient info
+  document.getElementById('selectedPatientInfo').style.display = 'block';
+  document.getElementById('pi-name').textContent = name;
+  document.getElementById('pi-age').textContent = age;
+  document.getElementById('pi-email').textContent = email;
+  document.getElementById('pi-phone').textContent = phone;
+}
+
+function updateServiceDuration() {
+  const select = document.getElementById('appointmentService');
+  const selectedOption = select.options[select.selectedIndex];
+  const duration = selectedOption.getAttribute('data-duration');
+  document.getElementById('appointmentDuration').value = duration ? `${duration} minutes` : '';
+}
+
+function updateClinicDoctors() {
+  // Update doctor dropdown based on selected clinic
+  const clinicId = document.getElementById('appointmentClinic').value;
+  const doctorSelect = document.getElementById('appointmentDoctor');
+  
+  if (!clinicId) {
+    doctorSelect.innerHTML = '<option value="">-- Choose a doctor --</option>';
+    return;
+  }
+  
+  const clinic = clinicLocations.find(c => c.id === clinicId);
+  if (!clinic) return;
+  
+  const clinicDoctors = sampleData.doctors.filter(d => clinic.doctors.includes(d.id));
+  
+  doctorSelect.innerHTML = '<option value="">-- Choose a doctor --</option>' +
+    clinicDoctors.map(d => `<option value="${d.id}">${d.name} (${d.specialty})</option>`).join('');
+}
+
+function updateDoctorAvailability() {
+  // Generate time slots based on doctor's schedule
+  const doctorId = document.getElementById('appointmentDoctor').value;
+  const date = document.getElementById('appointmentDate').value;
+  const timeSelect = document.getElementById('appointmentTime');
+  
+  if (!doctorId || !date) {
+    timeSelect.innerHTML = '<option value="">-- Select time slot --</option>';
+    return;
+  }
+  
+  // Generate slots based on selected interval (dynamic)
+  const slots = [];
+  const minuteValues = [];
+  for (let mins = 0; mins < 60; mins += appointmentTimeInterval) {
+    minuteValues.push(mins);
+  }
+  
+  for (let hour = 6; hour < 22; hour++) {
+    for (let min of minuteValues) {
+      const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+      slots.push(time);
+    }
+  }
+  
+  timeSelect.innerHTML = '<option value="">-- Select time slot --</option>' +
+    slots.map(slot => `<option value="${slot}">${slot}</option>`).join('');
+}
+
+function submitNewAppointment(e) {
+  e.preventDefault();
+  
+  const clinicId = document.getElementById('appointmentClinic').value;
+  const patientId = document.getElementById('selectedPatientId').value;
+  const doctorId = document.getElementById('appointmentDoctor').value;
+  const serviceId = document.getElementById('appointmentService').value;
+  const date = document.getElementById('appointmentDate').value;
+  const startTime = document.getElementById('appointmentTime').value;
+  const room = document.getElementById('appointmentRoom').value || 'Auto-assigned';
+  const notes = document.getElementById('appointmentNotes').value;
+  
+  if (!clinicId || !patientId || !doctorId || !serviceId || !date || !startTime) {
+    alert('Please fill in all required fields including clinic selection');
+    return;
+  }
+  
+  // Get patient, clinic, doctor and service info
+  const patient = sampleData.patients.find(p => p.id === patientId);
+  const clinic = clinicLocations.find(c => c.id === clinicId);
+  const doctor = sampleData.doctors.find(d => d.id === doctorId);
+  const service = appointmentServices.find(s => s.id === serviceId);
+  
+  // Check for conflicts
+  const conflict = receptionist_appointments.find(a => 
+    a.clinicId === clinicId &&
+    a.doctorId === doctorId && 
+    a.date === date && 
+    a.startTime === startTime
+  );
+  
+  if (conflict) {
+    alert('This time slot is already booked at this clinic. Please select another time.');
+    return;
+  }
+  
+  // Create appointment
+  const newAppt = {
+    id: `APPT-${Date.now()}`,
+    clinicId: clinicId,
+    clinicName: clinic.name,
+    doctorId: doctorId,
+    patientId: patientId,
+    patientName: patient.name,
+    doctorName: doctor.name,
+    date: date,
+    startTime: startTime,
+    endTime: calculateEndTime(startTime, service.duration),
+    service: serviceId,
+    room: room,
+    status: 'Scheduled',
+    notes: notes
+  };
+  
+  receptionist_appointments.push(newAppt);
+  alert(`Appointment created successfully!\\nPatient: ${patient.name}\\nClinic: ${clinic.name}\\nDate: ${date} at ${startTime}`);
+  loadSection('home');
+}
+
+function calculateEndTime(startTime, duration) {
+  const [hours, mins] = startTime.split(':').map(Number);
+  const totalMins = hours * 60 + mins + duration;
+  const endHours = Math.floor(totalMins / 60);
+  const endMins = totalMins % 60;
+  return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+}
+
+function openCreateAppointmentModal(clinicId, startTime, date) {
+  loadSection('createappt');
+  setTimeout(() => {
+    document.getElementById('appointmentClinic').value = clinicId;
+    document.getElementById('appointmentDate').value = date;
+    document.getElementById('appointmentTime').value = startTime;
+    document.getElementById('appointmentClinic').dispatchEvent(new Event('change'));
+  }, 100);
+}
+
+function showAppointmentDetails(apptId) {
+  const appt = receptionist_appointments.find(a => a.id === apptId);
+  if (!appt) return;
+  
+  const svc = appointmentServices.find(s => s.id === appt.service);
+  alert(`Appointment Details\\n\\nPatient: ${appt.patientName}\\nService: ${svc?.name}\\nDate: ${appt.date}\\nTime: ${appt.startTime} - ${appt.endTime}\\nRoom: ${appt.room}\\nStatus: ${appt.status}\\nNotes: ${appt.notes || 'None'}`);
+}
+
+function selectPatientForAppointment(patientId) {
+  loadSection('createappt');
+  setTimeout(() => {
+    const patient = sampleData.patients.find(p => p.id === patientId);
+    if (patient) {
+      selectReceptionistPatient(patient.id, patient.name, patient.email, patient.age, patient.mobile);
+    }
+  }, 100);
+}
+
+function editAppointment(apptId) {
+  alert('Edit appointment: ' + apptId + ' - Coming soon');
+}
+
+function cancelAppointment(apptId) {
+  if (confirm('Are you sure you want to cancel this appointment?')) {
+    const idx = receptionist_appointments.findIndex(a => a.id === apptId);
+    if (idx >= 0) {
+      receptionist_appointments.splice(idx, 1);
+      alert('Appointment cancelled successfully');
+      loadSection('manageappts');
+    }
+  }
+}
+
+function setTimeInterval(interval) {
+  appointmentTimeInterval = interval;
+  loadSection('home');
+}
+
+function applyCalendarFilter(filterValue) {
+  calendarAppointmentFilter = filterValue;
+  loadSection('home');
+}
+
+function selectDoctorView(doctorId) {
+  selectedDoctorId = doctorId ? doctorId : null;
+  loadSection('home');
+}
+
+function receptionistChangeDate(offset) {
+  const dateInput = document.getElementById('calendarDate');
+  const currentDate = new Date(dateInput.value);
+  currentDate.setDate(currentDate.getDate() + offset);
+  dateInput.value = currentDate.toISOString().split('T')[0];
+  localStorage.setItem('receptionistCalendarDate', dateInput.value);
+  loadSection('home');
+}
+
+function performPatientSearch() {
+  // Perform search based on input fields
+  const name = document.getElementById('searchName').value.toLowerCase();
+  const email = document.getElementById('searchEmail').value.toLowerCase();
+  const phone = document.getElementById('searchPhone').value.toLowerCase();
+  
+  const filtered = sampleData.patients.filter(p => 
+    (!name || p.name.toLowerCase().includes(name)) &&
+    (!email || p.email.toLowerCase().includes(email)) &&
+    (!phone || p.mobile.toLowerCase().includes(phone))
+  );
+  
+  // Update table (if needed, re-render the table here)
+}
+
+function performDoctorSearch() {
+  // Perform search based on input fields
+  const name = document.getElementById('searchDoctorName').value.toLowerCase();
+  const specialty = document.getElementById('searchDoctorSpecialty').value;
+  const clinic = document.getElementById('searchDoctorClinic').value;
+  
+  const filtered = sampleData.doctors.filter(d => {
+    const matchesName = !name || d.name.toLowerCase().includes(name);
+    const matchesSpecialty = !specialty || d.specialty === specialty;
+    const matchesClinic = !clinic || clinicLocations.find(c => c.id === clinic && c.doctors.includes(d.id));
+    return matchesName && matchesSpecialty && matchesClinic;
+  });
+  
+  // Update table (if needed, re-render the table here)
+}
+
+function viewDoctorSchedule(doctorId) {
+  // Set doctor filter and go to calendar view
+  selectedDoctorId = doctorId;
+  loadSection('home');
+}
+
+function selectPatientForAppointment(patientId) {
+  // Navigate to create appointment with pre-selected patient
+  loadSection('createappt');
+  setTimeout(() => {
+    const patient = sampleData.patients.find(p => p.id === patientId);
+    if (patient) {
+      selectReceptionistPatient(patientId, patient.name, patient.email, patient.age, patient.mobile);
+    }
+  }, 100);
+}
+
+// ==========================================
 // 5. ADMIN PORTAL (ERP)
 // ==========================================
 function renderAdmin(key) {
@@ -29200,6 +30087,9 @@ window.autoFill = function(role) {
   } else if(role === 'doctor') {
     usernameField.value = 'doctor@sozobrain.com';
     passwordField.value = 'doctor123';
+  } else if(role === 'receptionist') {
+    usernameField.value = 'receptionist@sozobrain.com';
+    passwordField.value = 'receptionist123';
   } else if(role === 'patient') {
     usernameField.value = 'patient@sozobrain.com';
     passwordField.value = 'patient123';
