@@ -1017,7 +1017,7 @@ const MENU = {
         {key:'finalreport', label:'Final Report'}
       ]
     },
-    
+    {key:'treatment-plan', label:'Treatment Plan', icon:'fa-file-medical'},
     {key:'appointments', label:'Appointments', icon:'fa-calendar-check'},
     {key:'eshop', label:'E-Shop', icon:'fa-cart-shopping'},
     {key:'customer-support', label:'Customer Support', icon:'fa-headset', children: [
@@ -1895,7 +1895,12 @@ function loadSection(key) {
       setProgress(key, 'in-progress');
     }
 
-    // Router
+    // Router (ensure Treatment Plan always renders)
+    if(key === 'treatmentplan' || key === 'treatment-plan') {
+      renderTreatmentPlan();
+      return;
+    }
+
     if(currentRole === 'patient') renderPatient(key);
     if(currentRole === 'doctor') renderDoctor(key);
     if(currentRole === 'receptionist') renderReceptionist(key);
@@ -2003,24 +2008,6 @@ function renderPatient(key) {
                 </div>
                 <div class="space-y-4">
                   <!-- Appointment 1 -->
-                  <div class="p-5 rounded-lg bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200 hover:shadow-md transition">
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span class="badge badge-info">Tomorrow</span>
-                          <span class="text-sm font-bold text-slate-900">2:00 PM - 2:45 PM</span>
-                        </div>
-                        <h4 class="font-bold text-base text-slate-900">TMS Therapy Session</h4>
-                        <p class="text-sm text-slate-600 mt-2">Dr. Sarah Chen, Neurology</p>
-                        <p class="text-xs text-slate-500 mt-1">
-                          <i class="fa-solid fa-location-dot mr-1"></i>Clinic Room 3
-                        </p>
-                      </div>
-                      <button class="btn-secondary text-xs px-3 py-1">Details</button>
-                    </div>
-                  </div>
-
-                  <!-- Appointment 2 -->
                   <div class="p-5 rounded-lg bg-slate-50 border border-slate-200 hover:shadow-md transition">
                     <div class="flex items-start justify-between">
                       <div class="flex-1">
@@ -2053,6 +2040,72 @@ function renderPatient(key) {
                         </p>
                       </div>
                       <button class="btn-secondary text-xs px-3 py-1">Reschedule</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Treatment Plan Section -->
+              <div id="treatmentPlanSection" class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-file-medical text-green-600"></i>
+                    My Treatment Plan
+                  </h3>
+                  <button class="btn-primary text-sm" onclick="loadSection('treatment-plan')">
+                    <i class="fa-solid fa-arrow-right mr-1"></i>View Full Plan
+                  </button>
+                </div>
+
+                <!-- Current Treatment Sessions -->
+                <div class="mb-4">
+                  <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-blue-600"></i>
+                    Current Treatment Sessions
+                  </h4>
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white flex-shrink-0">
+                        <i class="fa-solid fa-brain"></i>
+                      </div>
+                      <div class="flex-1">
+                        <p class="font-bold text-sm text-slate-900">High Beta Protocol (tDCS)</p>
+                        <p class="text-xs text-slate-600">Sessions 1-10 • Left DLPFC • 20 min</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Suggested Devices -->
+                <div>
+                  <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-laptop-medical text-green-600"></i>
+                    Doctor Recommended Devices
+                  </h4>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0">
+                          <i class="fa-solid fa-circle-nodes"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold text-sm text-slate-900">tDCS Device</p>
+                          <p class="text-xs text-slate-600">Transcranial Direct Current Stimulation</p>
+                        </div>
+                      </div>
+                      <span class="badge badge-success text-xs">€1200</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white flex-shrink-0">
+                          <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold text-sm text-slate-900">CES Device</p>
+                          <p class="text-xs text-slate-600">Cranial Electrotherapy Stimulation</p>
+                        </div>
+                      </div>
+                      <span class="badge badge-info text-xs">€900</span>
                     </div>
                   </div>
                 </div>
@@ -3106,6 +3159,9 @@ function renderPatient(key) {
     };
   }
 
+  else if (key === 'treatment-plan') {
+    renderTreatmentPlan();
+  }
   
 else if (key === 'appointments') {
   area.innerHTML = `
@@ -20668,7 +20724,7 @@ function getAssessmentNavigation(currentAssessment) {
     { id: 'doctornotes', label: 'Doctor\'s Notes', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
     { id: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-notes-medical', color: 'bg-orange-600' },
     { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
-  ];
+  ].filter(item => currentRole === 'patient' ? item.id !== 'brainmapping' : true);
   
   return `
     <div class="mb-6 bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
