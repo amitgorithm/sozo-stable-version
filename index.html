@@ -1759,7 +1759,7 @@ function renderWeekView(container, appointments, hourHeight) {
 }
 
 // Show appointment details in modal
-function showAppointmentDetails(appointmentId) {
+window.showAppointmentDetails = function(appointmentId) {
   const appointment = sampleData.appointments.find(a => a.id === appointmentId);
   if (!appointment) return;
   
