@@ -2086,6 +2086,78 @@ function renderPatient(key) {
             </div>
             <div class="flex items-center gap-3">
               <span class="text-sm text-slate-500">Last updated: ${new Date().toLocaleDateString()}</span>
+              
+              <!-- Notification Bell -->
+              <div class="relative">
+                <button onclick="toggleNotifications(event)" class="relative p-2 rounded-full hover:bg-slate-100 transition">
+                  <i class="fa-solid fa-bell text-slate-600 text-xl"></i>
+                  <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+                </button>
+                
+                <!-- Notifications Dropdown -->
+                <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-slate-200 z-50" style="max-height: 500px; overflow-y: auto;">
+                  <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-900">Notifications</h3>
+                    <button onclick="markAllRead()" class="text-xs font-bold text-sozo-600 hover:underline">
+                      Mark all as read
+                    </button>
+                  </div>
+                  
+                  <div class="divide-y divide-slate-100">
+                    <!-- Notification 1 -->
+                    <div class="p-4 hover:bg-slate-50 cursor-pointer transition">
+                      <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-calendar-check text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                          <div class="flex items-start justify-between mb-1">
+                            <h4 class="font-bold text-sm text-slate-900">Appointment Reminder</h4>
+                            <span class="text-xs text-slate-500">2h ago</span>
+                          </div>
+                          <p class="text-xs text-slate-600">Your follow-up consultation with Dr. Michael Torres is tomorrow at 10:00 AM</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Notification 2 -->
+                    <div class="p-4 hover:bg-slate-50 cursor-pointer transition">
+                      <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-clipboard-list text-orange-600"></i>
+                        </div>
+                        <div class="flex-1">
+                          <div class="flex items-start justify-between mb-1">
+                            <h4 class="font-bold text-sm text-slate-900">Pending Assessment</h4>
+                            <span class="text-xs text-slate-500">1d ago</span>
+                          </div>
+                          <p class="text-xs text-slate-600">Please complete your PRS Assessment - Insomnia (65% complete)</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Notification 3 -->
+                    <div class="p-4 hover:bg-slate-50 cursor-pointer transition">
+                      <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-message text-green-600"></i>
+                        </div>
+                        <div class="flex-1">
+                          <div class="flex items-start justify-between mb-1">
+                            <h4 class="font-bold text-sm text-slate-900">New Message from Dr. Watson</h4>
+                            <span class="text-xs text-slate-500">3d ago</span>
+                          </div>
+                          <p class="text-xs text-slate-600">Your latest brain mapping results are ready</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="p-3 border-t border-slate-200 text-center">
+                    <button class="text-sm font-bold text-sozo-600 hover:underline" onclick="openNotificationsFullWindow()">View All Notifications</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -2340,6 +2412,126 @@ function renderPatient(key) {
                 </div>
               </div>
 
+              <!-- Medical History Summary -->
+              <div id="medicalHistorySection" class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-file-medical text-green-600"></i>
+                    Medical History
+                  </h3>
+                  <button class="text-sm font-bold text-sozo-600 hover:underline" onclick="loadSection('reports')">View All</button>
+                </div>
+                
+                <!-- General Reports Section -->
+                <div class="mb-4">
+                  <h4 class="text-xs font-bold text-slate-600 uppercase mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-hospital text-blue-600"></i>
+                    General Reports
+                  </h4>
+                  <div class="space-y-2">
+                    <!-- CT Scan Report -->
+                    <div class="p-3 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-x-ray text-blue-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">CT Scan Report</h5>
+                          <p class="text-xs text-slate-600 mt-1">Brain CT - Normal findings</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 15, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- MRI Scan Report -->
+                    <div class="p-3 rounded-lg bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-brain text-indigo-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">MRI Scan Report</h5>
+                          <p class="text-xs text-slate-600 mt-1">Structural brain imaging</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 12, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Blood Test Report -->
+                    <div class="p-3 rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-droplet text-red-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">Blood Test Report</h5>
+                          <p class="text-xs text-slate-600 mt-1">Complete blood count</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 8, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sozo Related Reports Section -->
+                <div>
+                  <h4 class="text-xs font-bold text-slate-600 uppercase mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-brain-circuit text-orange-600"></i>
+                    Sozo Related Reports
+                  </h4>
+                  <div class="space-y-2">
+                    <!-- FNON Assessment -->
+                    <div class="p-3 rounded-lg bg-orange-50 border border-orange-200 hover:bg-orange-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-clipboard-check text-orange-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">FNON Assessment</h5>
+                          <p class="text-xs text-slate-600 mt-1">Functional neurological assessment</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 20, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- PRS Report -->
+                    <div class="p-3 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-clipboard-list text-green-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">PRS Report</h5>
+                          <p class="text-xs text-slate-600 mt-1">Polygenic Risk Score assessment</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 18, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Final Report -->
+                    <div class="p-3 rounded-lg bg-purple-50 border border-purple-200 hover:bg-purple-100 transition cursor-pointer">
+                      <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-file-medical text-purple-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h5 class="font-bold text-sm text-slate-900">Final Report</h5>
+                          <p class="text-xs text-slate-600 mt-1">Comprehensive treatment summary</p>
+                          <p class="text-xs text-slate-500 mt-1">Jan 22, 2026</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- View More -->
+                <div class="text-center pt-4 mt-4 border-t border-slate-200">
+                  <button class="text-sm font-bold text-slate-600 hover:text-sozo-600" onclick="loadSection('reports')">
+                    <i class="fa-solid fa-arrow-right mr-1"></i>View All Reports
+                  </button>
+                </div>
+              </div>
+
               <!-- Upcoming Workshops -->
               <div id="workshopsSection" class="card p-6 bg-gradient-to-br from-purple-50 to-indigo-50">
                 <div class="flex items-center justify-between mb-4">
@@ -2386,67 +2578,6 @@ function renderPatient(key) {
                   </div>
                 </div>
               </div>
-
-              <!-- Medical History Summary -->
-              <div id="medicalHistorySection" class="card p-6">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-file-medical text-green-600"></i>
-                    Medical History
-                  </h3>
-                  <button class="text-sm font-bold text-sozo-600 hover:underline" onclick="loadSection('reports')">View All</button>
-                </div>
-                <div class="space-y-3">
-                  <!-- Recent Record 1 -->
-                  <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition cursor-pointer">
-                    <div class="flex items-start gap-3">
-                      <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-notes-medical text-blue-600 text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <h5 class="font-bold text-sm text-slate-900">TMS Treatment Report</h5>
-                        <p class="text-xs text-slate-600 mt-1">Session 8 of 12</p>
-                        <p class="text-xs text-slate-500 mt-1">Jan 18, 2026</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Recent Record 2 -->
-                  <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition cursor-pointer">
-                    <div class="flex items-start gap-3">
-                      <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-brain text-green-600 text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <h5 class="font-bold text-sm text-slate-900">Brain Mapping Results</h5>
-                        <p class="text-xs text-slate-600 mt-1">Baseline Assessment</p>
-                        <p class="text-xs text-slate-500 mt-1">Jan 10, 2026</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Recent Record 3 -->
-                  <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition cursor-pointer">
-                    <div class="flex items-start gap-3">
-                      <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-prescription text-purple-600 text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <h5 class="font-bold text-sm text-slate-900">Prescription Update</h5>
-                        <p class="text-xs text-slate-600 mt-1">Medication adjustment</p>
-                        <p class="text-xs text-slate-500 mt-1">Jan 5, 2026</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- View More -->
-                  <div class="text-center pt-2">
-                    <button class="text-sm font-bold text-slate-600 hover:text-sozo-600" onclick="loadSection('reports')">
-                      <i class="fa-solid fa-arrow-right mr-1"></i>View 9 more records
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -2477,58 +2608,6 @@ function renderPatient(key) {
             </div>
             <div class="flex items-center gap-3">
               <button class="text-sm font-bold text-sozo-600 hover:underline">Customize view</button>
-              <div class="relative">
-              <button id="notificationBtn" class="relative p-2 text-slate-600 hover:text-sozo-600 transition">
-                <i class="fa-solid fa-bell text-xl"></i>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
-              </button>
-              <div id="notificationPanel" class="hidden absolute right-0 top-12 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50">
-                <div class="p-4 border-b border-slate-200">
-                  <h3 class="text-sm font-bold text-slate-900">Notifications</h3>
-                </div>
-                <div class="max-h-96 overflow-y-auto">
-                  <!-- Upcoming Appointments -->
-                  <div class="p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition" onclick="showNotificationInsight('appointment')">
-                    <div class="flex items-start gap-3">
-                      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-calendar-check text-blue-600"></i>
-                      </div>
-                      <div class="flex-1">
-                        <p class="text-sm font-bold text-slate-900">Upcoming Appointment</p>
-                        <p class="text-xs text-slate-600 mt-1">Dr. Sarah Chen - Tomorrow at 2:00 PM</p>
-                        <p class="text-xs text-slate-400 mt-1">TMS Session - Clinic Room 3</p>
-                      </div>
-                      <span class="text-xs text-slate-400">1h</span>
-                    </div>
-                  </div>
-                  <!-- Latest News -->
-                  <div class="p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition" onclick="showNotificationInsight('news1')">
-                    <div class="flex items-start gap-3">
-                      <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-newspaper text-green-600"></i>
-                      </div>
-                      <div class="flex-1">
-                        <p class="text-sm font-bold text-slate-900">New Research Published</p>
-                        <p class="text-xs text-slate-600 mt-1">Latest findings on TMS effectiveness for depression treatment</p>
-                      </div>
-                      <span class="text-xs text-slate-400">3h</span>
-                    </div>
-                  </div>
-                  <!-- Device Update -->
-                  <div class="p-4 hover:bg-slate-50 cursor-pointer transition" onclick="showNotificationInsight('device')">
-                    <div class="flex items-start gap-3">
-                      <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-circle-check text-orange-600"></i>
-                      </div>
-                      <div class="flex-1">
-                        <p class="text-sm font-bold text-slate-900">Device Sync Complete</p>
-                        <p class="text-xs text-slate-600 mt-1">Your Sozo Ring data has been updated</p>
-                      </div>
-                      <span class="text-xs text-slate-400">5h</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -6058,6 +6137,19 @@ else if (key === 'profile') {
           <div id="patientReportCount" class="text-sm text-slate-600 font-bold"></div>
         </div>
 
+        <!-- Category Filter Tabs -->
+        <div class="flex gap-2 mb-4">
+          <button class="sort-btn active" data-category="all" onclick="filterReportCategory('all')">
+            <i class="fa-solid fa-list mr-1"></i>All Reports
+          </button>
+          <button class="sort-btn" data-category="general" onclick="filterReportCategory('general')">
+            <i class="fa-solid fa-hospital mr-1"></i>General Reports
+          </button>
+          <button class="sort-btn" data-category="sozo" onclick="filterReportCategory('sozo')">
+            <i class="fa-solid fa-brain-circuit mr-1"></i>Sozo Related
+          </button>
+        </div>
+
         <div class="card p-4 mb-4 bg-slate-50 border-slate-200">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div class="md:col-span-2">
@@ -6092,6 +6184,7 @@ else if (key === 'profile') {
               <tr>
                 <th>Date</th>
                 <th>Report Type</th>
+                <th>Category</th>
                 <th>Doctor</th>
                 <th>Report ID</th>
                 <th>Status</th>
@@ -6111,6 +6204,32 @@ else if (key === 'profile') {
       const endInput = document.getElementById('patientReportEnd');
       const countEl = document.getElementById('patientReportCount');
       const clearBtn = document.getElementById('patientReportClear');
+      
+      let currentCategory = 'all';
+      
+      // Define report categories
+      const sozoReports = ['FNON Report', 'PRS Report', 'Final Report'];
+      const generalReports = ['CT Scan', 'MRI', 'Blood Work', 'X-Ray', 'ECG Report', 'Ultrasound', 'Mammography', 'Bone Density', 'Thyroid Panel', 'Lipid Panel', 'Vitamin D Test'];
+      
+      function getReportCategory(reportType) {
+        if (sozoReports.includes(reportType)) return 'sozo';
+        if (generalReports.includes(reportType)) return 'general';
+        return 'general'; // default to general for any other reports
+      }
+      
+      function getCategoryBadge(category) {
+        if (category === 'sozo') {
+          return '<span class="badge badge-sozo"><i class="fa-solid fa-brain-circuit mr-1"></i>Sozo</span>';
+        }
+        return '<span class="badge badge-info"><i class="fa-solid fa-hospital mr-1"></i>General</span>';
+      }
+      
+      window.filterReportCategory = function(category) {
+        currentCategory = category;
+        document.querySelectorAll('[data-category]').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-category="${category}"]`).classList.add('active');
+        applyFilters();
+      };
 
       function applyFilters() {
         const query = (searchInput?.value || '').toLowerCase();
@@ -6119,6 +6238,10 @@ else if (key === 'profile') {
         if(end) end.setHours(23,59,59,999);
 
         const filtered = userReports.filter(r => {
+          // Category filter
+          const reportCategory = getReportCategory(r.type);
+          if (currentCategory !== 'all' && reportCategory !== currentCategory) return false;
+          
           const reportDate = new Date(r.date);
           if(start && reportDate < start) return false;
           if(end && reportDate > end) return false;
@@ -6131,16 +6254,19 @@ else if (key === 'profile') {
         });
 
         if(tbody) {
-          tbody.innerHTML = filtered.map(r => `
+          tbody.innerHTML = filtered.map(r => {
+            const category = getReportCategory(r.type);
+            return `
             <tr>
               <td>${r.date}</td>
               <td>${r.type}</td>
+              <td>${getCategoryBadge(category)}</td>
               <td>${r.doctor}</td>
               <td class="font-mono text-sm">${r.id}</td>
               <td><span class="badge ${r.status==='Finalized' ? 'badge-success' : 'badge-warning'}">${r.status}</span></td>
               <td><button class="text-sozo-600 font-bold" onclick="alert('Downloading ${r.id}.pdf')"><i class="fa-solid fa-download"></i> PDF</button></td>
             </tr>
-          `).join('') || '<tr><td colspan="6" class="p-8 text-center text-slate-500">No reports found for your filters</td></tr>';
+          `}).join('') || '<tr><td colspan="7" class="p-8 text-center text-slate-500">No reports found for your filters</td></tr>';
         }
 
         if(countEl) {
@@ -6155,6 +6281,9 @@ else if (key === 'profile') {
         if(searchInput) searchInput.value = '';
         if(startInput) startInput.value = '';
         if(endInput) endInput.value = '';
+        currentCategory = 'all';
+        document.querySelectorAll('[data-category]').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-category="all"]').classList.add('active');
         applyFilters();
       });
 
@@ -6178,6 +6307,7 @@ else if (key === 'profile') {
     }, 50);
   }
   else if (key === 'profileoverview') renderProfile();
+  else if (key === 'doctornotes') renderDoctorNotes();
   else if (key === 'eshop') renderShopView();
   else if (key === 'devices') {
     // When devices is clicked as a sub-item under profile, show only devices
@@ -17154,6 +17284,252 @@ function toggleConditionalSections() {
   }
 }
 
+// Notification Dropdown Functions
+function toggleNotifications(event) {
+  event.stopPropagation();
+  const dropdown = document.getElementById('notificationsDropdown');
+  dropdown.classList.toggle('hidden');
+}
+
+function markAllRead() {
+  alert('All notifications marked as read');
+  // You can add logic here to update notification states
+  const allNotifs = document.querySelectorAll('[data-notification-item]');
+  allNotifs.forEach(n => n.classList.add('opacity-60'));
+}
+
+// Patient notifications data
+const PATIENT_NOTIFICATIONS = [
+  {
+    id: 1,
+    title: 'Appointment Reminder',
+    time: '2 hours ago',
+    date: 'Jan 28, 2026',
+    description: 'Your follow-up consultation with Dr. Michael Torres is tomorrow at 10:00 AM',
+    details: 'Please arrive 15 minutes early to complete any necessary paperwork. The appointment will be held via Telemedicine (Virtual). Make sure you have a stable internet connection.',
+    icon: 'fa-calendar-check',
+    color: 'blue',
+    read: false,
+    type: 'appointment'
+  },
+  {
+    id: 2,
+    title: 'Pending Assessment',
+    time: '1 day ago',
+    date: 'Jan 26, 2026',
+    description: 'Please complete your PRS Assessment - Insomnia (65% complete)',
+    details: 'This assessment is crucial for developing your personalized treatment plan. You have 3 days remaining to complete it. Click "Continue Assessment" to resume where you left off.',
+    icon: 'fa-clipboard-list',
+    color: 'orange',
+    read: false,
+    type: 'assessment',
+    action: 'Continue Assessment',
+    actionFn: 'openSpecificPRSForm(\'insomnia\')'
+  },
+  {
+    id: 3,
+    title: 'New Message from Dr. Watson',
+    time: '3 days ago',
+    date: 'Jan 24, 2026',
+    description: 'Your latest brain mapping results are ready',
+    details: 'Dr. Emily Watson has reviewed your brain mapping session results and left you a detailed message. The results show positive progress in the targeted areas. Please review the full report in your medical history.',
+    icon: 'fa-message',
+    color: 'green',
+    read: false,
+    type: 'message',
+    action: 'View Message',
+    actionFn: 'loadSection(\'messages\')'
+  },
+  {
+    id: 5,
+    title: 'Treatment Plan Updated',
+    time: '1 week ago',
+    date: 'Jan 20, 2026',
+    description: 'Your treatment plan has been updated by Dr. Torres',
+    details: 'Dr. Michael Torres has made adjustments to your treatment protocol based on your recent progress. The new plan includes modified session frequencies and updated protocols. Please review the changes in your treatment plan section.',
+    icon: 'fa-file-medical',
+    color: 'green',
+    read: true,
+    type: 'treatment'
+  },
+  {
+    id: 6,
+    title: 'Payment Receipt',
+    time: '2 weeks ago',
+    date: 'Jan 13, 2026',
+    description: 'Payment received for TMS Session Package',
+    details: 'Thank you for your payment of €1,200 for the 10-session TMS treatment package. Your receipt has been sent to your registered email address. You can view and download all payment receipts in the billing section.',
+    icon: 'fa-receipt',
+    color: 'blue',
+    read: true,
+    type: 'billing'
+  },
+  {
+    id: 7,
+    title: 'New Device Recommendation',
+    time: '2 weeks ago',
+    date: 'Jan 12, 2026',
+    description: 'Dr. Torres recommended a tDCS device for home use',
+    details: 'Based on your treatment progress, Dr. Torres has recommended the tDCS (Transcranial Direct Current Stimulation) device for supplemental home therapy. This device can enhance your treatment outcomes. View details in the E-Shop.',
+    icon: 'fa-laptop-medical',
+    color: 'green',
+    read: true,
+    type: 'recommendation',
+    action: 'View in E-Shop',
+    actionFn: 'loadSection(\'eshop\')'
+  }
+];
+
+// Open full window notifications view
+function openNotificationsFullWindow() {
+  // Close dropdown first
+  const dropdown = document.getElementById('notificationsDropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+  
+  const area = document.getElementById('contentArea');
+  const unreadCount = PATIENT_NOTIFICATIONS.filter(n => !n.read).length;
+  
+  const colorClasses = {
+    blue: { bg: 'bg-blue-50', border: 'border-l-blue-500', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnBg: 'bg-blue-600', btnHover: 'hover:bg-blue-700' },
+    orange: { bg: 'bg-orange-50', border: 'border-l-orange-500', iconBg: 'bg-orange-100', iconText: 'text-orange-600', btnBg: 'bg-orange-600', btnHover: 'hover:bg-orange-700' },
+    green: { bg: 'bg-green-50', border: 'border-l-green-500', iconBg: 'bg-green-100', iconText: 'text-green-600', btnBg: 'bg-green-600', btnHover: 'hover:bg-green-700' },
+    purple: { bg: 'bg-purple-50', border: 'border-l-purple-500', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnBg: 'bg-purple-600', btnHover: 'hover:bg-purple-700' }
+  };
+  
+  const notificationCards = PATIENT_NOTIFICATIONS.map(notif => {
+    const colors = colorClasses[notif.color] || colorClasses.blue;
+    const readOpacity = notif.read ? 'opacity-70' : '';
+    const actionButton = notif.action ? `
+      <button class="mt-3 px-4 py-2 ${colors.btnBg} ${colors.btnHover} text-white text-sm font-bold rounded-lg transition" onclick="${notif.actionFn || 'alert(\"Action clicked\")'}">
+        ${notif.action}
+      </button>
+    ` : '';
+    
+    return `
+      <div class="card p-6 border-l-4 ${colors.border} ${readOpacity} hover:shadow-lg transition" data-notification-item data-notification-id="${notif.id}">
+        <div class="flex gap-4">
+          <div class="w-12 h-12 rounded-full ${colors.iconBg} flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid ${notif.icon} ${colors.iconText} text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">${notif.title}</h3>
+                <div class="flex items-center gap-3 mt-1">
+                  <span class="text-xs text-slate-500">
+                    <i class="fa-solid fa-clock mr-1"></i>${notif.time}
+                  </span>
+                  <span class="text-xs text-slate-500">
+                    <i class="fa-solid fa-calendar mr-1"></i>${notif.date}
+                  </span>
+                </div>
+              </div>
+              ${!notif.read ? '<span class="w-3 h-3 bg-red-500 rounded-full"></span>' : ''}
+            </div>
+            <p class="text-sm font-semibold text-slate-700 mb-2">${notif.description}</p>
+            <p class="text-sm text-slate-600 leading-relaxed">${notif.details}</p>
+            ${actionButton}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  area.innerHTML = `
+    <div class="p-8" style="max-width: 1200px;">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-black text-slate-900 flex items-center gap-3">
+            <i class="fa-solid fa-bell text-sozo-600"></i>
+            All Notifications
+          </h1>
+          <p class="text-slate-600 mt-1">
+            You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="btn-secondary" onclick="markAllRead()">
+            <i class="fa-solid fa-check-double mr-2"></i>Mark All as Read
+          </button>
+          <button class="btn-primary" onclick="renderPatient('home')">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Back to Home
+          </button>
+        </div>
+      </div>
+      
+      <!-- Filter Tabs -->
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="sort-btn active" onclick="filterNotifications('all')">
+          <i class="fa-solid fa-list mr-1"></i>All (${PATIENT_NOTIFICATIONS.length})
+        </button>
+        <button class="sort-btn" onclick="filterNotifications('unread')">
+          <i class="fa-solid fa-envelope mr-1"></i>Unread (${unreadCount})
+        </button>
+        <button class="sort-btn" onclick="filterNotifications('appointment')">
+          <i class="fa-solid fa-calendar mr-1"></i>Appointments
+        </button>
+        <button class="sort-btn" onclick="filterNotifications('message')">
+          <i class="fa-solid fa-message mr-1"></i>Messages
+        </button>
+        <button class="sort-btn" onclick="filterNotifications('assessment')">
+          <i class="fa-solid fa-clipboard mr-1"></i>Assessments
+        </button>
+      </div>
+      
+      <!-- Notifications List -->
+      <div class="space-y-4" id="notificationsList">
+        ${notificationCards}
+      </div>
+      
+      ${PATIENT_NOTIFICATIONS.length === 0 ? `
+        <div class="card p-12 text-center">
+          <i class="fa-solid fa-bell-slash text-6xl text-slate-300 mb-4"></i>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">No Notifications</h3>
+          <p class="text-slate-600">You're all caught up! Check back later for updates.</p>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// Filter notifications by type
+function filterNotifications(filterType) {
+  // Update active button
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.closest('.sort-btn').classList.add('active');
+  
+  const notificationItems = document.querySelectorAll('[data-notification-item]');
+  
+  notificationItems.forEach(item => {
+    const notifId = parseInt(item.dataset.notificationId);
+    const notif = PATIENT_NOTIFICATIONS.find(n => n.id === notifId);
+    
+    if (!notif) {
+      item.style.display = 'none';
+      return;
+    }
+    
+    if (filterType === 'all') {
+      item.style.display = 'block';
+    } else if (filterType === 'unread') {
+      item.style.display = notif.read ? 'none' : 'block';
+    } else {
+      item.style.display = notif.type === filterType ? 'block' : 'none';
+    }
+  });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById('notificationsDropdown');
+  if (dropdown && !dropdown.classList.contains('hidden')) {
+    if (!event.target.closest('#notificationsDropdown') && !event.target.closest('button[onclick*="toggleNotifications"]')) {
+      dropdown.classList.add('hidden');
+    }
+  }
+});
+
 function handlePRSSubmit(conditionId) {
   const form = document.getElementById('prsForm');
   const formData = new FormData(form);
@@ -20976,8 +21352,172 @@ function renderDoctorNotes() {
             <textarea id="doctorRecommendations" class="input-royal min-h-24" placeholder="Enter treatment recommendations, follow-up instructions, or medication notes...">Recommend initiating cognitive rehabilitation therapy 3 times per week. Family should be educated on dementia care strategies and home safety modifications. Patient would benefit from structured daily routines and cognitive stimulation activities. Consider referral to occupational therapy for ADL assessment. Schedule follow-up appointment in 3 months to reassess cognitive function and adjust treatment plan accordingly.</textarea>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-500 uppercase">Medication Notes</label>
+            <label class="text-xs font-bold text-slate-500 uppercase mb-3 block">
+              <i class="fa-solid fa-pills mr-2"></i>Prescribed Medications
+            </label>
+            
+            ${currentRole === 'patient' ? `
+            <!-- Patient View - Medication Grid -->
+            <div class="bg-white rounded-lg border-2 border-slate-200 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                      <th class="px-4 py-3 text-left font-bold">Medicine Name</th>
+                      <th class="px-4 py-3 text-center font-bold">Dosage</th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-sunrise mr-1"></i>Morning
+                      </th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-sun mr-1"></i>Afternoon
+                      </th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-moon mr-1"></i>Dinner
+                      </th>
+                      <th class="px-4 py-3 text-left font-bold">Instructions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Donepezil</div>
+                        <div class="text-xs text-slate-500">Cholinesterase Inhibitor</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">5mg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">with water</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Vitamin B12</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">1000mcg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Before Meal</span>
+                          <span class="text-slate-600 text-sm">on empty stomach</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Vitamin D</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">2000 IU</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">for better absorption</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Omega-3 Fatty Acids</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">1000mg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">twice daily</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Legend -->
+              <div class="bg-slate-50 px-4 py-3 border-t border-slate-200">
+                <div class="flex items-center gap-6 text-xs text-slate-600">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-6 h-6 bg-green-500 text-white rounded-full font-bold text-xs">1</span>
+                    <span>Take this many pills</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-6 h-6 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                    <span>Skip this time</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded font-bold">After Meal</span>
+                    <span>Take after eating</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">Before Meal</span>
+                    <span>Take before eating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Additional Notes for Patient -->
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="font-bold text-blue-900 mb-2">
+                <i class="fa-solid fa-info-circle mr-2"></i>Important Medication Information
+              </h4>
+              <ul class="text-sm text-blue-800 space-y-1">
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Patient tolerating all medications well with no reported side effects</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Donepezil dose may be increased to 10mg after 4-6 weeks if tolerated</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Monitor for potential drug interactions with new prescriptions</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>No known drug allergies on record</li>
+                <li><i class="fa-solid fa-exclamation-triangle mr-2 text-orange-600"></i>Please inform your doctor of any side effects immediately</li>
+              </ul>
+            </div>
+            ` : `
+            <!-- Doctor/Staff View - Text Area -->
             <textarea id="doctorMedicationNotes" class="input-royal min-h-24" placeholder="Enter Medication Notes">Currently on Donepezil 5mg daily (cholinesterase inhibitor). Patient tolerating medication well with no reported side effects. Plan to increase to 10mg after 4-6 weeks if tolerated. Supplement regimen includes Vitamin B12 (1000mcg), Vitamin D (2000 IU), and Omega-3 fatty acids. Monitor for potential drug interactions with new prescriptions. Patient has no known drug allergies. Family educated on importance of medication adherence and potential side effects to watch for.</textarea>
+            `}
           </div>
         </div>
       </div>
