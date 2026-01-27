@@ -153,8 +153,76 @@
       background: transparent;
     }
     #apptScrollContainer {
-  isolation: isolate;
-}
+      isolation: isolate;
+    }
+
+    .app-shell {
+      min-height: 100%;
+    }
+    #mainSidebar {
+      width: 280px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #mobileSidebarOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 35;
+    }
+    @media (max-width: 1024px) {
+      #mainSidebar {
+        width: 240px;
+      }
+    }
+    @media (max-width: 768px) {
+      .app-shell {
+        flex-direction: column;
+      }
+      #mainSidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(320px, 80%);
+        transform: translateX(-100%);
+        z-index: 40;
+        box-shadow: 18px 0 40px rgba(15, 23, 42, 0.45);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      #mainApp.sidebar-visible #mainSidebar {
+        transform: translateX(0);
+      }
+      #mainApp.sidebar-visible #mobileSidebarOverlay {
+        display: block;
+      }
+      main {
+        padding-top: 0;
+      }
+      #mobileSidebarOverlay {
+        display: none;
+      }
+    }
+
+    .table-scrollable {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(234, 88, 12, 0.5) transparent;
+      margin-bottom: 1rem;
+    }
+    .table-scrollable table {
+      min-width: 480px;
+    }
+    .table-scrollable::-webkit-scrollbar {
+      height: 6px;
+    }
+    .table-scrollable::-webkit-scrollbar-thumb {
+      background-color: rgba(234, 88, 12, 0.6);
+      border-radius: 999px;
+    }
   </style>
 </head>
 <body class="text-slate-800">
@@ -269,11 +337,11 @@
     </div>
   </div>
   
-  <div id="mainApp" class="hidden w-full h-screen">
-      <div class="flex w-full h-full bg-slate-50 overflow-hidden">
+    <div id="mainApp" class="hidden w-full h-screen">
+      <div class="app-shell flex w-full h-full bg-slate-50 overflow-hidden">
    
         <!-- ================= SIDEBAR ================= -->
-        <aside class="w-64 shrink-0 flex flex-col text-white"
+        <aside id="mainSidebar" class="w-64 shrink-0 flex flex-col text-white"
           style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);">
           <!-- Logo -->
           <div class="p-4 flex items-center justify-center border-b border-slate-700">
@@ -312,14 +380,21 @@
    
         <!-- ================= MAIN CONTENT ================= -->
         <main class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+          <div class="sm:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white sticky top-0 z-20">
+            <button class="p-2 rounded-lg bg-slate-100 text-slate-700 shadow-inner" onclick="toggleMobileSidebar()" aria-label="Open sidebar">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <p class="text-sm font-semibold text-slate-600">Sozo Brain Center</p>
+            <span class="w-10"></span>
+          </div>
           <div id="contentArea" class="w-full min-h-full px-6 py-4">
             <!-- ================= YOUR PAGE CONTENT GOES HERE ================= -->
           </div>
         </main>
    
       </div>
+      <div id="mobileSidebarOverlay" onclick="hideMobileSidebar()" aria-hidden="true"></div>
     </div>
-    
     <script>
     // ========== Sozo App Bootstrap ==========
     // Demo users
@@ -411,6 +486,65 @@
         // Structure: { patientId: [ { id: 'section1', title: 'Custom Section', content: '' } ] }
       }
     };
+
+    function setMobileSidebarVisibility(visible) {
+      const appShell = document.getElementById('mainApp');
+      if (!appShell) return;
+      if (visible) {
+        appShell.classList.add('sidebar-visible');
+        document.body.style.overflow = 'hidden';
+      } else {
+        appShell.classList.remove('sidebar-visible');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const appShell = document.getElementById('mainApp');
+      if (!appShell) return;
+      setMobileSidebarVisibility(!appShell.classList.contains('sidebar-visible'));
+    }
+
+    function hideMobileSidebar() {
+      setMobileSidebarVisibility(false);
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        hideMobileSidebar();
+      }
+    });
+
+    const tableOverflowObserver = new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          if (node.tagName === 'TABLE') {
+            ensureTableScrollability(node);
+          }
+          node.querySelectorAll && node.querySelectorAll('table').forEach(ensureTableScrollability);
+        });
+      });
+    });
+
+    function ensureTableScrollability(table) {
+      if (table.closest('.overflow-x-auto, .table-scrollable')) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-scrollable';
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+
+    function ensureAllTablesScrollable() {
+      document.querySelectorAll('table').forEach(ensureTableScrollability);
+    }
+
+    function initTableOverflowObserver() {
+      ensureAllTablesScrollable();
+      tableOverflowObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    document.addEventListener('DOMContentLoaded', initTableOverflowObserver);
 
     // Sample data needed by modules
     const sampleData = {
@@ -1388,8 +1522,13 @@ function getWeekDateRange() {
 function updateWeekDisplay() {
   const weekRangeElement = document.getElementById('weekDateRange');
   if (weekRangeElement) {
-    weekRangeElement.textContent = getWeekDateRange();
+    weekRangeElement.textContent = calendarState.currentView === 'day' ? getCurrentDateLabel() : getWeekDateRange();
   }
+}
+
+function getCurrentDateLabel() {
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  return calendarState.currentDate.toLocaleDateString('en-US', options);
 }
 
 // Navigate calendar (prev/next week)
@@ -1443,11 +1582,18 @@ function renderTeamsCalendar() {
   
   // Get appointments
   const appointments = sampleData.appointments || [];
+
+  const isMobileViewport = window.innerWidth <= 768;
+  calendarState.currentView = isMobileViewport ? 'day' : 'week';
   
-  // Generate week view timeline
-  renderWeekView(container, appointments, hourHeight);
+  if (isMobileViewport) {
+    renderDayView(container, appointments, hourHeight);
+  } else {
+    renderWeekView(container, appointments, hourHeight);
+  }
   
-  // Update week display
+  
+  // Update week/day display text
   updateWeekDisplay();
 }
 
@@ -1866,8 +2012,9 @@ function startVisit(patientId) {
     return;
   }
   
-  // Set the current patient in global state
+  // Set the current patient in global state (both variables for consistency)
   globalState.currentPatient = patient;
+  globalSelectedPatientId = patient.id;
   
   // Navigate to patient history section
   loadSection('patienthistory');
@@ -1889,6 +2036,10 @@ function loadSection(key) {
       target.classList.add('active');
       const parentSublist = target.closest('.nav-sublist');
       if(parentSublist) parentSublist.classList.remove('hidden');
+    }
+
+    if (window.innerWidth < 768) {
+      hideMobileSidebar();
     }
 
     if(['fnon','brain','prs','finalreport'].includes(key) && assessmentProgress[key] !== 'completed') {
@@ -19354,6 +19505,7 @@ function renderDoctor(key) {
         // Add to patient database
         sampleData.patients.unshift(newPatient);
         globalSelectedPatientId = id;
+        globalState.currentPatient = newPatient;
         
         // Clear form
         document.getElementById('npFirstName').value = '';
@@ -20935,6 +21087,317 @@ function renderTreatmentPlan() {
         </div>
       </div>
 
+      <!-- Disease Selection & Automated Brain Region Mapping -->
+      <div class="mb-8 bg-gradient-to-br from-blue-50 via-purple-50 to-orange-50 p-6 rounded-xl border-2 border-orange-400">
+        <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-brain text-orange-600"></i>
+          Clinical Indication & Montage Configuration
+        </h3>
+        
+        <!-- Disease/Clinical Phenotype Selection -->
+        <div class="mb-6">
+          <label class="text-sm font-bold text-slate-800 block mb-2">
+            <i class="fa-solid fa-stethoscope mr-2 text-blue-600"></i>
+            Select Clinical Indication / Phenotype *
+          </label>
+          <select id="clinicalIndicationSelect" class="input-royal text-base font-semibold" ${currentRole === 'patient' ? 'disabled' : ''} onchange="updateMontageMapping()">
+            <option value="">-- Select Disease/Clinical Indication --</option>
+            <option value="ruminative_depression">Ruminative, Melancholic Depression; Low Drive; Cognitive Slowing</option>
+            <option value="cognitive_depression">Cognitive Depression, Attentional Inefficiency</option>
+            <option value="anxious_depression">Anxious Depression, Hypervigilance, Stress Sensitivity</option>
+          </select>
+        </div>
+
+        <!-- Automated Montage Display -->
+        <div id="montageDetailsSection" class="hidden">
+          <!-- Montage Category -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-lg border-2 border-blue-300 shadow-sm">
+              <label class="text-xs font-bold text-blue-700 block mb-2 uppercase tracking-wide">Montage Category</label>
+              <input type="text" id="montageCategory" class="input-royal font-bold text-lg bg-blue-50" readonly />
+            </div>
+            <div class="bg-white p-5 rounded-lg border-2 border-green-300 shadow-sm">
+              <label class="text-xs font-bold text-green-700 block mb-2 uppercase tracking-wide">Primary Network Target</label>
+              <input type="text" id="networkTarget" class="input-royal font-bold text-lg bg-green-50" readonly />
+            </div>
+          </div>
+
+          <!-- Brain Region Mappings -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Anode Placement -->
+            <div class="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-xl border-2 border-red-400 shadow-md">
+              <h4 class="text-lg font-bold text-red-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-red-600"></i>
+                Anode Placement (Excitatory +)
+              </h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-semibold text-slate-700 block mb-1">EEG 10-20 Position(s)</label>
+                  <input type="text" id="anodePlacement" class="input-royal font-bold text-base bg-white" readonly />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-slate-700 block mb-1">Alternative Options</label>
+                  <textarea id="anodeOptions" class="input-royal text-sm bg-white" rows="2" readonly></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cathode Placement -->
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border-2 border-blue-400 shadow-md">
+              <h4 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-minus-circle text-blue-600"></i>
+                Cathode Placement (Inhibitory -)
+              </h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-semibold text-slate-700 block mb-1">Recommended Placement</label>
+                  <input type="text" id="cathodePlacement" class="input-royal font-bold text-base bg-white" readonly />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-slate-700 block mb-1">Cathode Type</label>
+                  <input type="text" id="cathodeType" class="input-royal text-sm bg-white" readonly />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Clinical Information -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-lg border-2 border-purple-300 shadow-sm">
+              <label class="text-xs font-bold text-purple-700 block mb-2 uppercase tracking-wide">Secondary Network Role</label>
+              <input type="text" id="secondaryNetwork" class="input-royal text-sm bg-purple-50" readonly />
+            </div>
+            <div class="bg-white p-5 rounded-lg border-2 border-yellow-300 shadow-sm">
+              <label class="text-xs font-bold text-yellow-700 block mb-2 uppercase tracking-wide">Typical Use Stage</label>
+              <textarea id="useStage" class="input-royal text-sm bg-yellow-50" rows="2" readonly></textarea>
+            </div>
+          </div>
+
+          <!-- FNON Logic Explanation -->
+          <div class="mt-6 bg-gradient-to-r from-orange-100 to-orange-50 p-5 rounded-lg border-l-4 border-orange-600">
+            <h5 class="text-sm font-bold text-orange-900 mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb text-orange-600"></i>
+              FNON Logic (Why this montage exists)
+            </h5>
+            <p id="fnonLogic" class="text-sm text-orange-800 leading-relaxed"></p>
+          </div>
+
+          <!-- Interactive Brain Layout Visualization -->
+          <div class="mt-8 bg-white p-6 rounded-xl border-2 border-slate-300 shadow-lg">
+            <h4 class="text-xl font-bold text-slate-900 mb-6 text-center flex items-center justify-center gap-3">
+              <i class="fa-solid fa-brain text-purple-600 text-2xl"></i>
+              EEG 10-20 Montage Visualization
+            </h4>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Top-Down Brain View -->
+              <div class="flex flex-col items-center">
+                <h5 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide">Top-Down View</h5>
+                <svg id="brainLayoutTopView" viewBox="0 0 300 300" class="w-full max-w-md border-2 border-slate-200 rounded-lg bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+                  <!-- Brain outline circle -->
+                  <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
+                  <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                  
+                  <!-- Nasion marker (top) -->
+                  <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+                  <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
+                  
+                  <!-- Inion marker (bottom) -->
+                  <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+                  <text x="150" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">INION</text>
+                  
+                  <!-- Left/Right markers -->
+                  <text x="15" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">L</text>
+                  <text x="285" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">R</text>
+                  
+                  <!-- Row 1: Frontal Pole -->
+                  <g id="fp1-electrode" class="electrode">
+                    <circle cx="110" cy="70" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="110" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">FP1</text>
+                  </g>
+                  <g id="fpz-electrode" class="electrode">
+                    <circle cx="150" cy="65" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="70" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">FPZ</text>
+                  </g>
+                  <g id="fp2-electrode" class="electrode">
+                    <circle cx="190" cy="70" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="190" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">FP2</text>
+                  </g>
+                  
+                  <!-- Row 2: Frontal -->
+                  <g id="f7-electrode" class="electrode">
+                    <circle cx="70" cy="100" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="70" y="105" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F7</text>
+                  </g>
+                  <g id="f3-electrode" class="electrode">
+                    <circle cx="115" cy="105" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="115" y="110" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F3</text>
+                  </g>
+                  <g id="fz-electrode" class="electrode">
+                    <circle cx="150" cy="100" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="105" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">FZ</text>
+                  </g>
+                  <g id="f4-electrode" class="electrode">
+                    <circle cx="185" cy="105" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="185" y="110" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F4</text>
+                  </g>
+                  <g id="f8-electrode" class="electrode">
+                    <circle cx="230" cy="100" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="230" y="105" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F8</text>
+                  </g>
+                  
+                  <!-- Row 3: Fronto-Central -->
+                  <g id="fc1-electrode" class="electrode">
+                    <circle cx="125" cy="135" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="125" y="140" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">FC1</text>
+                  </g>
+                  <g id="fcz-electrode" class="electrode">
+                    <circle cx="150" cy="130" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="135" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">FCZ</text>
+                  </g>
+                  <g id="fc2-electrode" class="electrode">
+                    <circle cx="175" cy="135" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="175" y="140" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">FC2</text>
+                  </g>
+                  
+                  <!-- Row 4: Central -->
+                  <g id="t3-electrode" class="electrode">
+                    <circle cx="40" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="40" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T3</text>
+                  </g>
+                  <g id="c3-electrode" class="electrode">
+                    <circle cx="95" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="95" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">C3</text>
+                  </g>
+                  <g id="cz-electrode" class="electrode">
+                    <circle cx="150" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">CZ</text>
+                  </g>
+                  <g id="c4-electrode" class="electrode">
+                    <circle cx="205" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="205" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">C4</text>
+                  </g>
+                  <g id="t4-electrode" class="electrode">
+                    <circle cx="260" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="260" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T4</text>
+                  </g>
+                  
+                  <!-- Row 5: Parietal -->
+                  <g id="t5-electrode" class="electrode">
+                    <circle cx="70" cy="200" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="70" y="205" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T5</text>
+                  </g>
+                  <g id="p3-electrode" class="electrode">
+                    <circle cx="115" cy="195" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="115" y="200" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">P3</text>
+                  </g>
+                  <g id="pz-electrode" class="electrode">
+                    <circle cx="150" cy="200" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="205" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">PZ</text>
+                  </g>
+                  <g id="p4-electrode" class="electrode">
+                    <circle cx="185" cy="195" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="185" y="200" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">P4</text>
+                  </g>
+                  <g id="t6-electrode" class="electrode">
+                    <circle cx="230" cy="200" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="230" y="205" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T6</text>
+                  </g>
+                  
+                  <!-- Row 6: Occipital -->
+                  <g id="o1-electrode" class="electrode">
+                    <circle cx="125" cy="235" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="125" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">O1</text>
+                  </g>
+                  <g id="oz-electrode" class="electrode">
+                    <circle cx="150" cy="240" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="150" y="245" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">OZ</text>
+                  </g>
+                  <g id="o2-electrode" class="electrode">
+                    <circle cx="175" cy="235" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
+                    <text x="175" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">O2</text>
+                  </g>
+                </svg>
+              </div>
+              
+              <!-- Legend and Instructions -->
+              <div class="flex flex-col justify-center space-y-6">
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-lg border-2 border-slate-300">
+                  <h5 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wide">
+                    <i class="fa-solid fa-map-marker-alt mr-2"></i>Electrode Legend
+                  </h5>
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-300">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-white font-bold"></i>
+                      </div>
+                      <div>
+                        <p class="font-bold text-sm text-red-900">Anode (+)</p>
+                        <p class="text-xs text-red-700">Excitatory stimulation</p>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-300">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
+                        <i class="fa-solid fa-minus text-white font-bold"></i>
+                      </div>
+                      <div>
+                        <p class="font-bold text-sm text-blue-900">Cathode (-)</p>
+                        <p class="text-xs text-blue-700">Inhibitory stimulation</p>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-300">
+                      <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-slate-400"></div>
+                      <div>
+                        <p class="font-bold text-sm text-slate-900">Inactive</p>
+                        <p class="text-xs text-slate-700">Not used in this montage</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Extracephalic Reference Note -->
+                <div id="extracephalicNote" class="hidden bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border-2 border-green-400">
+                  <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-info-circle text-green-600 text-xl mt-1"></i>
+                    <div>
+                      <p class="font-bold text-sm text-green-900 mb-1">Extracephalic Cathode</p>
+                      <p class="text-xs text-green-800 leading-relaxed">
+                        Cathode placed on <strong>shoulder/torso</strong> (not shown on brain diagram). 
+                        This placement minimizes interference with target brain regions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Active Montage Info -->
+                <div id="activeMontageInfo" class="bg-gradient-to-r from-purple-50 to-indigo-50 p-5 rounded-lg border-2 border-purple-400">
+                  <h5 class="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-bullseye"></i>
+                    Active Configuration
+                  </h5>
+                  <div class="space-y-2 text-xs">
+                    <div class="flex justify-between items-center">
+                      <span class="text-purple-700 font-semibold">Anode(s):</span>
+                      <span id="activeAnodes" class="font-bold text-purple-900">Not selected</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-purple-700 font-semibold">Cathode(s):</span>
+                      <span id="activeCathodes" class="font-bold text-purple-900">Not selected</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-purple-700 font-semibold">Target Network:</span>
+                      <span id="activeNetwork" class="font-bold text-purple-900">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Treatment Sessions - First Row -->
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
         <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Treatment Session 1</h3>
@@ -21384,6 +21847,15 @@ function renderTreatmentPlan() {
   
   // Attach event listeners
   setTimeout(() => {
+    // Clinical Indication Dropdown - trigger initial update if needed
+    const clinicalSelect = document.getElementById('clinicalIndicationSelect');
+    if (clinicalSelect) {
+      // Initialize montage display if there's a pre-selected value
+      if (clinicalSelect.value) {
+        updateMontageMapping();
+      }
+    }
+    
     // Patient Navigation Dropdown
     const patientNavSelect = document.getElementById('patientNavigationSelectTreatment');
     if (patientNavSelect) {
@@ -21447,6 +21919,230 @@ function renderTreatmentPlan() {
       });
     }
   }, 100);
+}
+
+// Treatment Plan Montage Mapping Function
+function updateMontageMapping() {
+  const selection = document.getElementById('clinicalIndicationSelect')?.value;
+  const montageSection = document.getElementById('montageDetailsSection');
+  
+  if (!selection || !montageSection) return;
+  
+  // Define montage configurations based on the table
+  const montageConfigs = {
+    ruminative_depression: {
+      category: 'Montage Category 1 - Standard 1-channel',
+      clinicalIndication: 'Ruminative, melancholic depression; low drive; cognitive slowing',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: '—',
+      anodePlacement: 'F3 (left executive hub), F4 (right-biased affective profile), optional Fz',
+      anodeOptions: 'Limbic regulation, indirect DMN disengagement',
+      cathodePlacement: 'Shoulder / torso (preferred); FPz or Cz if cephalic required',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Strengthens top-down executive control; reduces rumination indirectly via improved network switching',
+      anodes: ['F3', 'F4', 'FZ'],
+      cathodes: ['FPZ', 'CZ'],
+      extracephalic: true
+    },
+    cognitive_depression: {
+      category: 'Montage Category 2 - Standard 1-channel',
+      clinicalIndication: 'Cognitive depression, attentional inefficiency',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: 'DAN / parietal integration',
+      anodePlacement: 'F3 / F4 / Fz',
+      anodeOptions: '',
+      cathodePlacement: 'P3 / P4 (integrational integration) or extracephalic',
+      cathodeType: 'Cephalic or extracephalic (case-dependent)',
+      fnonLogic: 'Treats depression as network inefficiency rather than mood deficit',
+      anodes: ['F3', 'F4', 'FZ'],
+      cathodes: ['P3', 'P4'],
+      extracephalic: false
+    },
+    anxious_depression: {
+      category: 'Montage Category 3 - Standard 1-channel',
+      clinicalIndication: 'Anxious depression, hypervigilance, stress sensitivity',
+      networkTarget: 'SN (Salience Network - regulatory)',
+      secondaryNetwork: 'CEN stabilization',
+      anodePlacement: 'FCz, FC1 / FC2',
+      anodeOptions: '',
+      cathodePlacement: 'Shoulder / torso preferred; Cz or FPz if cephalic',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Normalizes pathological salience attribution and improves switching',
+      anodes: ['FCZ', 'FC1', 'FC2'],
+      cathodes: ['CZ', 'FPZ'],
+      extracephalic: true
+    }
+  };
+  
+  const config = montageConfigs[selection];
+  
+  if (config) {
+    // Show the montage section
+    montageSection.classList.remove('hidden');
+    
+    // Populate all fields
+    document.getElementById('montageCategory').value = config.category;
+    document.getElementById('networkTarget').value = config.networkTarget;
+    document.getElementById('secondaryNetwork').value = config.secondaryNetwork;
+    document.getElementById('anodePlacement').value = config.anodePlacement;
+    document.getElementById('anodeOptions').value = config.anodeOptions;
+    document.getElementById('cathodePlacement').value = config.cathodePlacement;
+    document.getElementById('cathodeType').value = config.cathodeType;
+    document.getElementById('useStage').value = 'Clinical treatment phase';
+    document.getElementById('fnonLogic').textContent = config.fnonLogic;
+    
+    // Update brain visualization
+    updateBrainVisualization(config);
+    
+    // Scroll to the montage section smoothly
+    setTimeout(() => {
+      montageSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  } else {
+    // Hide the section if no selection
+    montageSection.classList.add('hidden');
+    resetBrainVisualization();
+  }
+}
+
+// Update brain diagram visualization with electrode highlights
+function updateBrainVisualization(config) {
+  // Reset all electrodes first
+  resetBrainVisualization();
+  
+  if (!config) return;
+  
+  // Highlight anodes (red/orange)
+  if (config.anodes && config.anodes.length > 0) {
+    config.anodes.forEach(electrode => {
+      const el = document.getElementById(electrode.toLowerCase() + '-electrode');
+      if (el) {
+        const circle = el.querySelector('circle');
+        const text = el.querySelector('text');
+        if (circle) {
+          circle.setAttribute('fill', 'url(#anodeGradient)');
+          circle.setAttribute('stroke', '#dc2626');
+          circle.setAttribute('stroke-width', '3');
+        }
+        if (text) {
+          text.setAttribute('fill', '#ffffff');
+          text.setAttribute('font-weight', 'bold');
+        }
+      }
+    });
+  }
+  
+  // Highlight cathodes (blue)
+  if (config.cathodes && config.cathodes.length > 0) {
+    config.cathodes.forEach(electrode => {
+      const el = document.getElementById(electrode.toLowerCase() + '-electrode');
+      if (el) {
+        const circle = el.querySelector('circle');
+        const text = el.querySelector('text');
+        if (circle) {
+          circle.setAttribute('fill', 'url(#cathodeGradient)');
+          circle.setAttribute('stroke', '#2563eb');
+          circle.setAttribute('stroke-width', '3');
+        }
+        if (text) {
+          text.setAttribute('fill', '#ffffff');
+          text.setAttribute('font-weight', 'bold');
+        }
+      }
+    });
+  }
+  
+  // Show/hide extracephalic note
+  const extracephalicNote = document.getElementById('extracephalicNote');
+  if (extracephalicNote) {
+    if (config.extracephalic) {
+      extracephalicNote.classList.remove('hidden');
+    } else {
+      extracephalicNote.classList.add('hidden');
+    }
+  }
+  
+  // Update active montage info
+  const activeAnodes = document.getElementById('activeAnodes');
+  const activeCathodes = document.getElementById('activeCathodes');
+  const activeNetwork = document.getElementById('activeNetwork');
+  
+  if (activeAnodes) activeAnodes.textContent = config.anodes.join(', ');
+  if (activeCathodes) {
+    if (config.extracephalic) {
+      activeCathodes.textContent = 'Shoulder/Torso (extracephalic)';
+    } else {
+      activeCathodes.textContent = config.cathodes.join(', ');
+    }
+  }
+  if (activeNetwork) activeNetwork.textContent = config.networkTarget;
+  
+  // Add gradients to SVG if they don't exist
+  addSVGGradients();
+}
+
+// Reset brain visualization to default state
+function resetBrainVisualization() {
+  const electrodes = document.querySelectorAll('.electrode');
+  electrodes.forEach(el => {
+    const circle = el.querySelector('circle');
+    const text = el.querySelector('text');
+    if (circle) {
+      circle.setAttribute('fill', '#e2e8f0');
+      circle.setAttribute('stroke', '#64748b');
+      circle.setAttribute('stroke-width', '2.5');
+      circle.style.animation = '';
+    }
+    if (text) {
+      text.setAttribute('fill', '#1e293b');
+      text.setAttribute('font-weight', 'bold');
+    }
+  });
+  
+  // Hide extracephalic note
+  const extracephalicNote = document.getElementById('extracephalicNote');
+  if (extracephalicNote) extracephalicNote.classList.add('hidden');
+  
+  // Reset active info
+  const activeAnodes = document.getElementById('activeAnodes');
+  const activeCathodes = document.getElementById('activeCathodes');
+  const activeNetwork = document.getElementById('activeNetwork');
+  
+  if (activeAnodes) activeAnodes.textContent = 'Not selected';
+  if (activeCathodes) activeCathodes.textContent = 'Not selected';
+  if (activeNetwork) activeNetwork.textContent = '—';
+}
+
+// Add SVG gradients for electrode highlighting
+function addSVGGradients() {
+  const svg = document.getElementById('brainLayoutTopView');
+  if (!svg) return;
+  
+  // Check if gradients already exist
+  if (document.getElementById('anodeGradient')) return;
+  
+  // Create defs element
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  
+  // Anode gradient (red to orange)
+  const anodeGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+  anodeGradient.setAttribute('id', 'anodeGradient');
+  anodeGradient.innerHTML = `
+    <stop offset="0%" style="stop-color:#f87171;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+  `;
+  
+  // Cathode gradient (blue to cyan)
+  const cathodeGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+  cathodeGradient.setAttribute('id', 'cathodeGradient');
+  cathodeGradient.innerHTML = `
+    <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+  `;
+  
+  defs.appendChild(anodeGradient);
+  defs.appendChild(cathodeGradient);
+  svg.insertBefore(defs, svg.firstChild);
 }
 
 // -- FNON MODULE LOGIC --
@@ -22370,6 +23066,25 @@ function attachUploadHistoryEventListeners() {
 function renderBrainMap() {
   const area = document.getElementById('contentArea');
   
+  // For patient role, auto-select their own patient context
+  if(currentRole === 'patient' && !globalSelectedPatientId) {
+    const ap = getActivePatient();
+    if(ap?.id) globalSelectedPatientId = ap.id;
+  }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
+  // Sync globalSelectedPatientId from globalState.currentPatient if missing
+  if(!globalSelectedPatientId && globalState.currentPatient) {
+    globalSelectedPatientId = globalState.currentPatient.id;
+  }
+  
   // Allow admin to access without patient selection
   if(!globalSelectedPatientId && currentRole !== 'admin') { 
     area.innerHTML = `<div class="p-10 text-center text-slate-400">Please select a patient in FNON Checklist first.</div>`; 
@@ -22838,6 +23553,25 @@ function renderBrainMap() {
 
 function renderPRSDoctor() {
   const area = document.getElementById('contentArea');
+  
+  // For patient role, auto-select their own patient context
+  if(currentRole === 'patient' && !globalSelectedPatientId) {
+    const ap = getActivePatient();
+    if(ap?.id) globalSelectedPatientId = ap.id;
+  }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
+  // Sync globalSelectedPatientId from globalState.currentPatient if missing
+  if(!globalSelectedPatientId && globalState.currentPatient) {
+    globalSelectedPatientId = globalState.currentPatient.id;
+  }
   
   // Allow admin to access without patient selection
   if(!globalSelectedPatientId && currentRole !== 'admin') { 
