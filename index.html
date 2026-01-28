@@ -2076,15 +2076,15 @@ function renderPatient(key) {
 
   if(key === 'home') {
     area.innerHTML = `
-      <div class="p-8" style='width:77rem;'>
-        <div class="flex flex-col gap-6">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+        <div class="flex flex-col gap-4 sm:gap-6">
           <!-- Header -->
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 class="text-3xl font-black text-slate-900 mt-1">Welcome, ${p.name}</h2>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Welcome, ${p.name}</h2>
               <p class="text-slate-600 mt-1">Here's your health overview at a glance</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-shrink-0">
               <span class="text-sm text-slate-500">Last updated: ${new Date().toLocaleDateString()}</span>
               
               <!-- Notification Bell -->
@@ -2095,7 +2095,7 @@ function renderPatient(key) {
                 </button>
                 
                 <!-- Notifications Dropdown -->
-                <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-slate-200 z-50" style="max-height: 500px; overflow-y: auto;">
+                <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-slate-200 z-50" style="max-height: 500px; overflow-y: auto;">
                   <div class="p-4 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="font-bold text-slate-900">Notifications</h3>
                     <button onclick="markAllRead()" class="text-xs font-bold text-sozo-600 hover:underline">
@@ -2599,7 +2599,7 @@ function renderPatient(key) {
     };
 
     area.innerHTML = `
-      <div class="p-8" style='width:77rem;'>
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="flex flex-col gap-6">
           <div class="flex items-center justify-between">
             <div>
@@ -3171,8 +3171,8 @@ function renderPatient(key) {
 
   else if (key === 'mypatients') {
     area.innerHTML = `
-      <div style = 'width:77rem;' class='p-8'>
-      <div class="mb-4 flex items-center justify-between">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+      <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl font-bold">My Referrals</h2>
           <p class="text-slate-500 text-sm">Add and manage patient referrals.</p>
@@ -3180,103 +3180,93 @@ function renderPatient(key) {
         <button id="patientAddBtn" class="bg-sozo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-sozo-700 shadow-lg shadow-sozo-500/20"><i class="fa-solid fa-plus mr-2"></i>Add Referral</button>
       </div>
       
-      <div class="card p-6">
-        <table>
-          <thead>
-            <tr>
-              <th>Referral Name</th>
-              <th>Email</th>
-              <th>Country</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+      <div class="card p-4 sm:p-6">
+        <div class="table-scrollable">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-200">
+                <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Referral Name</th>
+                <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden md:table-cell">Email</th>
+                <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden sm:table-cell">Country</th>
+                <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Status</th>
+              </tr>
+            </thead>
           <tbody id="patientReferralsList">
-            <tr>
-              <td><strong>Emma Johnson</strong></td>
-              <td>emma.johnson@email.com</td>
-              <td>UK</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Emma Johnson</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">emma.johnson@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">UK</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Sophia Garcia</strong></td>
-              <td>sophia.garcia@email.com</td>
-              <td>Spain</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Sophia Garcia</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">sophia.garcia@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Spain</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Ava Wilson</strong></td>
-              <td>ava.wilson@email.com</td>
-              <td>Cyprus</td>
-              <td><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Ava Wilson</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">ava.wilson@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Cyprus</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>James Anderson</strong></td>
-              <td>james.anderson@email.com</td>
-              <td>Canada</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">James Anderson</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">james.anderson@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Canada</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Maria Rodriguez</strong></td>
-              <td>maria.rodriguez@email.com</td>
-              <td>Mexico</td>
-              <td><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Maria Rodriguez</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">maria.rodriguez@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Mexico</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>David Chen</strong></td>
-              <td>david.chen@email.com</td>
-              <td>Singapore</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">David Chen</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">david.chen@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Singapore</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Sarah Williams</strong></td>
-              <td>sarah.williams@email.com</td>
-              <td>Australia</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Sarah Williams</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">sarah.williams@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Australia</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Thomas Mueller</strong></td>
-              <td>thomas.mueller@email.com</td>
-              <td>Germany</td>
-              <td><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Thomas Mueller</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">thomas.mueller@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Germany</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Isabella Rossi</strong></td>
-              <td>isabella.rossi@email.com</td>
-              <td>Italy</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Isabella Rossi</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">isabella.rossi@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Italy</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Lucas Silva</strong></td>
-              <td>lucas.silva@email.com</td>
-              <td>Brazil</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Lucas Silva</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">lucas.silva@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Brazil</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Emily Taylor</strong></td>
-              <td>emily.taylor@email.com</td>
-              <td>New Zealand</td>
-              <td><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Emily Taylor</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">emily.taylor@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">New Zealand</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-xmark"></i></span></td>
             </tr>
-            <tr>
-              <td><strong>Yuki Tanaka</strong></td>
-              <td>yuki.tanaka@email.com</td>
-              <td>Japan</td>
-              <td><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
-              
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+              <td class="px-2 sm:px-4 py-3 text-sm font-bold">Yuki Tanaka</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">yuki.tanaka@email.com</td>
+              <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">Japan</td>
+              <td class="px-2 sm:px-4 py-3"><span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-check"></i></span></td>
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Add Referral Modal -->
@@ -20432,7 +20422,7 @@ function renderDoctor(key) {
           <p class="text-slate-500 text-sm">Register a new patient visit with complete information</p>
         </div>
         
-        <div class="card p-6 max-w-4xl mb-8" style='width:85rem;'>
+        <div class="card p-4 sm:p-6 max-w-full overflow-hidden mb-8">
           <form id="visitForm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <!-- Patient Selection -->
@@ -24334,15 +24324,15 @@ function renderReceptionist(key) {
     }
     
     let html = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">${calendarTitle}</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">${calendarTitle}</h2>
           <p class="text-slate-600 mt-1">${calendarDescription}</p>
         </div>
         
         <!-- Date Navigation & Doctor Selector -->
-        <div class="card p-4 mb-6 flex items-center justify-between">
-          <div class="flex items-center gap-4">
+        <div class="card p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-4">
             <button class="btn-secondary px-3 py-2" onclick="receptionistChangeDate(-1)" title="Previous">&larr;</button>
             <input type="date" id="calendarDate" value="${selectedDate}" class="input-royal py-2 px-3" onchange="receptionistChangeDate(0)">
             <button class="btn-secondary px-3 py-2" onclick="receptionistChangeDate(1)" title="Next">&rarr;</button>
@@ -24350,23 +24340,23 @@ function renderReceptionist(key) {
             <div style="width: 1px; height: 30px; background-color: #e2e8f0; margin: 0 8px;"></div>
             
             <label class="text-sm font-bold text-slate-900">Calendar:</label>
-            <select id="doctorSelect" class="input-royal py-2 px-3 w-56" onchange="selectDoctorView(this.value)">
+            <select id="doctorSelect" class="input-royal py-2 px-3 w-full sm:w-56" onchange="selectDoctorView(this.value)">
               <option value="">-- All Clinics --</option>
               ${sampleData.doctors.map(d => `<option value="${d.id}" ${selectedDoctorId === d.id ? 'selected' : ''}>${d.name} (${d.specialty})</option>`).join('')}
             </select>
           </div>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary px-4 py-2" onclick="loadSection('createappt')">
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="btn-primary px-3 sm:px-4 py-2 text-sm" onclick="loadSection('createappt')">
               <i class="fa-solid fa-plus mr-2"></i>Create Appointment
             </button>
           </div>
         </div>
         
         <!-- Time Interval Selector Dropdown -->
-        <div class="mb-6 flex items-center gap-6">
+        <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
           <div class="flex items-center gap-3">
             <label class="text-sm font-bold text-slate-900">Time Interval:</label>
-            <select id="timeIntervalSelect" class="input-royal py-2 px-3 w-40" onchange="setTimeInterval(parseInt(this.value))">
+            <select id="timeIntervalSelect" class="input-royal py-2 px-3 w-full sm:w-40" onchange="setTimeInterval(parseInt(this.value))">
               <option value="15" ${appointmentTimeInterval === 15 ? 'selected' : ''}>15 Minutes</option>
               <option value="30" ${appointmentTimeInterval === 30 ? 'selected' : ''}>30 Minutes</option>
               <option value="45" ${appointmentTimeInterval === 45 ? 'selected' : ''}>45 Minutes</option>
@@ -24376,7 +24366,7 @@ function renderReceptionist(key) {
           
           <div class="flex items-center gap-3">
             <label class="text-sm font-bold text-slate-900">Filter:</label>
-            <select id="calendarFilter" class="input-royal py-2 px-3 w-48" onchange="applyCalendarFilter(this.value)">
+            <select id="calendarFilter" class="input-royal py-2 px-3 w-full sm:w-48" onchange="applyCalendarFilter(this.value)">
               <option value="all">-- All Appointments --</option>
               <option value="scheduled">Scheduled</option>
               <option value="confirmed">Confirmed</option>
@@ -24397,10 +24387,11 @@ function renderReceptionist(key) {
         
         <!-- Calendar Grid -->
         <div class="card overflow-x-auto p-0 border-0">
-          <table class="w-full" style="table-layout: fixed; min-width: 1200px;">
-            <thead>
-              <tr class="bg-slate-900 text-white">
-                <th class="px-4 py-3 text-left w-24">Time</th>
+          <div class="table-scrollable">
+            <table class="w-full" style="table-layout: fixed; min-width: 800px;">
+              <thead>
+                <tr class="bg-slate-900 text-white">
+                  <th class="px-2 sm:px-4 py-3 text-left w-16 sm:w-24 sticky left-0 z-10 bg-slate-900">Time</th>
     `;
     
     // Define light background colors for clinics
@@ -24414,7 +24405,7 @@ function renderReceptionist(key) {
     // Add clinic columns with colors
     clinicsToDisplay.forEach(clinic => {
       const bgColor = clinicColors[clinic.id] || '#f1f5f9';
-      html += `<th class="px-4 py-3 text-center text-sm font-bold border-l border-slate-700" style="background-color: ${bgColor}; color: #1e293b;">${clinic.name}<br><span class="text-xs font-normal">${clinic.country}</span></th>`;
+      html += `<th class="px-2 sm:px-4 py-3 text-center text-sm font-bold border-l border-slate-700 whitespace-nowrap" style="background-color: ${bgColor}; color: #1e293b;">${clinic.name}<br><span class="text-xs font-normal hidden sm:inline">${clinic.country}</span></th>`;
     });
     
     html += `
@@ -24436,7 +24427,7 @@ function renderReceptionist(key) {
         const slotEndMinutes = slotStartMinutes + appointmentTimeInterval;
         
         html += `<tr class="border-b border-slate-200 hover:bg-slate-50">
-          <td class="px-4 py-3 font-bold text-sm bg-slate-100 sticky left-0 z-10">${timeStr}</td>`;
+          <td class="px-2 sm:px-4 py-3 font-bold text-xs sm:text-sm bg-slate-100 sticky left-0 z-10">${timeStr}</td>`;
         
         clinicsToDisplay.forEach(clinic => {
           // Find appointment that overlaps with this time slot
@@ -24493,18 +24484,19 @@ function renderReceptionist(key) {
     html += `
             </tbody>
           </table>
+          </div>
         </div>
         
         <!-- Legend -->
         <div class="card p-4 mt-6">
           <h4 class="font-bold text-sm mb-3">Legend</h4>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="flex items-center gap-2">
-              <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded"></div>
+              <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded flex-shrink-0"></div>
               <span class="text-sm">Scheduled Appointment (Click to view/edit)</span>
             </div>
             <div class="flex items-center gap-2">
-              <div class="w-6 h-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded"></div>
+              <div class="w-6 h-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded flex-shrink-0"></div>
               <span class="text-sm">Available Slot (Click to book)</span>
             </div>
           </div>
@@ -24516,14 +24508,14 @@ function renderReceptionist(key) {
     
   } else if(key === 'createappt') {
     area.innerHTML = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">Create Appointment</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Create Appointment</h2>
           <p class="text-slate-600 mt-1">Book a new appointment for a patient</p>
         </div>
         
-        <form onsubmit="submitNewAppointment(event)" class="card p-8">
-          <div class="grid grid-cols-2 gap-8">
+        <form onsubmit="submitNewAppointment(event)" class="card p-4 sm:p-6 lg:p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
             <!-- Left Column -->
             <div class="space-y-6">
               <!-- Clinic Selection -->
@@ -24636,47 +24628,49 @@ function renderReceptionist(key) {
   } else if(key === 'manageappts') {
     // Manage/view/reschedule/cancel appointments
     area.innerHTML = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">Manage Appointments</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Manage Appointments</h2>
           <p class="text-slate-600 mt-1">View, reschedule, or cancel appointments</p>
         </div>
         
-        <div class="card p-6">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-slate-100 border-b border-slate-200">
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Date & Time</th>
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Patient</th>
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Clinic</th>
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Doctor</th>
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Service</th>
-                <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Status</th>
-                <th class="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${receptionist_appointments.map(appt => {
-                const svc = appointmentServices.find(s => s.id === appt.service);
-                const doc = sampleData.doctors.find(d => d.id === appt.doctorId);
-                const clinic = clinicLocations.find(c => c.id === appt.clinicId);
-                return `
-                  <tr class="border-b border-slate-200 hover:bg-slate-50">
-                    <td class="px-4 py-3 text-sm font-bold">${appt.date} ${appt.startTime}</td>
-                    <td class="px-4 py-3 text-sm">${appt.patientName}</td>
-                    <td class="px-4 py-3 text-sm"><span class="font-semibold text-sozo-600">${clinic?.name || 'N/A'}</span><br><span class="text-xs text-slate-500">${clinic?.country || ''}</span></td>
-                    <td class="px-4 py-3 text-sm">${doc?.name || 'N/A'}</td>
-                    <td class="px-4 py-3 text-sm">${svc?.name || appt.service}</td>
-                    <td class="px-4 py-3"><span class="badge badge-info">${appt.status}</span></td>
-                    <td class="px-4 py-3 text-center">
-                      <button class="text-xs font-bold text-blue-600 hover:underline" onclick="editAppointment('${appt.id}')">Edit</button>
-                      <span class="text-slate-300">•</span>
-                      <button class="text-xs font-bold text-red-600 hover:underline" onclick="cancelAppointment('${appt.id}')">Cancel</button>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
+        <div class="card p-4 sm:p-6">
+          <div class="table-scrollable">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-200">
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap">Date & Time</th>
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap">Patient</th>
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap hidden sm:table-cell">Clinic</th>
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap hidden md:table-cell">Doctor</th>
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap hidden lg:table-cell">Service</th>
+                  <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase whitespace-nowrap hidden sm:table-cell">Status</th>
+                  <th class="px-2 sm:px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${receptionist_appointments.map(appt => {
+                  const svc = appointmentServices.find(s => s.id === appt.service);
+                  const doc = sampleData.doctors.find(d => d.id === appt.doctorId);
+                  const clinic = clinicLocations.find(c => c.id === appt.clinicId);
+                  return `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                      <td class="px-2 sm:px-4 py-3 text-sm font-bold whitespace-nowrap">${appt.date}<br class="sm:hidden">${appt.startTime}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm">${appt.patientName}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell"><span class="font-semibold text-sozo-600">${clinic?.name || 'N/A'}</span><br><span class="text-xs text-slate-500">${clinic?.country || ''}</span></td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">${doc?.name || 'N/A'}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden lg:table-cell">${svc?.name || appt.service}</td>
+                      <td class="px-2 sm:px-4 py-3 hidden sm:table-cell"><span class="badge badge-info">${appt.status}</span></td>
+                      <td class="px-2 sm:px-4 py-3 text-center">
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-2 justify-center">
+                          <button class="text-xs font-bold text-blue-600 hover:underline" onclick="editAppointment('${appt.id}')">Edit</button>
+                          <button class="text-xs font-bold text-red-600 hover:underline" onclick="cancelAppointment('${appt.id}')">Cancel</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
           </table>
         </div>
       </div>
@@ -24685,40 +24679,41 @@ function renderReceptionist(key) {
   } else if(key === 'patientsearch') {
     // Advanced patient search
     area.innerHTML = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">Patient Search</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Patient Search</h2>
           <p class="text-slate-600 mt-1">Search and view patient information</p>
         </div>
         
-        <div class="card p-8">
-          <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="card p-4 sm:p-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <input type="text" id="searchName" placeholder="Name" class="input-royal" onkeyup="performPatientSearch()">
             <input type="text" id="searchEmail" placeholder="Email" class="input-royal" onkeyup="performPatientSearch()">
             <input type="text" id="searchPhone" placeholder="Phone" class="input-royal" onkeyup="performPatientSearch()">
           </div>
           
           <div id="patientSearchTable" class="mt-6">
-            <table class="w-full">
-              <thead>
-                <tr class="bg-slate-100 border-b border-slate-200">
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Name</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Age</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Email</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Phone</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Status</th>
-                  <th class="px-4 py-3 text-center text-xs font-bold uppercase">Action</th>
-                </tr>
-              </thead>
+            <div class="table-scrollable">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-slate-100 border-b border-slate-200">
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Name</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden sm:table-cell">Age</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden md:table-cell">Email</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Phone</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden lg:table-cell">Status</th>
+                    <th class="px-2 sm:px-4 py-3 text-center text-xs font-bold uppercase whitespace-nowrap">Action</th>
+                  </tr>
+                </thead>
               <tbody>
                 ${sampleData.patients.map(p => `
                   <tr class="border-b border-slate-200 hover:bg-slate-50">
-                    <td class="px-4 py-3 text-sm font-bold">${p.name}</td>
-                    <td class="px-4 py-3 text-sm">${p.age}</td>
-                    <td class="px-4 py-3 text-sm">${p.email}</td>
-                    <td class="px-4 py-3 text-sm">${p.mobile}</td>
-                    <td class="px-4 py-3"><span class="badge badge-success">${p.status}</span></td>
-                    <td class="px-4 py-3 text-center">
+                    <td class="px-2 sm:px-4 py-3 text-sm font-bold">${p.name}</td>
+                    <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">${p.age}</td>
+                    <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell">${p.email}</td>
+                    <td class="px-2 sm:px-4 py-3 text-sm">${p.mobile}</td>
+                    <td class="px-2 sm:px-4 py-3 hidden lg:table-cell"><span class="badge badge-success">${p.status}</span></td>
+                    <td class="px-2 sm:px-4 py-3 text-center">
                       <button class="text-xs font-bold text-blue-600 hover:underline" onclick="selectPatientForAppointment('${p.id}')">Book Appointment</button>
                     </td>
                   </tr>
@@ -24733,14 +24728,14 @@ function renderReceptionist(key) {
   } else if(key === 'doctorsearch') {
     // Doctor search page
     area.innerHTML = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">Doctor Search</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Doctor Search</h2>
           <p class="text-slate-600 mt-1">Search and view doctor information</p>
         </div>
         
-        <div class="card p-8">
-          <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="card p-4 sm:p-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <input type="text" id="searchDoctorName" placeholder="Doctor Name" class="input-royal" onkeyup="performDoctorSearch()">
             <select id="searchDoctorSpecialty" class="input-royal" onchange="performDoctorSearch()">
               <option value="">-- All Specialties --</option>
@@ -24757,28 +24752,29 @@ function renderReceptionist(key) {
           </div>
           
           <div id="doctorSearchTable" class="mt-6">
-            <table class="w-full">
-              <thead>
-                <tr class="bg-slate-100 border-b border-slate-200">
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Name</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Specialty</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Clinics</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Email</th>
-                  <th class="px-4 py-3 text-left text-xs font-bold uppercase">Phone</th>
-                  <th class="px-4 py-3 text-center text-xs font-bold uppercase">Action</th>
-                </tr>
-              </thead>
+            <div class="table-scrollable">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-slate-100 border-b border-slate-200">
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Name</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden md:table-cell">Specialty</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden lg:table-cell">Clinics</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap hidden sm:table-cell">Email</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-bold uppercase whitespace-nowrap">Phone</th>
+                    <th class="px-2 sm:px-4 py-3 text-center text-xs font-bold uppercase whitespace-nowrap">Action</th>
+                  </tr>
+                </thead>
               <tbody>
                 ${sampleData.doctors.map(d => {
                   const doctorClinics = clinicLocations.filter(c => c.doctors.includes(d.id));
                   return `
                     <tr class="border-b border-slate-200 hover:bg-slate-50">
-                      <td class="px-4 py-3 text-sm font-bold">${d.name}</td>
-                      <td class="px-4 py-3 text-sm"><span class="badge badge-warning">${d.specialty}</span></td>
-                      <td class="px-4 py-3 text-sm">${doctorClinics.map(c => c.name).join(', ')}</td>
-                      <td class="px-4 py-3 text-sm">${d.email || 'N/A'}</td>
-                      <td class="px-4 py-3 text-sm">${d.phone || 'N/A'}</td>
-                      <td class="px-4 py-3 text-center">
+                      <td class="px-2 sm:px-4 py-3 text-sm font-bold">${d.name}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden md:table-cell"><span class="badge badge-warning">${d.specialty}</span></td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden lg:table-cell">${doctorClinics.map(c => c.name).join(', ')}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm hidden sm:table-cell">${d.email || 'N/A'}</td>
+                      <td class="px-2 sm:px-4 py-3 text-sm">${d.phone || 'N/A'}</td>
+                      <td class="px-2 sm:px-4 py-3 text-center">
                         <button class="text-xs font-bold text-blue-600 hover:underline" onclick="viewDoctorSchedule('${d.id}')">View Schedule</button>
                       </td>
                     </tr>
@@ -24794,23 +24790,23 @@ function renderReceptionist(key) {
   } else if(key === 'profile') {
     // Receptionist profile
     area.innerHTML = `
-      <div class="p-8" style="width:79rem;">
+      <div class="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
         <div class="mb-6">
-          <h2 class="text-3xl font-black text-slate-900">My Profile</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">My Profile</h2>
           <p class="text-slate-600 mt-1">Receptionist information and settings</p>
         </div>
         
-        <div class="card p-8">
-          <div class="flex items-start gap-8">
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white">
-              <i class="fa-solid fa-user text-5xl"></i>
+        <div class="card p-4 sm:p-6 lg:p-8">
+          <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+            <div class="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white flex-shrink-0">
+              <i class="fa-solid fa-user text-3xl sm:text-5xl"></i>
             </div>
-            <div class="flex-1">
-              <h3 class="text-2xl font-bold text-slate-900">${rec.name}</h3>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-xl sm:text-2xl font-bold text-slate-900">${rec.name}</h3>
               <p class="text-slate-600 mt-1">Receptionist</p>
               <div class="mt-4 space-y-2 text-sm">
-                <div><span class="font-bold">ID:</span> ${rec.id}</div>
-                <div><span class="font-bold">Email:</span> ${rec.email}</div>
+                <div class="break-words"><span class="font-bold">ID:</span> ${rec.id}</div>
+                <div class="break-words"><span class="font-bold">Email:</span> ${rec.email}</div>
                 <div><span class="font-bold">Clinic:</span> ${rec.clinic || 'SOZO Brain Center'}</div>
                 <div><span class="font-bold">Country:</span> ${rec.country || 'Germany'}</div>
               </div>
