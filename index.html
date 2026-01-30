@@ -262,7 +262,6 @@
 
 <div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-orange-100 to-white relative overflow-hidden">
   <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(1200px 600px at -10% -10%, rgba(251, 146, 60, 0.15) 0%, rgba(251, 146, 60, 0.08) 40%, rgba(255,255,255,0) 70%), radial-gradient(800px 400px at 110% 110%, rgba(250, 204, 21, 0.12) 0%, rgba(255,255,255,0) 60%);"></div>
-
   <div class="bg-white/95 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md relative z-10 border border-white/20">
     <div class="text-center mb-8">
       <div class="flex justify-center mb-4">
@@ -369,6 +368,80 @@
     <!-- Close login card and wrapper before app shell -->
     </div>
   </div>
+
+<!-- Visit Selection Page (Patient Only) -->
+<div id="visitSelectionPage" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-sozo-50 via-orange-50 to-white relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(1200px 600px at -10% -10%, rgba(251, 146, 60, 0.15) 0%, rgba(251, 146, 60, 0.08) 40%, rgba(255,255,255,0) 70%), radial-gradient(800px 400px at 110% 110%, rgba(250, 204, 21, 0.12) 0%, rgba(255,255,255,0) 60%);"></div>
+  
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="flex justify-center mb-6">
+        <img src="logo1.png" alt="SOZOBRAIN Logo" class="h-20 w-auto">
+      </div>
+      <h1 class="text-4xl font-black text-slate-900 mb-3">Welcome to Your Patient Portal</h1>
+      <p class="text-xl text-slate-600 font-medium" id="visitSelectionWelcome">Please select your visit stage to continue</p>
+    </div>
+
+    <!-- Visit Selection Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- First Visit -->
+      <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300 cursor-pointer group" onclick="selectVisit('first-visit')">
+        <div class="flex items-start gap-6">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-star text-white text-2xl"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-black text-slate-900 mb-2 group-hover:text-sozo-600 transition-colors">First Visit</h3>
+            <p class="text-slate-600 mb-4">Begin your treatment journey with your initial consultation and assessment</p>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-sm text-slate-700">
+                <i class="fa-solid fa-check text-green-600"></i>
+                <span>Treatment Plan Overview</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-slate-700">
+                <i class="fa-solid fa-check text-green-600"></i>
+                <span>Upcoming Session Details</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Follow-Up Visit 3 -->
+      <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300 cursor-pointer group" onclick="selectVisit('followup-3')">
+        <div class="flex items-start gap-6">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-trophy text-white text-2xl"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-black text-slate-900 mb-2 group-hover:text-sozo-600 transition-colors">Follow-Up Visit </h3>
+            <p class="text-slate-600 mb-4">Complete view of your treatment journey with all historical data</p>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-sm text-slate-700">
+                <i class="fa-solid fa-check text-green-600"></i>
+                <span>Complete Treatment History</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-slate-700">
+                <i class="fa-solid fa-check text-green-600"></i>
+                <span>Full Progress Analysis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Option -->
+    <div class="text-center">
+      <button onclick="handleLogoutFromVisitSelection()" class="text-slate-600 hover:text-slate-900 font-semibold transition-colors">
+        <i class="fa-solid fa-arrow-left mr-2"></i>Back to Login
+      </button>
+    </div>
+  </div>
+</div>
+<!-- End of Visit Selection Page -->
   
     <div id="mainApp" class="hidden w-full h-screen">
       <div class="app-shell flex w-full h-full bg-slate-50 overflow-hidden">
@@ -444,6 +517,283 @@
     let selectedDoctor = { id:'', name:'', email:'' };
     let globalSelectedPatientId = null;
     let assessmentProgress = { fnon:'completed', brain:'completed', prs:'completed', finalreport:'not-started' };
+    let selectedVisit = null; // Track current visit stage for patient (first-visit, followup-1, followup-2, followup-3)
+
+    // ==========================================
+    // LOCAL STORAGE STATE MANAGEMENT
+    // ==========================================
+    // 
+    // This module provides persistent storage for patient portal data using localStorage.
+    // All user session data, patient information, and preferences are automatically saved
+    // and restored across browser sessions.
+    //
+    // KEY FEATURES:
+    // - Auto-save user sessions on login
+    // - Auto-restore sessions on page load (24-hour expiry)
+    // - Persistent patient data storage
+    // - User preferences management
+    // - Automatic logout after 24 hours
+    //
+    // STORAGE KEYS:
+    // - sozo_current_user: Current logged-in user data
+    // - sozo_current_role: User role (patient, doctor, admin, receptionist)
+    // - sozo_patient_data: Patient-specific data (for patient role only)
+    // - sozo_user_preferences: User preferences (theme, notifications, etc.)
+    // - sozo_session_data: Session metadata (timestamp, login time)
+    //
+    // PUBLIC API:
+    // - updatePatientField(fieldName, value) - Update single patient field
+    // - updatePatientFields(updates) - Update multiple patient fields
+    // - getPatientField(fieldName) - Get specific patient field value
+    // - getPatientData() - Get all patient data
+    // - addHealthRecord(record) - Add health record entry
+    // - updatePreferences(prefs) - Update user preferences
+    // - getPreferences() - Get current preferences
+    // - logoutUser() - Logout and clear all localStorage data
+    //
+    // USAGE EXAMPLES:
+    // updatePatientField('phone', '+49 30 123456');
+    // updatePatientFields({ phone: '+49 30 123456', email: 'new@email.com' });
+    // const phone = getPatientField('phone');
+    // addHealthRecord({ type: 'blood_pressure', value: '120/80', date: '2026-01-29' });
+    // updatePreferences({ theme: 'dark', notifications: true });
+    //
+    const STORAGE_KEYS = {
+      CURRENT_USER: 'sozo_current_user',
+      CURRENT_ROLE: 'sozo_current_role',
+      PATIENT_DATA: 'sozo_patient_data',
+      USER_PREFERENCES: 'sozo_user_preferences',
+      SESSION_DATA: 'sozo_session_data'
+    };
+
+    // Save user data to localStorage
+    function saveToLocalStorage(key, data) {
+      try {
+        const serialized = JSON.stringify(data);
+        localStorage.setItem(key, serialized);
+        console.log('✓ Saved to localStorage:', key);
+        return true;
+      } catch (error) {
+        console.error('✗ Failed to save to localStorage:', error);
+        return false;
+      }
+    }
+
+    // Load user data from localStorage
+    function loadFromLocalStorage(key) {
+      try {
+        const serialized = localStorage.getItem(key);
+        if (serialized === null) {
+          console.log('No data found in localStorage for:', key);
+          return null;
+        }
+        const data = JSON.parse(serialized);
+        console.log('✓ Loaded from localStorage:', key);
+        return data;
+      } catch (error) {
+        console.error('✗ Failed to load from localStorage:', error);
+        return null;
+      }
+    }
+
+    // Remove data from localStorage
+    function removeFromLocalStorage(key) {
+      try {
+        localStorage.removeItem(key);
+        console.log('✓ Removed from localStorage:', key);
+        return true;
+      } catch (error) {
+        console.error('✗ Failed to remove from localStorage:', error);
+        return false;
+      }
+    }
+
+    // Clear all Sozo app data from localStorage
+    function clearAllLocalStorage() {
+      try {
+        Object.values(STORAGE_KEYS).forEach(key => {
+          localStorage.removeItem(key);
+        });
+        console.log('✓ Cleared all localStorage data');
+        return true;
+      } catch (error) {
+        console.error('✗ Failed to clear localStorage:', error);
+        return false;
+      }
+    }
+
+    // Save current user session
+    function saveUserSession(user, role) {
+      const sessionData = {
+        user: user,
+        role: role,
+        timestamp: new Date().toISOString(),
+        loginTime: new Date().toISOString()
+      };
+      saveToLocalStorage(STORAGE_KEYS.CURRENT_USER, user);
+      saveToLocalStorage(STORAGE_KEYS.CURRENT_ROLE, role);
+      saveToLocalStorage(STORAGE_KEYS.SESSION_DATA, sessionData);
+    }
+
+    // Load user session
+    function loadUserSession() {
+      const user = loadFromLocalStorage(STORAGE_KEYS.CURRENT_USER);
+      const role = loadFromLocalStorage(STORAGE_KEYS.CURRENT_ROLE);
+      const sessionData = loadFromLocalStorage(STORAGE_KEYS.SESSION_DATA);
+      
+      if (user && role) {
+        console.log('✓ User session restored:', user.name, '(' + role + ')');
+        return { user, role, sessionData };
+      }
+      
+      console.log('No valid user session found');
+      return null;
+    }
+
+    // Update patient data in localStorage
+    function updatePatientData(updates) {
+      if (currentRole !== 'patient') {
+        console.warn('updatePatientData can only be called for patient role');
+        return false;
+      }
+      
+      // Merge updates with current user data
+      const updatedUser = { ...currentUser, ...updates };
+      
+      // Update global state
+      currentUser = updatedUser;
+      
+      // Save to localStorage
+      saveToLocalStorage(STORAGE_KEYS.CURRENT_USER, updatedUser);
+      saveToLocalStorage(STORAGE_KEYS.PATIENT_DATA, updatedUser);
+      
+      console.log('✓ Patient data updated:', Object.keys(updates));
+      return true;
+    }
+
+    // Get patient data from localStorage or current session
+    function getPatientData() {
+      if (currentUser && currentRole === 'patient') {
+        return currentUser;
+      }
+      
+      const storedData = loadFromLocalStorage(STORAGE_KEYS.PATIENT_DATA);
+      return storedData;
+    }
+
+    // Save user preferences
+    function saveUserPreferences(preferences) {
+      const existingPrefs = loadFromLocalStorage(STORAGE_KEYS.USER_PREFERENCES) || {};
+      const updatedPrefs = { ...existingPrefs, ...preferences };
+      saveToLocalStorage(STORAGE_KEYS.USER_PREFERENCES, updatedPrefs);
+      return updatedPrefs;
+    }
+
+    // Load user preferences
+    function loadUserPreferences() {
+      return loadFromLocalStorage(STORAGE_KEYS.USER_PREFERENCES) || {};
+    }
+
+    // Auto-restore session on page load
+    function autoRestoreSession() {
+      const session = loadUserSession();
+      
+      if (session && session.user && session.role) {
+        // Check if session is still valid (e.g., not expired)
+        const sessionData = session.sessionData;
+        if (sessionData && sessionData.timestamp) {
+          const loginTime = new Date(sessionData.timestamp);
+          const now = new Date();
+          const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+          
+          // Auto-logout after 24 hours
+          if (hoursSinceLogin > 24) {
+            console.log('Session expired (24 hours), clearing data');
+            clearAllLocalStorage();
+            return false;
+          }
+        }
+        
+        // Restore session
+        currentUser = session.user;
+        currentRole = session.role;
+        
+        console.log('✓ Session auto-restored for:', currentUser.name);
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Logout and clear session
+    function logoutUser() {
+      console.log('Logging out user:', currentUser?.name);
+      currentUser = null;
+      currentRole = null;
+      selectedDoctor = { id:'', name:'', email:'' };
+      selectedVisit = null;
+      clearAllLocalStorage();
+    }
+
+    // ==========================================
+    // PATIENT DATA UPDATE HELPERS
+    // ==========================================
+    
+    // Update specific patient fields
+    window.updatePatientField = function(fieldName, value) {
+      if (currentRole !== 'patient') {
+        console.warn('Can only update patient data when logged in as patient');
+        return false;
+      }
+      
+      const updates = { [fieldName]: value };
+      return updatePatientData(updates);
+    };
+    
+    // Update multiple patient fields at once
+    window.updatePatientFields = function(updates) {
+      if (currentRole !== 'patient') {
+        console.warn('Can only update patient data when logged in as patient');
+        return false;
+      }
+      
+      return updatePatientData(updates);
+    };
+    
+    // Get specific patient field value
+    window.getPatientField = function(fieldName) {
+      const data = getPatientData();
+      return data ? data[fieldName] : null;
+    };
+    
+    // Add health record entry
+    window.addHealthRecord = function(record) {
+      if (currentRole !== 'patient') {
+        console.warn('Can only add health records when logged in as patient');
+        return false;
+      }
+      
+      const healthRecords = currentUser.healthRecords || [];
+      healthRecords.push({
+        ...record,
+        timestamp: new Date().toISOString(),
+        id: 'HR-' + Date.now()
+      });
+      
+      return updatePatientData({ healthRecords });
+    };
+    
+    // Update user preferences (theme, notifications, etc.)
+    window.updatePreferences = function(prefs) {
+      const updated = saveUserPreferences(prefs);
+      console.log('✓ Preferences updated:', prefs);
+      return updated;
+    };
+    
+    // Get current preferences
+    window.getPreferences = function() {
+      return loadUserPreferences();
+    };
 
     // PRS CONDITIONS - Must be defined early for final report
     const PRS_CONDITIONS = [
@@ -1052,7 +1402,7 @@
       all[email] = {
         id: `${role?.toUpperCase()||'USR'}-${Math.floor(100+Math.random()*900)}`,
         name: `${firstName} ${lastName}`.trim(), role: role||'patient', email, password,
-        avatar: 'https://i.pravatar.cc/100?u='+encodeURIComponent(email), country, mobile
+        avatar : 'https://i.pravatar.cc/100?u='+encodeURIComponent(email), country, mobile
       };
       saveRegisteredUsers(all);
       return true;
@@ -1172,6 +1522,117 @@
 // ==========================================
 // 2. ROUTING & NAVIGATION
 // ==========================================
+
+// Visit Selection Functions
+window.selectVisit = function(visit) {
+  selectedVisit = visit;
+  
+  // Save selected visit to localStorage
+  saveToLocalStorage('sozo_selected_visit', visit);
+  
+  console.log('✓ Visit selected:', visit);
+  
+  // Hide visit selection page, show main app
+  document.getElementById('visitSelectionPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  
+  // Setup UI
+  const sidebarName = document.getElementById('sidebarName');
+  const sidebarRole = document.getElementById('sidebarRole');
+  const sidebarAvatar = document.getElementById('sidebarAvatar');
+  
+  if(sidebarName) sidebarName.innerText = currentUser.name;
+  if(sidebarRole) sidebarRole.innerText = currentRole.toUpperCase();
+  if(sidebarAvatar) {
+    sidebarAvatar.innerHTML = '<i class="fa-solid fa-user text-white text-2xl"></i>';
+  }
+  
+  // Render sidebar with visit-specific menu and load home
+  renderSidebar();
+  loadSection('home');
+};
+
+window.handleLogoutFromVisitSelection = function() {
+  if(confirm('Are you sure you want to logout?')) {
+    logoutUser();
+    selectedVisit = null;
+    document.getElementById('visitSelectionPage').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('loginForm').reset();
+  }
+};
+
+// Get patient menu based on selected visit
+function getPatientMenuForVisit(visit) {
+  const baseMenu = [
+    {key:'home', label:'Home', icon:'fa-home'},
+    {key:'treatment-plan', label:'Treatment Plan', icon:'fa-file-medical'},
+    {key:'appointments', label:'Appointments', icon:'fa-calendar-check'}
+  ];
+
+  // Full menu for follow-up visits
+  const fullMenu = [
+    {key:'home', label:'Home', icon:'fa-home'},
+    {key:'dashboard', label:'Dashboard', icon:'fa-heart-pulse'},
+    {
+      key:'wellness', label:'Medical Assessment', icon:'fa-spa',
+      children: [
+        {key:'fnon', label:'FNON Assessment'},
+        {key:'prs', label:'PRS Assessment'},
+        {key:'finalreport', label:'Final Report'}
+      ]
+    },
+    {key:'treatment-plan', label:'Treatment Plan', icon:'fa-file-medical'},
+    {key:'appointments', label:'Appointments', icon:'fa-calendar-check'},
+    {key:'eshop', label:'E-Shop', icon:'fa-cart-shopping'},
+    {key:'customer-support', label:'Customer Support', icon:'fa-headset', children: [
+      {key:'mypatients', label:'My Referrals'},
+      {key:'messages', label:'Messages'},
+      {key:'telemedicine', label:'Telemedicine'}
+    ]},
+    {key:'profile', label:'My Profile', icon:'fa-user-circle', children: [
+      {key:'profileoverview', label:'Profile Overview'},
+      {key:'devices', label:'My Devices'}
+    ]},
+    {key:'financial-services', label:'Financial Services', icon:'fa-building-columns', children: [
+      {key:'billing', label:'Billing'},
+      {key:'insurance', label:'Insurance'}
+    ]},
+    {key:'reports', label:'History', icon:'fa-file-medical'}
+  ];
+
+  switch(visit) {
+    case 'first-visit':
+      return [
+        {key:'treatment-plan', label:'Treatment Plan', icon:'fa-file-medical'}
+      ];
+    case 'followup-1':
+      return [
+        ...baseMenu,
+        {key:'dashboard', label:'Dashboard', icon:'fa-heart-pulse'},
+        {key:'profile', label:'My Profile', icon:'fa-user-circle'}
+      ];
+    case 'followup-2':
+      return [
+        ...baseMenu,
+        {key:'dashboard', label:'Dashboard', icon:'fa-heart-pulse'},
+        {
+          key:'wellness', label:'Medical Assessment', icon:'fa-spa',
+          children: [
+            {key:'fnon', label:'FNON Assessment'},
+            {key:'prs', label:'PRS Assessment'}
+          ]
+        },
+        {key:'profile', label:'My Profile', icon:'fa-user-circle'},
+        {key:'eshop', label:'E-Shop', icon:'fa-cart-shopping'}
+      ];
+    case 'followup-3':
+      return fullMenu;
+    default:
+      return baseMenu;
+  }
+}
+
 const MENU = {
   patient: [
     {key:'home', label:'Home', icon:'fa-home'},
@@ -1253,7 +1714,16 @@ function renderSidebar() {
   try {
     const nav = document.getElementById('sidebarNav');
     nav.innerHTML = '';
-    const menuItems = MENU[currentRole];
+    
+    // For patient role, use visit-specific menu
+    let menuItems;
+    if (currentRole === 'patient' && selectedVisit) {
+      menuItems = getPatientMenuForVisit(selectedVisit);
+      console.log('✓ Rendering sidebar for visit:', selectedVisit, 'with', menuItems.length, 'items');
+    } else {
+      menuItems = MENU[currentRole];
+    }
+    
     if(!menuItems) {
       console.error('Menu items not found for role:', currentRole);
       return;
@@ -2108,7 +2578,18 @@ function openSpecificPRSForm(diseaseType) {
 // 3. PATIENT PORTAL (Apple Health Style)
 // ==========================================
 function renderPatient(key) {
-  const p = getActivePatient();
+  // Load patient data from localStorage or current session
+  let p = getActivePatient();
+  
+  // If patient role, merge with localStorage data
+  if (currentRole === 'patient') {
+    const storedPatientData = getPatientData();
+    if (storedPatientData) {
+      p = { ...p, ...storedPatientData };
+      console.log('✓ Patient data loaded from localStorage');
+    }
+  }
+  
   const area = document.getElementById('contentArea');
 
   if(key === 'home') {
@@ -18043,7 +18524,7 @@ function renderFinalReport() {
         </table>
       </div>
     </div>
-
+    ${currentRole !== 'patient' ? `
     <!-- Treatment Plan Section -->
     <div class="mb-6">
       <h4 class="text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2">Treatment Plan</h4>
@@ -18290,6 +18771,7 @@ function renderFinalReport() {
           </div>
         </div>
       </div>
+      ` : ''}
     </div>
 
     <!-- Conclusion and Recommendations -->
@@ -21288,7 +21770,17 @@ function getAssessmentNavigation(currentAssessment) {
     { id: 'doctornotes', label: currentRole === 'patient' ? 'Prescription' : 'Doctor\'s Notes', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
     { id: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-notes-medical', color: 'bg-orange-600' },
     { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
-  ].filter(item => currentRole === 'patient' ? item.id !== 'brainmapping' : true);
+  ].filter(item => {
+    // Hide brain mapping for patients
+    if (currentRole === 'patient' && item.id === 'brainmapping') return false;
+    
+    // For first visit patients, hide FNON and PRS
+    if (currentRole === 'patient' && selectedVisit === 'first-visit') {
+      if (item.id === 'fnon' || item.id === 'prs') return false;
+    }
+    
+    return true;
+  });
   
   return `
     <div class="mb-6 bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
@@ -21564,9 +22056,11 @@ function renderDoctorNotes() {
 
       <!-- Action Buttons -->
       <div class="flex justify-between items-center mt-6">
+        ${currentRole !== 'patient' || selectedVisit !== 'first-visit' ? `
         <button onclick="loadSection('prs')" class="btn-secondary">
           <i class="fa-solid fa-arrow-left mr-2"></i>Back to PRS
         </button>
+        ` : '<div></div>'}
         <div class="flex gap-3">
           ${currentRole !== 'patient' ? `
             <button onclick="alert('Draft saved successfully!')" class="bg-slate-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-700 transition">
@@ -22760,8 +23254,6 @@ function renderTreatmentPlan() {
             </h5>
             <p id="fnonLogic" class="text-sm text-orange-800 leading-relaxed"></p>
           </div>
-<<<<<<< HEAD
-=======
 
           <!-- Interactive Brain Layout Visualization -->
           <div class="mt-8 bg-white p-6 rounded-xl border-2 border-slate-300 shadow-lg">
@@ -23379,7 +23871,6 @@ function renderTreatmentPlan() {
               </tr>
             </tbody>
           </table>
->>>>>>> dev
         </div>
       </div>
 
@@ -24981,6 +25472,7 @@ Note: All medications to be taken as prescribed. Report any side effects to your
       </div>
 
       <!-- Treatment Sessions - First Row (PATIENT PORTAL: Pre-filled from doctor's plan) -->
+      ${currentRole !== 'patient' ? `
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
         <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Treatment Session 1</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -25101,8 +25593,10 @@ Note: All medications to be taken as prescribed. Report any side effects to your
           </div>
         </div>
       </div>
+      ` : ''}
 
       <!-- Treatment Sessions - Second Row -->
+      ${currentRole !== 'patient' ? `
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
         <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Treatment Session 2</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -25215,6 +25709,7 @@ Note: All medications to be taken as prescribed. Report any side effects to your
           </div>
         </div>
       </div>
+      ` : ''}
 
       <!-- Device Suggestions Section -->
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
@@ -25424,6 +25919,87 @@ Note: All medications to be taken as prescribed. Report any side effects to your
         </div>
         `}
       </div>
+
+      <!-- Clinical Notes Section (First Visit Only) -->
+      ${currentRole === 'patient' && selectedVisit === 'first-visit' ? `
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+            <i class="fa-solid fa-notes-medical text-white text-lg"></i>
+          </div>
+          <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Clinical Notes</h3>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+          <!-- Session 1 Notes -->
+          <div class="mb-6">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+              <h4 class="text-lg font-bold text-slate-800">Session 1 Notes</h4>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Date</p>
+                  <p class="font-semibold text-slate-900">January 15, 2025</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Duration</p>
+                  <p class="font-semibold text-slate-900">45 minutes</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                  <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                <p class="text-sm text-slate-700 leading-relaxed">Patient presented with mild cognitive impairment symptoms. Initial assessment shows decreased attention span and memory recall difficulties. Patient is alert and cooperative. No adverse reactions noted during initial evaluation. Baseline cognitive scores established for treatment monitoring.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Session 2 Notes -->
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fa-solid fa-file-medical text-purple-600 text-lg"></i>
+              <h4 class="text-lg font-bold text-slate-800">Session 2 Notes</h4>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-purple-500">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Date</p>
+                  <p class="font-semibold text-slate-900">January 22, 2025</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Duration</p>
+                  <p class="font-semibold text-slate-900">50 minutes</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                  <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                <p class="text-sm text-slate-700 leading-relaxed">Follow-up session shows patient adapting well to treatment protocol. Slight improvement in attention metrics noted. Patient reports feeling more focused during daily activities. No side effects reported. Treatment parameters adjusted based on initial response. Continue with current montage configuration.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Treatment Progress Summary -->
+          <div class="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-chart-line text-blue-600 text-xl mt-1"></i>
+              <div>
+                <h5 class="font-bold text-slate-800 mb-2">Treatment Progress Summary</h5>
+                <p class="text-sm text-slate-700">Patient is responding positively to initial treatment sessions. Early indicators suggest good tolerance to tDCS therapy. Recommend continuing with current protocol and monitoring cognitive improvement markers in upcoming sessions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      ` : ''}
 
       <!-- Save Button -->
       ${currentRole !== 'patient' ? `
@@ -34294,6 +34870,73 @@ function initSozoApp() {
   console.log('Demo Users:', users);
   loadFnonState();
   
+  // Try to restore previous session from localStorage
+  const sessionRestored = autoRestoreSession();
+  
+  if (sessionRestored && currentUser && currentRole) {
+    console.log('✓ Auto-restoring session for:', currentUser.name, '(' + currentRole + ')');
+    
+    // Restore selected visit for patients
+    if (currentRole === 'patient') {
+      selectedVisit = loadFromLocalStorage('sozo_selected_visit');
+      console.log('✓ Restored visit:', selectedVisit);
+    }
+    
+    // Auto-login: Skip login page and go to main app (or visit selection for patients without visit)
+    const loginPage = document.getElementById('loginPage');
+    const visitSelectionPage = document.getElementById('visitSelectionPage');
+    const mainApp = document.getElementById('mainApp');
+    
+    if (loginPage && mainApp) {
+      loginPage.style.display = 'none';
+      
+      // For patients without selected visit, show visit selection
+      if (currentRole === 'patient' && !selectedVisit) {
+        if(visitSelectionPage) {
+          visitSelectionPage.style.display = 'flex';
+          const welcomeEl = document.getElementById('visitSelectionWelcome');
+          if(welcomeEl) welcomeEl.textContent = `Welcome back ${currentUser.name}, please select your visit stage to continue`;
+        }
+        console.log('✓ Patient session restored - showing visit selection');
+        return;
+      }
+      
+      mainApp.style.display = 'block';
+      
+      // Setup UI for restored session
+      const sidebarName = document.getElementById('sidebarName');
+      const sidebarRole = document.getElementById('sidebarRole');
+      const sidebarAvatar = document.getElementById('sidebarAvatar');
+      
+      if(sidebarName) sidebarName.innerText = currentUser.name;
+      if(sidebarRole) sidebarRole.innerText = currentRole.toUpperCase();
+      if(sidebarAvatar) {
+        sidebarAvatar.innerHTML = '<i class="fa-solid fa-user text-white text-2xl"></i>';
+      }
+      
+      // Render sidebar and load home
+      renderSidebar();
+      loadSection('home');
+      
+      // Auto-select doctor if role is doctor
+      if(currentRole === 'doctor') {
+        selectedDoctor = {
+          id: currentUser.id || 'DOC-001',
+          name: currentUser.name,
+          email: currentUser.email
+        };
+        globalState.currentDoctor = {
+          id: currentUser.id || 'DOC-001',
+          name: currentUser.name,
+          email: currentUser.email,
+          clinic: currentUser.clinic || 'SOZO Brain Center'
+        };
+      }
+      
+      console.log('✓ Session restored and UI initialized');
+    }
+  }
+  
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   
@@ -34348,6 +34991,9 @@ function initSozoApp() {
           currentUser = foundUser;
           currentRole = foundUser.role;
           
+          // Save user session to localStorage
+          saveUserSession(foundUser, foundUser.role);
+          
           // Auto-select doctor if role is doctor
           if(currentRole === 'doctor') {
             selectedDoctor = {
@@ -34371,26 +35017,41 @@ function initSozoApp() {
           
           if(sidebarName) sidebarName.innerText = currentUser.name;
           if(sidebarRole) sidebarRole.innerText = currentUser.role.toUpperCase();
-          if(sidebarAvatar) sidebarAvatar.src = currentUser.avatar;
+          if(sidebarAvatar) sidebarAvatar.innerHTML = '<i class="fa-solid fa-user text-white text-2xl"></i>';
   
           // Transition
           const loginPage = document.getElementById('loginPage');
+          const visitSelectionPage = document.getElementById('visitSelectionPage');
           const mainApp = document.getElementById('mainApp');
           console.log('Login page:', !!loginPage, 'Main app:', !!mainApp);
           
-          if(loginPage) { loginPage.style.display = 'none'; loginPage.classList.add('hidden'); }
-          if(mainApp) { mainApp.style.display = 'flex'; mainApp.classList.remove('hidden'); }
-          
-          // Render sidebar with error handling
-          setTimeout(() => {
-            try {
-              console.log('Rendering sidebar for role:', currentRole);
-              renderSidebar();
-            } catch(err) {
-              console.error('Sidebar render error:', err);
-              alert('Error loading interface. Please refresh the page.');
+          // For patients, show visit selection page first
+          if(currentRole === 'patient') {
+            if(loginPage) { loginPage.style.display = 'none'; loginPage.classList.add('hidden'); }
+            if(visitSelectionPage) { 
+              visitSelectionPage.style.display = 'flex'; 
+              visitSelectionPage.classList.remove('hidden'); 
+              // Update welcome message
+              const welcomeEl = document.getElementById('visitSelectionWelcome');
+              if(welcomeEl) welcomeEl.textContent = `Welcome ${currentUser.name}, please select your visit stage to continue`;
             }
-          }, 50);
+            console.log('✓ Patient login - showing visit selection page');
+          } else {
+            // For non-patients, go directly to main app
+            if(loginPage) { loginPage.style.display = 'none'; loginPage.classList.add('hidden'); }
+            if(mainApp) { mainApp.style.display = 'flex'; mainApp.classList.remove('hidden'); }
+            
+            // Render sidebar with error handling
+            setTimeout(() => {
+              try {
+                console.log('Rendering sidebar for role:', currentRole);
+                renderSidebar();
+              } catch(err) {
+                console.error('Sidebar render error:', err);
+                alert('Error loading interface. Please refresh the page.');
+              }
+            }, 50);
+          }
         } else {
           console.log('Login failed: User not found');
           if (loginErrEl) loginErrEl.textContent = 'Invalid email or password. Please try again.';
@@ -34456,11 +35117,17 @@ if (document.readyState === 'loading') {
 }
 
 function handleLogout() {
-  if(confirm('Logout?')) {
-    currentUser = null; currentRole = null; globalSelectedPatientId = null;
+  if(confirm('Are you sure you want to logout?')) {
+    // Clear user session and localStorage
+    logoutUser();
+    
+    // Reset UI
+    globalSelectedPatientId = null;
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('loginForm').reset();
+    
+    console.log('✓ User logged out successfully');
   }
 }
 
