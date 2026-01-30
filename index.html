@@ -2048,7 +2048,11 @@ function loadSection(key) {
 
     // Router (ensure Treatment Plan always renders)
     if(key === 'treatmentplan' || key === 'treatment-plan') {
-      renderTreatmentPlan();
+      if(currentRole === 'patient') {
+        renderPatientTreatmentPlan();
+      } else {
+        renderTreatmentPlan();
+      }
       return;
     }
 
@@ -2241,7 +2245,7 @@ function renderPatient(key) {
                         <h4 class="font-bold text-base text-slate-900">Follow-up Consultation</h4>
                         <p class="text-sm text-slate-600 mt-2">Dr. Michael Torres</p>
                         <p class="text-xs text-slate-500 mt-1">
-                          <i class="fa-solid fa-video mr-1"></i>Telemedicine (Virtual)
+                          <i class="fa-solid fa-location-dot mr-1"></i>Clinical Visit
                         </p>
                       </div>
                       <button class="btn-secondary text-xs px-3 py-1">Join</button>
@@ -3380,7 +3384,7 @@ function renderPatient(key) {
   }
 
   else if (key === 'treatment-plan') {
-    renderTreatmentPlan();
+    renderPatientTreatmentPlan();
   }
   
 else if (key === 'appointments') {
@@ -4462,6 +4466,9 @@ else if (key === 'profile') {
   else if (key === 'fnon') {
     area.innerHTML = `
       <div class="p-8">
+      
+      ${getAssessmentNavigation('fnon')}
+      
       <div class="mb-6">
         <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
         <p class="text-slate-500">Functional Network of Neurons - Assessment Overview</p>
@@ -20212,7 +20219,13 @@ function renderDoctor(key) {
   else if (key === 'brainmapping') renderBrainMap();
   else if (key === 'prs') renderPRSDoctor();
   else if (key === 'doctornotes') renderDoctorNotes();
-  else if (key === 'treatmentplan') renderTreatmentPlan();
+  else if (key === 'treatmentplan') {
+    if (currentRole === 'patient') {
+      renderPatientTreatmentPlan();
+    } else {
+      renderTreatmentPlan();
+    }
+  }
   else if (key === 'finalreport') {
     // Admin renders final report using shared function
     renderFinalReport();
@@ -21239,7 +21252,7 @@ function getAssessmentNavigation(currentAssessment) {
     { id: 'fnon', label: 'FNON', icon: 'fa-clipboard-check', color: 'bg-blue-600' },
     { id: 'brainmapping', label: 'Brain Mapping', icon: 'fa-brain', color: 'bg-purple-600' },
     { id: 'prs', label: 'PRS', icon: 'fa-clipboard-list', color: 'bg-green-600' },
-    { id: 'doctornotes', label: 'Doctor\'s Notes', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
+    { id: 'doctornotes', label: currentRole === 'patient' ? 'Prescription' : 'Doctor\'s Notes', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
     { id: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-notes-medical', color: 'bg-orange-600' },
     { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
   ].filter(item => currentRole === 'patient' ? item.id !== 'brainmapping' : true);
@@ -21308,12 +21321,14 @@ function renderDoctorNotes() {
       <!-- Header -->
       <div class="mb-6 flex items-center justify-between">
         <div>
-          <h2 class="text-3xl font-black text-slate-900">Doctor's Notes & Comments</h2>
-          <p class="text-slate-600 mt-1">Clinical observations, recommendations, and medication notes for ${p.name}</p>
+          <h2 class="text-3xl font-black text-slate-900">${currentRole === 'patient' ? 'Prescription' : 'Doctor\'s Notes & Comments'}</h2>
+          <p class="text-slate-600 mt-1">${currentRole === 'patient' ? 'Medications and treatment instructions from your doctor' : 'Clinical observations, recommendations, and medication notes for ' + p.name}</p>
         </div>
+        ${currentRole !== 'patient' ? `
         <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm">
           <i class="fa-solid fa-arrow-left mr-2"></i>Back to Patient History
         </button>
+        ` : ''}
       </div>
 
       <!-- Patient Info Banner -->
@@ -21333,10 +21348,12 @@ function renderDoctorNotes() {
       <div class="card p-6 border border-slate-200 bg-gradient-to-r from-yellow-50 to-white">
         <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-comment-medical mr-2"></i>Doctor's Notes & Comments</h3>
         <div class="space-y-4">
+          ${currentRole !== 'patient' ? `
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase">Clinical Observations</label>
             <textarea id="doctorNotes" class="input-royal min-h-32" placeholder="Enter clinical observations, assessment notes, or any relevant comments...">Patient presents with moderate cognitive decline consistent with early-stage dementia. Notable impairments in short-term memory and executive function. Patient is oriented to person and place but occasionally confused about time. Family reports increasing difficulty with daily activities and mild behavioral changes over the past 6 months. Physical examination reveals no acute neurological deficits. Patient's speech is coherent but shows occasional word-finding difficulties.</textarea>
           </div>
+          ` : ''}
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase">Recommendations</label>
             <textarea id="doctorRecommendations" class="input-royal min-h-24" placeholder="Enter treatment recommendations, follow-up instructions, or medication notes...">Recommend initiating cognitive rehabilitation therapy 3 times per week. Family should be educated on dementia care strategies and home safety modifications. Patient would benefit from structured daily routines and cognitive stimulation activities. Consider referral to occupational therapy for ADL assessment. Schedule follow-up appointment in 3 months to reassess cognitive function and adjust treatment plan accordingly.</textarea>
@@ -21518,12 +21535,14 @@ function renderDoctorNotes() {
           <i class="fa-solid fa-arrow-left mr-2"></i>Back to PRS
         </button>
         <div class="flex gap-3">
-          <button onclick="alert('Draft saved successfully!')" class="bg-slate-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-700 transition">
-            <i class="fa-solid fa-save mr-2"></i>Save Draft
-          </button>
-          <button onclick="alert('Notes submitted successfully!'); loadSection('treatmentplan');" class="btn-primary px-6 py-3">
-            <i class="fa-solid fa-arrow-right mr-2"></i>Continue to Treatment Plan
-          </button>
+          ${currentRole !== 'patient' ? `
+            <button onclick="alert('Draft saved successfully!')" class="bg-slate-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-700 transition">
+              <i class="fa-solid fa-save mr-2"></i>Save Draft
+            </button>
+            <button onclick="alert('Notes submitted successfully!'); loadSection('treatmentplan');" class="btn-primary px-6 py-3">
+              <i class="fa-solid fa-arrow-right mr-2"></i>Continue to Treatment Plan
+            </button>
+          ` : ''}
         </div>
       </div>
     </div>
@@ -21617,6 +21636,7 @@ function renderTreatmentPlan() {
         </div>
       </div>
 
+      ${currentRole !== 'patient' ? `
       <!-- Disease Selection & Automated Brain Region Mapping -->
       <div class="mb-8 bg-gradient-to-br from-blue-50 via-purple-50 to-orange-50 p-6 rounded-xl border-2 border-orange-400">
         <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -21927,6 +21947,7 @@ function renderTreatmentPlan() {
           </div>
         </div>
       </div>
+      ` : ''}
 
       <!-- Treatment Sessions - First Row -->
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
@@ -22331,38 +22352,6 @@ function renderTreatmentPlan() {
       </div>
 
       <!-- Medication Suggestions Section -->
-      <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
-        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">
-          <i class="fa-solid fa-pills mr-2"></i>Medication Suggestions
-        </h3>
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm font-semibold text-slate-700 block mb-2">Prescribed Medications</label>
-            <textarea 
-              id="medicationSuggestions" 
-              class="input-royal w-full text-sm" 
-              rows="8" 
-              placeholder="Enter medication suggestions, dosages, and instructions...&#10;&#10;Example:&#10;1. Medication Name: [Drug name]&#10;   Dosage: [Amount and frequency]&#10;   Duration: [Treatment period]&#10;   Instructions: [Special instructions]&#10;&#10;2. ..." 
-              ${currentRole === 'patient' ? 'readonly' : ''}
-            ></textarea>
-          </div>
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-info-circle text-blue-600 text-xl mt-1"></i>
-              <div class="text-sm text-blue-800">
-                <p class="font-semibold mb-1">Clinical Notes:</p>
-                <ul class="list-disc list-inside space-y-1 text-xs">
-                  <li>Include medication name, dosage, frequency, and duration</li>
-                  <li>Note any contraindications or interactions with neuromodulation</li>
-                  <li>Specify timing relative to treatment sessions if applicable</li>
-                  <li>Document any medication adjustments based on treatment response</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Save Button -->
       ${currentRole !== 'patient' ? `
       <div class="flex justify-end gap-3 mt-6">
@@ -22673,6 +22662,683 @@ function addSVGGradients() {
   defs.appendChild(anodeGradient);
   defs.appendChild(cathodeGradient);
   svg.insertBefore(defs, svg.firstChild);
+}
+
+// -- PATIENT PORTAL TREATMENT PLAN --
+function renderPatientTreatmentPlan() {
+  // Separate patient-specific function with same structure and same data sources
+  const area = document.getElementById('contentArea');
+  
+  // For patient role, auto-select their own patient context
+  if(currentRole === 'patient' && !globalSelectedPatientId) {
+    const ap = getActivePatient();
+    if(ap?.id) globalSelectedPatientId = ap.id;
+  }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
+  // SAME DATA SOURCE as doctor version
+  const p = globalState.currentPatient || getActivePatient();
+  if (!p) {
+    area.innerHTML = `
+      <div class="p-8">
+        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+          <p class="text-yellow-800 font-bold">No patient selected</p>
+          <p class="text-sm text-yellow-700 mt-2">Please select a patient to view their treatment plan.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Sample treatment data for patients (pre-filled by doctor)
+  const treatmentData = {
+    session1: {
+      number: '1-10',
+      protocol: 'High Beta Training',
+      duration: '20 minutes',
+      frequency: '5x per week',
+      notes: 'Focus on attention and cognitive performance improvement',
+      targetArea: 'Left DLPFC',
+      modality: 'tDCS',
+      intensity: '2mA',
+      outcome: 'Improved attention, focus, and executive function. Reduction in cognitive fatigue and enhancement of working memory.'
+    },
+    session2: {
+      number: '11-20',
+      protocol: 'Alpha/Theta Training',
+      duration: '20 minutes',
+      frequency: '3x per week',
+      notes: 'Relaxation and stress reduction protocol',
+      targetArea: 'Right PFC',
+      modality: 'Neurofeedback',
+      intensity: 'Low-Medium',
+      outcome: 'Stress reduction, improved emotional regulation, enhanced relaxation response, and better sleep quality.'
+    },
+    sessions: {
+      count: 20,
+      pricePerSession: '€100',
+      multiplier: 20
+    },
+    suggestedDevice: {
+      name: 'tDCS',
+      price: '€1200',
+      sessions: '15 sessions'
+    },
+    suggestedDevice2: {
+      name: 'CES Device',
+      description: 'Cranial Electrotherapy Stimulation',
+      price: '€900',
+      sessions: '12 sessions'
+    },
+    medications: `1. Medication: Low-dose Escitalopram 5mg
+   Dosage: Once daily in the morning
+   Duration: 12 weeks (to be reviewed)
+   Instructions: Take with food. May be used in conjunction with neuromodulation therapy.
+
+2. Supplement: Omega-3 Fatty Acids 1000mg
+   Dosage: Twice daily with meals
+   Duration: Ongoing
+   Instructions: Supports brain health and complements treatment protocol.
+
+Note: All medications to be taken as prescribed. Report any side effects to your healthcare provider immediately.`
+  };
+  
+  // SAME HTML STRUCTURE as doctor version (renderTreatmentPlan)
+  area.innerHTML = `
+    <div class="p-8">
+    
+    ${getAssessmentNavigation('treatmentplan')}
+    
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">Treatment Plan</h2>
+        <p class="text-slate-500">Neuromodulation Treatment Planning & Documentation</p>
+      </div>
+      ${currentRole !== 'patient' ? `
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <select id="patientNavigationSelectTreatment" class="input-royal pr-10 font-bold text-slate-900 bg-white border-2 border-orange-300">
+            <option value="">Select Patient...</option>
+            ${sampleData.patients.map(patient => `
+              <option value="${patient.id}" ${globalState.currentPatient?.id === patient.id ? 'selected' : ''}>
+                ${patient.name} (${patient.id})
+              </option>
+            `).join('')}
+          </select>
+          <i class="fa-solid fa-user-group absolute right-3 top-3 text-orange-600 pointer-events-none"></i>
+        </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm" title="Back to Patient History">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Patient View
+        </button>
+      </div>
+      ` : ''}
+    </div>
+
+    ${globalState.currentPatient && currentRole !== 'patient' ? `
+    <!-- Auto-populated Patient Context -->
+    <div class="card p-6 mb-8 border-l-4 border-l-orange-600 bg-gradient-to-r from-orange-50 to-slate-50">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-orange-900"><i class="fa-solid fa-user-circle mr-2"></i>Patient: ${p.name}</h3>
+        <span class="badge badge-sozo">ID: ${p.id}</span>
+      </div>
+      <div class="grid grid-cols-3 gap-4 text-sm">
+        <div><span class="font-bold text-slate-700">Age:</span> <span class="text-slate-900">${p.age}</span></div>
+        <div><span class="font-bold text-slate-700">Gender:</span> <span class="text-slate-900">${p.gender}</span></div>
+        <div><span class="font-bold text-slate-700">Status:</span> <span class="badge badge-info">${p.status || 'Active'}</span></div>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Treatment Plan Content -->
+    <div class="card p-8">
+      
+      <!-- Patient Info -->
+      <div class="mb-6">
+        <label class="text-sm font-bold text-slate-800 block mb-2">Patient's Name & Date</label>
+        <div class="grid grid-cols-2 gap-4">
+          <input type="text" id="treatmentPatientName" class="input-royal" placeholder="Patient Name" value="${p.name}" ${currentRole === 'patient' ? 'readonly' : ''} />
+          <input type="date" id="treatmentDate" class="input-royal" value="${new Date().toISOString().split('T')[0]}" ${currentRole === 'patient' ? 'readonly' : ''} />
+        </div>
+      </div>
+
+      <!-- Treatment Sessions - First Row (PATIENT PORTAL: Pre-filled from doctor's plan) -->
+      <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Treatment Session 1</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Brain Diagram 1 with Fields -->
+          <div>
+            <div class="mb-3">
+              <svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto mb-3">
+                <!-- Brain mapping diagram -->
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                <!-- Top markers -->
+                <circle cx="100" cy="30" r="5" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="100" y="20" text-anchor="middle" font-size="10" fill="#64748b">NASION</text>
+                <!-- Row 1 -->
+                <circle cx="70" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="70" y="54" text-anchor="middle" font-size="8" fill="#64748b">FP1</text>
+                <circle cx="100" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="54" text-anchor="middle" font-size="8" fill="#64748b">FPZ</text>
+                <circle cx="130" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="130" y="54" text-anchor="middle" font-size="8" fill="#64748b">FP2</text>
+                <!-- Row 2 -->
+                <circle cx="50" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="50" y="79" text-anchor="middle" font-size="8" fill="#64748b">F7</text>
+                <circle cx="75" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="75" y="79" text-anchor="middle" font-size="8" fill="#64748b">F3</text>
+                <circle cx="100" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="79" text-anchor="middle" font-size="8" fill="#64748b">FZ</text>
+                <circle cx="125" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="125" y="79" text-anchor="middle" font-size="8" fill="#64748b">F4</text>
+                <circle cx="150" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="150" y="79" text-anchor="middle" font-size="8" fill="#64748b">F8</text>
+                <!-- Center row -->
+                <circle cx="30" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="30" y="104" text-anchor="middle" font-size="8" fill="#64748b">T3</text>
+                <circle cx="65" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="65" y="104" text-anchor="middle" font-size="8" fill="#64748b">C3</text>
+                <circle cx="100" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="104" text-anchor="middle" font-size="8" fill="#64748b">CZ</text>
+                <circle cx="135" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="135" y="104" text-anchor="middle" font-size="8" fill="#64748b">C4</text>
+                <circle cx="170" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="170" y="104" text-anchor="middle" font-size="8" fill="#64748b">T4</text>
+                <!-- Row 4 -->
+                <circle cx="50" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="50" y="129" text-anchor="middle" font-size="8" fill="#64748b">T5</text>
+                <circle cx="75" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="75" y="129" text-anchor="middle" font-size="8" fill="#64748b">P3</text>
+                <circle cx="100" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="129" text-anchor="middle" font-size="8" fill="#64748b">PZ</text>
+                <circle cx="125" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="125" y="129" text-anchor="middle" font-size="8" fill="#64748b">P4</text>
+                <circle cx="150" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="150" y="129" text-anchor="middle" font-size="8" fill="#64748b">T6</text>
+                <!-- Bottom row -->
+                <circle cx="85" cy="150" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="85" y="154" text-anchor="middle" font-size="8" fill="#64748b">O1</text>
+                <circle cx="100" cy="155" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="159" text-anchor="middle" font-size="8" fill="#64748b">OZ</text>
+                <circle cx="115" cy="150" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="115" y="154" text-anchor="middle" font-size="8" fill="#64748b">O2</text>
+                <!-- Bottom marker -->
+                <circle cx="100" cy="170" r="5" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="100" y="185" text-anchor="middle" font-size="10" fill="#64748b">INION</text>
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Session #:</span>
+                <input type="text" id="session1Number" class="input-royal flex-1 text-sm" placeholder="e.g., 1-10" value="${currentRole === 'patient' ? treatmentData.session1.number : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Protocol:</span>
+                <input type="text" id="session1Protocol" class="input-royal flex-1 text-sm" placeholder="e.g., High Beta" value="${currentRole === 'patient' ? treatmentData.session1.protocol : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Duration:</span>
+                <input type="text" id="session1Duration" class="input-royal flex-1 text-sm" placeholder="e.g., 20 min" value="${currentRole === 'patient' ? treatmentData.session1.duration : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Frequency:</span>
+                <input type="text" id="session1Frequency" class="input-royal flex-1 text-sm" placeholder="e.g., 5x/week" value="${currentRole === 'patient' ? treatmentData.session1.frequency : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Notes:</span>
+                <textarea id="session1Notes" class="input-royal flex-1 text-sm" rows="2" placeholder="Additional notes..." ${currentRole === 'patient' ? 'readonly' : ''}>${currentRole === 'patient' ? treatmentData.session1.notes : ''}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Head Profile with Fields -->
+          <div>
+            <div class="mb-3">
+              <svg viewBox="0 0 120 200" class="w-32 h-48 mx-auto mb-3">
+                <!-- Head profile outline -->
+                <path d="M 60 30 Q 90 30 90 60 L 90 120 Q 90 140 70 155 L 60 160 L 60 175 Q 75 175 75 185" 
+                      fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="65" cy="80" r="6" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <path d="M 50 100 Q 55 105 60 100" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Target Area:</span>
+                <input type="text" id="session1TargetArea" class="input-royal flex-1 text-sm" placeholder="e.g., Left DLPFC" value="${currentRole === 'patient' ? treatmentData.session1.targetArea : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Modality:</span>
+                <input type="text" id="session1Modality" class="input-royal flex-1 text-sm" placeholder="e.g., tDCS/rTMS" value="${currentRole === 'patient' ? treatmentData.session1.modality : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Intensity:</span>
+                <input type="text" id="session1Intensity" class="input-royal flex-1 text-sm" placeholder="e.g., 2mA" value="${currentRole === 'patient' ? treatmentData.session1.intensity : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Expected Outcome:</span>
+                <textarea id="session1Outcome" class="input-royal flex-1 text-sm" rows="3" placeholder="Expected therapeutic outcomes..." ${currentRole === 'patient' ? 'readonly' : ''}>${currentRole === 'patient' ? treatmentData.session1.outcome : ''}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Treatment Sessions - Second Row -->
+      <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Treatment Session 2</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Brain Diagram 2 with Fields -->
+          <div>
+            <div class="mb-3">
+              <svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto mb-3">
+                <!-- Brain mapping diagram (same as above) -->
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                <circle cx="100" cy="30" r="5" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="100" y="20" text-anchor="middle" font-size="10" fill="#64748b">NASION</text>
+                <circle cx="70" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="70" y="54" text-anchor="middle" font-size="8" fill="#64748b">FP1</text>
+                <circle cx="100" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="54" text-anchor="middle" font-size="8" fill="#64748b">FPZ</text>
+                <circle cx="130" cy="50" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="130" y="54" text-anchor="middle" font-size="8" fill="#64748b">FP2</text>
+                <circle cx="50" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="50" y="79" text-anchor="middle" font-size="8" fill="#64748b">F7</text>
+                <circle cx="75" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="75" y="79" text-anchor="middle" font-size="8" fill="#64748b">F3</text>
+                <circle cx="100" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="79" text-anchor="middle" font-size="8" fill="#64748b">FZ</text>
+                <circle cx="125" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="125" y="79" text-anchor="middle" font-size="8" fill="#64748b">F4</text>
+                <circle cx="150" cy="75" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="150" y="79" text-anchor="middle" font-size="8" fill="#64748b">F8</text>
+                <circle cx="30" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="30" y="104" text-anchor="middle" font-size="8" fill="#64748b">T3</text>
+                <circle cx="65" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="65" y="104" text-anchor="middle" font-size="8" fill="#64748b">C3</text>
+                <circle cx="100" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="104" text-anchor="middle" font-size="8" fill="#64748b">CZ</text>
+                <circle cx="135" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="135" y="104" text-anchor="middle" font-size="8" fill="#64748b">C4</text>
+                <circle cx="170" cy="100" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="170" y="104" text-anchor="middle" font-size="8" fill="#64748b">T4</text>
+                <circle cx="50" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="50" y="129" text-anchor="middle" font-size="8" fill="#64748b">T5</text>
+                <circle cx="75" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="75" y="129" text-anchor="middle" font-size="8" fill="#64748b">P3</text>
+                <circle cx="100" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="129" text-anchor="middle" font-size="8" fill="#64748b">PZ</text>
+                <circle cx="125" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="125" y="129" text-anchor="middle" font-size="8" fill="#64748b">P4</text>
+                <circle cx="150" cy="125" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="150" y="129" text-anchor="middle" font-size="8" fill="#64748b">T6</text>
+                <circle cx="85" cy="150" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="85" y="154" text-anchor="middle" font-size="8" fill="#64748b">O1</text>
+                <circle cx="100" cy="155" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="100" y="159" text-anchor="middle" font-size="8" fill="#64748b">OZ</text>
+                <circle cx="115" cy="150" r="8" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <text x="115" y="154" text-anchor="middle" font-size="8" fill="#64748b">O2</text>
+                <circle cx="100" cy="170" r="5" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="100" y="185" text-anchor="middle" font-size="10" fill="#64748b">INION</text>
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Session #:</span>
+                <input type="text" id="session2Number" class="input-royal flex-1 text-sm" placeholder="e.g., 11-20" value="${currentRole === 'patient' ? treatmentData.session2.number : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Protocol:</span>
+                <input type="text" id="session2Protocol" class="input-royal flex-1 text-sm" placeholder="e.g., Alpha/Theta" value="${currentRole === 'patient' ? treatmentData.session2.protocol : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Duration:</span>
+                <input type="text" id="session2Duration" class="input-royal flex-1 text-sm" placeholder="e.g., 20 min" value="${currentRole === 'patient' ? treatmentData.session2.duration : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Frequency:</span>
+                <input type="text" id="session2Frequency" class="input-royal flex-1 text-sm" placeholder="e.g., 3x/week" value="${currentRole === 'patient' ? treatmentData.session2.frequency : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Notes:</span>
+                <textarea id="session2Notes" class="input-royal flex-1 text-sm" rows="2" placeholder="Additional notes..." ${currentRole === 'patient' ? 'readonly' : ''}>${currentRole === 'patient' ? treatmentData.session2.notes : ''}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Head Profile with Fields -->
+          <div>
+            <div class="mb-3">
+              <svg viewBox="0 0 120 200" class="w-32 h-48 mx-auto mb-3">
+                <path d="M 60 30 Q 90 30 90 60 L 90 120 Q 90 140 70 155 L 60 160 L 60 175 Q 75 175 75 185" 
+                      fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="65" cy="80" r="6" fill="none" stroke="#ea580c" stroke-width="2"/>
+                <path d="M 50 100 Q 55 105 60 100" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Target Area:</span>
+                <input type="text" id="session2TargetArea" class="input-royal flex-1 text-sm" placeholder="e.g., Right PFC" value="${currentRole === 'patient' ? treatmentData.session2.targetArea : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Modality:</span>
+                <input type="text" id="session2Modality" class="input-royal flex-1 text-sm" placeholder="e.g., Neurofeedback" value="${currentRole === 'patient' ? treatmentData.session2.modality : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Intensity:</span>
+                <input type="text" id="session2Intensity" class="input-royal flex-1 text-sm" placeholder="e.g., Low" value="${currentRole === 'patient' ? treatmentData.session2.intensity : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-32 text-xs font-semibold text-slate-700">Expected Outcome:</span>
+                <textarea id="session2Outcome" class="input-royal flex-1 text-sm" rows="3" placeholder="Expected therapeutic outcomes..." ${currentRole === 'patient' ? 'readonly' : ''}>${currentRole === 'patient' ? treatmentData.session2.outcome : ''}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Suggestions Section -->
+      <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Device Suggestions</h3>
+        
+        <!-- Brain Function Assessment Session -->
+        <div class="mb-4">
+          <div class="grid grid-cols-3 gap-4 mb-3">
+            <div class="col-span-2">
+              <label class="text-xs font-semibold text-slate-700 block mb-1">Brain Function Assessment Session</label>
+            </div>
+            <div>
+              <input type="text" id="assessmentPrice" class="input-royal text-sm text-center" value="€300" ${currentRole === 'patient' ? 'readonly' : ''} />
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-slate-700 block mb-1">No. of Sessions</label>
+              <input type="number" id="numSessions" class="input-royal text-sm text-center" placeholder="e.g., 15" value="${currentRole === 'patient' ? treatmentData.sessions.count : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+            </div>
+            <div class="col-span-2">
+              <label class="text-xs font-semibold text-slate-700 block mb-1">Price per Session</label>
+              <div class="flex items-center gap-2">
+                <input type="text" id="pricePerSession" class="input-royal text-sm flex-1" placeholder="€100" value="${currentRole === 'patient' ? treatmentData.sessions.pricePerSession : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+                <span class="text-slate-600">×</span>
+                <input type="number" id="sessionMultiplier" class="input-royal text-sm w-20" placeholder="4" value="${currentRole === 'patient' ? treatmentData.sessions.multiplier : ''}" ${currentRole === 'patient' ? 'readonly' : ''} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${currentRole === 'patient' ? `
+        <!-- Patient View: Recommended Devices -->
+        <div class="mb-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="fa-solid fa-info-circle text-blue-600"></i>
+            <p class="text-sm font-semibold text-blue-900">Your doctor has recommended the following devices based on your treatment plan:</p>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-white p-4 rounded-lg border-2 border-green-400 shadow-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <i class="fa-solid fa-circle-nodes text-3xl text-green-600"></i>
+                  <div>
+                    <div class="font-bold text-lg text-slate-900">${treatmentData.suggestedDevice.name}</div>
+                    <div class="text-sm text-slate-600">Transcranial Direct Current Stimulation</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-sozo-600">${treatmentData.suggestedDevice.price}</div>
+                  <div class="text-sm text-slate-600">${treatmentData.suggestedDevice.sessions}</div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg border-2 border-blue-400 shadow-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <i class="fa-solid fa-wave-square text-3xl text-blue-600"></i>
+                  <div>
+                    <div class="font-bold text-lg text-slate-900">${treatmentData.suggestedDevice2.name}</div>
+                    <div class="text-sm text-slate-600">${treatmentData.suggestedDevice2.description}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-sozo-600">${treatmentData.suggestedDevice2.price}</div>
+                  <div class="text-sm text-slate-600">${treatmentData.suggestedDevice2.sessions}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        ` : `
+        <!-- Doctor View: Full Device Selection Table -->
+        <!-- Neuromodulation Technique Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse border border-slate-300">
+            <thead class="bg-gradient-to-r from-blue-600 to-orange-500 text-white">
+              <tr>
+                <th class="border border-slate-300 px-4 py-3 text-left text-sm font-bold">Select</th>
+                <th class="border border-slate-300 px-4 py-3 text-left text-sm font-bold">Neuromodulation Technique</th>
+                <th class="border border-slate-300 px-4 py-3 text-center text-sm font-bold">Price</th>
+                <th class="border border-slate-300 px-4 py-3 text-center text-sm font-bold">Frequency/Sessions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white">
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="HD-tDCS" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-microchip text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">HD-tDCS</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€3000</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 10 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="tDCS-1200" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-nodes text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">tDCS</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€1200</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 15 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="tDCS-650" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-headset text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">tDCS (Standard)</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€650</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 20 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="CES" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-wave-square text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">CES (Cranial Electrotherapy)</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€900</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 12 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="MET" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-bolt text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">MET (Microcurrent Therapy)</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€1400</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 8 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="RehabGlove" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-hand text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">Rehabilitation Glove</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <span class="font-bold text-slate-900">€200</span>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., Daily use" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="radio" name="deviceSelection" value="TPS" class="w-4 h-4 text-sozo-600" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-podcast text-2xl text-slate-600"></i>
+                    <span class="font-semibold text-slate-800">TPS (Transcranial Pulse Stimulation)</span>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-24 text-center" placeholder="€" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+                <td class="border border-slate-300 px-4 py-3 text-center">
+                  <input type="text" class="input-royal text-sm w-32 text-center" placeholder="e.g., 6 sessions" ${currentRole === 'patient' ? 'disabled' : ''} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        `}
+      </div>
+
+      <!-- Save Button -->
+      ${currentRole !== 'patient' ? `
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="saveTreatmentPlanBtn" class="btn-primary">
+          <i class="fa-solid fa-save mr-2"></i>Save Treatment Plan
+        </button>
+      </div>
+      ` : ''}
+    </div>
+    </div>
+  `;
+  
+  // Attach event listeners  
+  setTimeout(() => {
+    // Clinical Indication Dropdown - trigger initial update if needed
+    const clinicalSelect = document.getElementById('clinicalIndicationSelect');
+    if (clinicalSelect) {
+      // Initialize montage display if there's a pre-selected value
+      if (clinicalSelect.value) {
+        updateMontageMapping();
+      }
+    }
+    
+    // Patient Navigation Dropdown
+    const patientNavSelect = document.getElementById('patientNavigationSelectTreatment');
+    if (patientNavSelect) {
+      patientNavSelect.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            renderPatientTreatmentPlan();
+          }
+        }
+      });
+    }
+    
+    // Save Button Handler
+    const saveBtn = document.getElementById('saveTreatmentPlanBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        // Collect treatment plan data
+        const treatmentData = {
+          patientId: p.id,
+          patientName: document.getElementById('treatmentPatientName')?.value,
+          treatmentDate: document.getElementById('treatmentDate')?.value,
+          session1: {
+            number: document.getElementById('session1Number')?.value,
+            protocol: document.getElementById('session1Protocol')?.value,
+            duration: document.getElementById('session1Duration')?.value,
+            frequency: document.getElementById('session1Frequency')?.value,
+            notes: document.getElementById('session1Notes')?.value,
+            targetArea: document.getElementById('session1TargetArea')?.value,
+            modality: document.getElementById('session1Modality')?.value,
+            intensity: document.getElementById('session1Intensity')?.value,
+            outcome: document.getElementById('session1Outcome')?.value
+          },
+          session2: {
+            number: document.getElementById('session2Number')?.value,
+            protocol: document.getElementById('session2Protocol')?.value,
+            duration: document.getElementById('session2Duration')?.value,
+            frequency: document.getElementById('session2Frequency')?.value,
+            notes: document.getElementById('session2Notes')?.value,
+            targetArea: document.getElementById('session2TargetArea')?.value,
+            modality: document.getElementById('session2Modality')?.value,
+            intensity: document.getElementById('session2Intensity')?.value,
+            outcome: document.getElementById('session2Outcome')?.value
+          }
+        };
+        
+        console.log('Treatment Plan Saved:', treatmentData);
+        
+        // Show success message
+        saveBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Saved!';
+        saveBtn.classList.remove('bg-sozo-600');
+        saveBtn.classList.add('bg-green-500');
+        setTimeout(() => {
+          saveBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save Treatment Plan';
+          saveBtn.classList.remove('bg-green-500');
+          saveBtn.classList.add('bg-sozo-600');
+        }, 2000);
+      });
+    }
+  }, 100);
 }
 
 // -- FNON MODULE LOGIC --
@@ -25610,7 +26276,13 @@ function renderAdmin(key) {
     `;
   }
   else if (key === 'fnon') renderFNON();
-  else if (key === 'treatmentplan') renderTreatmentPlan();
+  else if (key === 'treatmentplan') {
+    if (currentRole === 'patient') {
+      renderPatientTreatmentPlan();
+    } else {
+      renderTreatmentPlan();
+    }
+  }
   else if (key === 'brainmap') renderBrainMap();
   else if (key === 'prs') renderPRSDoctor();
   else if (key === 'finalreport') {
