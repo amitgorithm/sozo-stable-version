@@ -313,3 +313,16 @@ export function canProceed(patientId) {
 
   return true;
 }
+
+/**
+ * Assign patient to clinical assistant
+ */
+export function assignPatientToClinical(patientId) {
+  if (!AppState.patients[patientId]) return;
+  
+  AppState.patients[patientId].assignedTo = ROLES.CLINICAL_ASSISTANT;
+  
+  addNote(patientId, 'System', 'Patient assigned to Clinical Assistant for treatment execution');
+  
+  saveState();
+}
