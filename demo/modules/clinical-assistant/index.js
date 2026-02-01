@@ -106,19 +106,21 @@ function renderAssessmentChecklist(patient) {
           </div>
         </div>
 
-        <div class="checklist-item ${brainMappingCompleted ? 'completed' : 'pending'} disabled">
+        <div class="checklist-item ${brainMappingCompleted ? 'completed' : 'pending'}">
           <div class="status-icon">${brainMappingCompleted ? '✓' : '○'}</div>
           <div class="item-content">
             <strong>Brain Mapping (EEG)</strong>
-            <p class="small">Doctor only - No access</p>
+            <p class="small">Upload EEG Brain Mapping Scan</p>
             ${brainMappingCompleted ? `
-              <div class="result">Score: ${assessments.brainMapping.score} | By: ${assessments.brainMapping.completedBy}</div>
+              <div class="result">Brain Scan Uploaded | By: ${assessments.brainMapping.completedBy}</div>
             ` : ''}
           </div>
           <div class="item-actions">
-            <span class="status-badge ${brainMappingCompleted ? 'success' : 'pending'}">
-              ${brainMappingCompleted ? 'Complete' : 'Doctor Required'}
-            </span>
+            ${!brainMappingCompleted ? `
+              <button id="uploadEEG" class="btn btn-primary">Upload EEG BrainMapping Scan</button>
+            ` : `
+              <span class="status-badge success">Brain Scan Uploaded</span>
+            `}
           </div>
         </div>
       </div>
@@ -129,6 +131,12 @@ function renderAssessmentChecklist(patient) {
   if (!prsCompleted) {
     document.getElementById('performPRS').onclick = () => {
       performPRS(patient.profile.id);
+    };
+  }
+  
+  if (!brainMappingCompleted) {
+    document.getElementById('uploadEEG').onclick = () => {
+      uploadEEGScan(patient.profile.id);
     };
   }
 }
@@ -146,6 +154,26 @@ function performPRS(patientId) {
   Actions.addNote(patientId, 'Clinical Assistant', `PRS assessment completed with score: ${score}`);
   
   alert('PRS assessment completed successfully!');
+  
+  // Re-render to show updates
+  const patient = Actions.getPatient(patientId);
+  renderAssessmentChecklist(patient);
+  renderTreatmentPlanView(patient);
+}
+
+function uploadEEGScan(patientId) {
+  // Simulate EEG brain mapping upload
+  const score = Math.floor(Math.random() * 30) + 70; // Random 70-100 for brain scans
+  
+  Actions.updateAssessment(patientId, ASSESSMENTS.BRAIN_MAPPING, {
+    score,
+    completedBy: 'Clinical Assistant',
+    notes: 'EEG Brain Mapping scan uploaded and processed successfully'
+  });
+
+  Actions.addNote(patientId, 'Clinical Assistant', 'EEG Brain Mapping scan uploaded');
+  
+  alert('Brain Scan Uploaded successfully!');
   
   // Re-render to show updates
   const patient = Actions.getPatient(patientId);

@@ -106,10 +106,11 @@ function renderAssessmentCard(title, assessment, patientId) {
             <div>Score: <strong>${assessment.score}</strong></div>
             <div>Completed by: ${assessment.completedBy}</div>
             <div class="small">Date: ${new Date(assessment.completedAt).toLocaleDateString()}</div>
+            ${title.includes('Brain Mapping') ? '<div class="success">Brain Mapping EEG Scan Uploaded</div>' : ''}
           </div>
         ` : `
           <div class="assessment-actions">
-            <button class="btn btn-primary perform-assessment" data-type="${title.toLowerCase().replace(' ', '').replace('(eeg)', '')}" data-patient="${patientId}">
+            <button class="btn btn-primary perform-assessment" data-type="${title.toLowerCase().replace(/\s+/g, '').replace('(eeg)', '')}" data-patient="${patientId}">
               Perform ${title}
             </button>
           </div>
@@ -147,7 +148,14 @@ function performAssessment(type, patientId) {
 
   Actions.updateAssessment(patientId, typeMap[type], assessmentData);
   
-  alert(`${type.toUpperCase()} assessment completed successfully!`);
+  let successMessage;
+  if (type === 'brainmapping') {
+    successMessage = 'Brain Mapping EEG Scan Uploaded successfully!';
+  } else {
+    successMessage = `${type.toUpperCase()} assessment completed successfully!`;
+  }
+  
+  alert(successMessage);
   
   // Re-render the module
   const patient = Actions.getPatient(patientId);
