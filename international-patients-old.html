@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Patient Pre-Qualification | Sozo Brain Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+    
+    .section-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+    }
+    
+    .section-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+      background: white;
+    }
+    
+    .radio-option:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+      transform: translateX(4px);
+    }
+    
+    .radio-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 16px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    
+    .radio-option.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.5s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: 2px solid #667eea;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: #f8f9ff;
+      transform: translateY(-2px);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+    
+    .question-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 16px;
+      display: block;
+    }
+    
+    .section-description {
+      color: #64748b;
+      font-size: 14px;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    
+    .qualification-output {
+      background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+      border: 2px solid #667eea;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+    
+    .score-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .score-high { background: #d1fae5; color: #065f46; }
+    .score-medium { background: #fef3c7; color: #92400e; }
+    .score-low { background: #fee2e2; color: #991b1b; }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-12 text-white">
+      <div class="inline-block mb-6">
+        <div class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-2xl">
+          <i class="fa-solid fa-brain text-6xl text-purple-600"></i>
+        </div>
+      </div>
+      <h1 class="text-4xl font-bold mb-4">Sozo Brain Center</h1>
+      <h2 class="text-2xl font-semibold mb-2">International Patient Pre-Qualification</h2>
+      <p class="text-lg opacity-90">Parkinson's Disease Treatment Inquiry</p>
+      <p class="text-sm mt-4 opacity-75 max-w-2xl mx-auto">
+        This questionnaire helps us understand your condition and situation to provide you with the most appropriate treatment recommendations and support.
+      </p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="bg-white rounded-full p-2 mb-8 shadow-lg">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="flex justify-between text-xs font-semibold text-gray-600 mt-2 px-4">
+        <span id="progressText">Section 1 of 8</span>
+        <span id="progressPercent">0%</span>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <form id="questionnaireForm">
+      
+      <!-- SECTION 1: Diagnosis & Disease Stage -->
+      <div class="section-card" data-section="1">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Diagnosis & Disease Stage</h3>
+            <p class="section-description">Understanding your current medical status</p>
+          </div>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="mb-8">
+          <label class="question-label">
+            1. Have you been formally diagnosed with Parkinson's disease by a neurologist?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q1_diagnosis" value="yes" required>
+              <span>Yes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q1_diagnosis" value="no">
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q1_diagnosis" value="suspected">
+              <span>Suspected but not confirmed</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="mb-8">
+          <label class="question-label">
+            2. How long ago were you diagnosed (or symptoms began)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q2_time" value="less_1year" required>
+              <span>Less than 1 year</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q2_time" value="1_3years">
+              <span>1–3 years</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q2_time" value="3_5years">
+              <span>3–5 years</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q2_time" value="more_5years">
+              <span>More than 5 years</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="mb-6">
+          <label class="question-label">
+            3. How would you describe your current disease stage?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q3_stage" value="mild" required>
+              <span>Mild symptoms, fully independent</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q3_stage" value="moderate">
+              <span>Moderate symptoms, some daily difficulty</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q3_stage" value="advanced">
+              <span>Advanced symptoms, significant assistance needed</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q3_stage" value="unsure">
+              <span>Unsure</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Motor Symptoms -->
+      <div class="section-card" data-section="2" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-person-walking"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Motor Symptoms</h3>
+            <p class="section-description">Assessment of physical symptoms</p>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="mb-8">
+          <label class="question-label">
+            4. Do you experience tremor?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q4_tremor" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q4_tremor" value="mild">
+              <span>Yes – mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q4_tremor" value="moderate">
+              <span>Yes – moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q4_tremor" value="severe">
+              <span>Yes – severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="mb-8">
+          <label class="question-label">
+            5. Do you experience stiffness or rigidity?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q5_rigidity" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q5_rigidity" value="mild">
+              <span>Yes – mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q5_rigidity" value="moderate">
+              <span>Yes – moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q5_rigidity" value="severe">
+              <span>Yes – severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="mb-8">
+          <label class="question-label">
+            6. Do you experience slowness of movement (bradykinesia)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q6_bradykinesia" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q6_bradykinesia" value="mild">
+              <span>Yes – mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q6_bradykinesia" value="moderate">
+              <span>Yes – moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q6_bradykinesia" value="severe">
+              <span>Yes – severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="mb-8">
+          <label class="question-label">
+            7. Do you experience freezing of gait (feet "stuck to the floor")?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q7_freezing" value="never" required>
+              <span>Never</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q7_freezing" value="occasionally">
+              <span>Occasionally</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q7_freezing" value="frequently">
+              <span>Frequently</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q7_freezing" value="daily">
+              <span>Daily</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="mb-6">
+          <label class="question-label">
+            8. Have you experienced falls in the last 6 months?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q8_falls" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q8_falls" value="1-2">
+              <span>1–2 falls</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q8_falls" value="multiple">
+              <span>Multiple falls</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q8_falls" value="frequent_injury">
+              <span>Frequent falls with injury</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Non-Motor Symptoms -->
+      <div class="section-card" data-section="3" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Non-Motor Symptoms</h3>
+            <p class="section-description">Cognitive, emotional, and other symptoms</p>
+          </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="mb-8">
+          <label class="question-label">
+            9. Do you experience cognitive or memory difficulties?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q9_cognitive" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q9_cognitive" value="mild">
+              <span>Mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q9_cognitive" value="moderate">
+              <span>Moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q9_cognitive" value="severe">
+              <span>Severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="mb-8">
+          <label class="question-label">
+            10. Do you experience anxiety or depression?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q10_mood" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q10_mood" value="mild">
+              <span>Mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q10_mood" value="moderate">
+              <span>Moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q10_mood" value="severe">
+              <span>Severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="mb-8">
+          <label class="question-label">
+            11. Do you have sleep disturbances (insomnia, vivid dreams, REM sleep issues)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q11_sleep" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q11_sleep" value="mild">
+              <span>Mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q11_sleep" value="moderate">
+              <span>Moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q11_sleep" value="severe">
+              <span>Severe</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="mb-6">
+          <label class="question-label">
+            12. Do you experience autonomic symptoms (constipation, dizziness, blood pressure drops)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q12_autonomic" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q12_autonomic" value="mild">
+              <span>Mild</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q12_autonomic" value="moderate">
+              <span>Moderate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q12_autonomic" value="severe">
+              <span>Severe</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Medication & Treatment History -->
+      <div class="section-card" data-section="4" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-pills"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Medication & Treatment History</h3>
+            <p class="section-description">Current treatments and their effectiveness</p>
+          </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="mb-8">
+          <label class="question-label">
+            13. Are you currently taking Parkinson's medication (e.g. Levodopa)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q13_medication" value="yes" required>
+              <span>Yes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q13_medication" value="no">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="mb-8">
+          <label class="question-label">
+            14. How effective is your current medication?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q14_effectiveness" value="very" required>
+              <span>Very effective</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q14_effectiveness" value="moderately">
+              <span>Moderately effective</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q14_effectiveness" value="minimally">
+              <span>Minimally effective</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q14_effectiveness" value="none">
+              <span>No longer effective</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="mb-8">
+          <label class="question-label">
+            15. Do you experience medication "wearing off" or fluctuations?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q15_fluctuations" value="no" required>
+              <span>No</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q15_fluctuations" value="occasionally">
+              <span>Occasionally</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q15_fluctuations" value="frequently">
+              <span>Frequently</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q15_fluctuations" value="severe">
+              <span>Severe fluctuations</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="mb-6">
+          <label class="question-label">
+            16. Have you undergone advanced treatments?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q16_advanced" value="none" required>
+              <span>None</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q16_advanced" value="dbs">
+              <span>Deep Brain Stimulation (DBS)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q16_advanced" value="pump">
+              <span>Pump therapy</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q16_advanced" value="other">
+              <span>Other</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: Functional Independence -->
+      <div class="section-card" data-section="5" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-wheelchair"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Functional Independence</h3>
+            <p class="section-description">Daily living and mobility assessment</p>
+          </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="mb-8">
+          <label class="question-label">
+            17. Are you able to walk independently?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q17_walking" value="independent" required>
+              <span>Yes, without aid</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q17_walking" value="aid">
+              <span>Yes, with walking aid</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q17_walking" value="wheelchair_long">
+              <span>Wheelchair for long distances</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q17_walking" value="wheelchair_dependent">
+              <span>Wheelchair dependent</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="mb-6">
+          <label class="question-label">
+            18. Are you able to perform daily activities (dressing, eating, hygiene)?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q18_daily" value="independent" required>
+              <span>Fully independent</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q18_daily" value="mild">
+              <span>Mild assistance</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q18_daily" value="moderate">
+              <span>Moderate assistance</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q18_daily" value="full">
+              <span>Full assistance</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: Travel & Practical Readiness -->
+      <div class="section-card" data-section="6" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-plane"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Travel & Practical Readiness</h3>
+            <p class="section-description">Understanding your ability to travel for treatment</p>
+          </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="mb-8">
+          <label class="question-label">
+            19. Are you able to travel internationally for treatment?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q19_travel" value="yes_alone" required>
+              <span>Yes, without assistance</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q19_travel" value="yes_assisted">
+              <span>Yes, with assistance</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q19_travel" value="possibly">
+              <span>Possibly, depending on support</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q19_travel" value="no">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="mb-8">
+          <label class="question-label">
+            20. Preferred treatment location (if applicable):
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q20_location" value="cyprus" required>
+              <span>Cyprus</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q20_location" value="germany">
+              <span>Germany</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q20_location" value="austria">
+              <span>Austria</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q20_location" value="switzerland">
+              <span>Switzerland</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q20_location" value="flexible">
+              <span>Flexible / Any recommended</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="mb-6">
+          <label class="question-label">
+            21. How soon would you consider treatment if suitable?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q21_timeframe" value="immediate" required>
+              <span>Immediately (0–1 month)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q21_timeframe" value="1-3months">
+              <span>1–3 months</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q21_timeframe" value="3-6months">
+              <span>3–6 months</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q21_timeframe" value="exploring">
+              <span>Just exploring options</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7: Financial Readiness -->
+      <div class="section-card" data-section="7" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-euro-sign"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Financial Readiness</h3>
+            <p class="section-description">Non-intrusive assessment of funding capacity</p>
+          </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="mb-8">
+          <label class="question-label">
+            22. How would you describe your readiness to fund treatment if recommended?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q22_funding" value="ready" required>
+              <span>Ready and able</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q22_funding" value="planning">
+              <span>Able with planning</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q22_funding" value="discussion">
+              <span>Requires financial discussion</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q22_funding" value="not_feasible">
+              <span>Not currently feasible</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="mb-6">
+          <label class="question-label">
+            23. Would you like assistance with treatment planning and options?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q23_assistance" value="yes" required>
+              <span>Yes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q23_assistance" value="maybe">
+              <span>Maybe</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q23_assistance" value="no">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 8: Motivation & Goals -->
+      <div class="section-card" data-section="8" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Motivation & Goals</h3>
+            <p class="section-description">Understanding your treatment expectations</p>
+          </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="mb-8">
+          <label class="question-label">
+            24. What is your primary goal?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q24_goal" value="mobility" required>
+              <span>Improve mobility and balance</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q24_goal" value="tremor">
+              <span>Reduce tremor and rigidity</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q24_goal" value="cognition">
+              <span>Improve cognition and mood</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q24_goal" value="independence">
+              <span>Maintain independence</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q24_goal" value="all">
+              <span>All of the above</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="mb-6">
+          <label class="question-label">
+            25. How motivated are you to engage in an intensive treatment program if recommended?
+          </label>
+          <div class="space-y-3">
+            <label class="radio-option">
+              <input type="radio" name="q25_motivation" value="very" required>
+              <span>Very motivated</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q25_motivation" value="moderately">
+              <span>Moderately motivated</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q25_motivation" value="unsure">
+              <span>Unsure</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="q25_motivation" value="not_ready">
+              <span>Not ready</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center mt-8">
+        <button type="button" id="prevBtn" class="btn-secondary" style="display: none;">
+          <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+        </button>
+        <div class="flex-1"></div>
+        <button type="button" id="nextBtn" class="btn-primary">
+          Next <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+        <button type="submit" id="submitBtn" class="btn-primary" style="display: none;">
+          <i class="fa-solid fa-check mr-2"></i> Submit Questionnaire
+        </button>
+      </div>
+    </form>
+
+    <!-- Thank You / Results Section (Hidden Initially) -->
+    <div id="thankYouSection" class="section-card" style="display: none;">
+      <div class="text-center mb-8">
+        <div class="w-24 h-24 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-6">
+          <i class="fa-solid fa-check text-6xl text-green-600"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Thank You!</h2>
+        <p class="text-lg text-gray-600">
+          Your questionnaire has been submitted successfully.
+        </p>
+        <p class="text-gray-600 mt-4">
+          Our medical team will review your information and contact you within 48 hours.
+        </p>
+      </div>
+
+      <!-- Internal Qualification Output (For Demo - Hidden in Production) -->
+      <div id="qualificationOutput" class="qualification-output">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">
+          <i class="fa-solid fa-chart-bar mr-2"></i> Internal Qualification Profile
+        </h3>
+        <p class="text-sm text-gray-600 mb-4">
+          <i class="fa-solid fa-info-circle mr-1"></i> This section is for internal review only and not visible to patients
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <div class="text-sm font-semibold text-gray-700 mb-2">Clinical Relevance</div>
+            <div id="clinicalScore" class="score-badge score-medium">Medium</div>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-gray-700 mb-2">Travel Feasibility</div>
+            <div id="travelScore" class="score-badge score-medium">Medium</div>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-gray-700 mb-2">Financial Readiness</div>
+            <div id="financialScore" class="score-badge score-medium">Medium</div>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-gray-700 mb-2">Conversion Likelihood</div>
+            <div id="conversionCategory" class="score-badge score-medium">Medium Potential</div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-300 pt-4">
+          <div class="text-sm font-semibold text-gray-700 mb-2">Recommended Next Action</div>
+          <div id="recommendedAction" class="text-gray-800 font-medium">
+            Schedule discovery call with clinical team
+          </div>
+        </div>
+
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="text-sm font-semibold text-blue-900 mb-2">
+            <i class="fa-solid fa-lightbulb mr-2"></i> Summary Notes
+          </div>
+          <div id="summaryNotes" class="text-sm text-blue-800">
+            <!-- Generated summary will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== QUESTIONNAIRE STATE ==========
+    const questionnaireState = {
+      currentSection: 1,
+      totalSections: 8,
+      answers: {},
+      startTime: new Date()
+    };
+
+    // ========== FORM NAVIGATION ==========
+    let currentSection = 1;
+    const totalSections = 8;
+
+    function showSection(sectionNum) {
+      // Hide all sections
+      document.querySelectorAll('.section-card').forEach(card => {
+        card.style.display = 'none';
+        card.classList.remove('visible');
+      });
+
+      // Show current section with animation
+      const currentCard = document.querySelector(`[data-section="${sectionNum}"]`);
+      if (currentCard) {
+        currentCard.style.display = 'block';
+        setTimeout(() => currentCard.classList.add('visible'), 50);
+      }
+
+      // Update buttons
+      document.getElementById('prevBtn').style.display = sectionNum === 1 ? 'none' : 'inline-block';
+      document.getElementById('nextBtn').style.display = sectionNum === totalSections ? 'none' : 'inline-block';
+      document.getElementById('submitBtn').style.display = sectionNum === totalSections ? 'inline-block' : 'none';
+
+      // Update progress
+      updateProgress();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateProgress() {
+      const percent = (currentSection / totalSections) * 100;
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressText').textContent = `Section ${currentSection} of ${totalSections}`;
+      document.getElementById('progressPercent').textContent = Math.round(percent) + '%';
+    }
+
+    function validateCurrentSection() {
+      const currentCard = document.querySelector(`[data-section="${currentSection}"]`);
+      const inputs = currentCard.querySelectorAll('input[required]');
+      
+      // Get unique question names
+      const questionNames = new Set();
+      inputs.forEach(input => questionNames.add(input.name));
+      
+      // Check if all questions have an answer
+      for (const name of questionNames) {
+        const answered = currentCard.querySelector(`input[name="${name}"]:checked`);
+        if (!answered) {
+          alert('Please answer all questions before proceeding.');
+          return false;
+        }
+      }
+      
+      return true;
+    }
+
+    // Next button
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (validateCurrentSection()) {
+        currentSection++;
+        showSection(currentSection);
+      }
+    });
+
+    // Previous button
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      currentSection--;
+      showSection(currentSection);
+    });
+
+    // ========== FORM SUBMISSION ==========
+    document.getElementById('questionnaireForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      if (!validateCurrentSection()) {
+        return;
+      }
+
+      // Collect all answers
+      const formData = new FormData(e.target);
+      const answers = {};
+      for (const [key, value] of formData.entries()) {
+        answers[key] = value;
+      }
+
+      // Calculate qualification scores
+      const qualification = calculateQualification(answers);
+      
+      // Save to state
+      questionnaireState.answers = answers;
+      questionnaireState.qualification = qualification;
+      questionnaireState.completedTime = new Date();
+
+      // Log to console (replace with API call in production)
+      console.log('Questionnaire Submitted:', questionnaireState);
+
+      // Display results
+      displayResults(qualification, answers);
+    });
+
+    // ========== QUALIFICATION LOGIC ==========
+    function calculateQualification(answers) {
+      let clinicalScore = 0;
+      let travelScore = 0;
+      let financialScore = 0;
+
+      // Clinical Relevance Scoring
+      // Diagnosis confirmation
+      if (answers.q1_diagnosis === 'yes') clinicalScore += 3;
+      else if (answers.q1_diagnosis === 'suspected') clinicalScore += 2;
+      
+      // Disease duration (moderate duration = higher relevance)
+      if (answers.q2_time === '1_3years' || answers.q2_time === '3_5years') clinicalScore += 2;
+      else if (answers.q2_time === 'more_5years') clinicalScore += 1;
+      
+      // Disease stage
+      if (answers.q3_stage === 'moderate') clinicalScore += 3;
+      else if (answers.q3_stage === 'advanced') clinicalScore += 2;
+      else if (answers.q3_stage === 'mild') clinicalScore += 1;
+
+      // Motor symptoms severity
+      const motorSymptoms = [answers.q4_tremor, answers.q5_rigidity, answers.q6_bradykinesia];
+      motorSymptoms.forEach(symptom => {
+        if (symptom === 'moderate') clinicalScore += 2;
+        else if (symptom === 'severe') clinicalScore += 3;
+        else if (symptom === 'mild') clinicalScore += 1;
+      });
+
+      // Medication effectiveness (lower = higher score)
+      if (answers.q14_effectiveness === 'minimally' || answers.q14_effectiveness === 'none') {
+        clinicalScore += 3;
+      } else if (answers.q14_effectiveness === 'moderately') {
+        clinicalScore += 2;
+      }
+
+      // Travel Feasibility Scoring
+      if (answers.q19_travel === 'yes_alone') travelScore += 3;
+      else if (answers.q19_travel === 'yes_assisted') travelScore += 2;
+      else if (answers.q19_travel === 'possibly') travelScore += 1;
+
+      // Timeframe urgency
+      if (answers.q21_timeframe === 'immediate') travelScore += 3;
+      else if (answers.q21_timeframe === '1-3months') travelScore += 2;
+      else if (answers.q21_timeframe === '3-6months') travelScore += 1;
+
+      // Mobility for travel
+      if (answers.q17_walking === 'independent' || answers.q17_walking === 'aid') {
+        travelScore += 2;
+      }
+
+      // Financial Readiness Scoring
+      if (answers.q22_funding === 'ready') financialScore += 3;
+      else if (answers.q22_funding === 'planning') financialScore += 2;
+      else if (answers.q22_funding === 'discussion') financialScore += 1;
+
+      // Motivation
+      if (answers.q25_motivation === 'very') financialScore += 2;
+      else if (answers.q25_motivation === 'moderately') financialScore += 1;
+
+      // Categorize scores
+      const getCategoryFromScore = (score, thresholds) => {
+        if (score >= thresholds.high) return 'high';
+        if (score >= thresholds.medium) return 'medium';
+        return 'low';
+      };
+
+      const clinical = getCategoryFromScore(clinicalScore, { high: 12, medium: 6 });
+      const travel = getCategoryFromScore(travelScore, { high: 7, medium: 4 });
+      const financial = getCategoryFromScore(financialScore, { high: 4, medium: 2 });
+
+      // Overall conversion category
+      let conversionCategory;
+      let recommendedAction;
+
+      if (clinical === 'high' && travel === 'high' && financial === 'high') {
+        conversionCategory = 'high';
+        recommendedAction = 'Priority clinical review and immediate discovery call';
+      } else if (clinical === 'high' && (travel === 'high' || financial === 'high')) {
+        conversionCategory = 'medium-high';
+        recommendedAction = 'Schedule discovery call within 48 hours';
+      } else if (clinical === 'medium' || travel === 'medium' || financial === 'medium') {
+        conversionCategory = 'medium';
+        recommendedAction = 'Standard review queue - contact within 5 business days';
+      } else {
+        conversionCategory = 'low';
+        recommendedAction = 'Educational resources and follow-up in 2-4 weeks';
+      }
+
+      return {
+        scores: {
+          clinical: { value: clinicalScore, category: clinical },
+          travel: { value: travelScore, category: travel },
+          financial: { value: financialScore, category: financial }
+        },
+        conversionCategory,
+        recommendedAction
+      };
+    }
+
+    // ========== DISPLAY RESULTS ==========
+    function displayResults(qualification, answers) {
+      // Hide form
+      document.getElementById('questionnaireForm').style.display = 'none';
+      
+      // Show thank you section
+      const thankYou = document.getElementById('thankYouSection');
+      thankYou.style.display = 'block';
+      setTimeout(() => thankYou.classList.add('visible'), 50);
+
+      // Update qualification scores
+      const scoreClass = {
+        'high': 'score-high',
+        'medium-high': 'score-high',
+        'medium': 'score-medium',
+        'low': 'score-low'
+      };
+
+      document.getElementById('clinicalScore').textContent = qualification.scores.clinical.category.toUpperCase();
+      document.getElementById('clinicalScore').className = `score-badge ${scoreClass[qualification.scores.clinical.category]}`;
+
+      document.getElementById('travelScore').textContent = qualification.scores.travel.category.toUpperCase();
+      document.getElementById('travelScore').className = `score-badge ${scoreClass[qualification.scores.travel.category]}`;
+
+      document.getElementById('financialScore').textContent = qualification.scores.financial.category.toUpperCase();
+      document.getElementById('financialScore').className = `score-badge ${scoreClass[qualification.scores.financial.category]}`;
+
+      document.getElementById('conversionCategory').textContent = qualification.conversionCategory.toUpperCase().replace('-', ' ') + ' POTENTIAL';
+      document.getElementById('conversionCategory').className = `score-badge ${scoreClass[qualification.conversionCategory]}`;
+
+      document.getElementById('recommendedAction').textContent = qualification.recommendedAction;
+
+      // Generate summary notes
+      const summary = generateSummaryNotes(answers, qualification);
+      document.getElementById('summaryNotes').innerHTML = summary;
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function generateSummaryNotes(answers, qualification) {
+      let notes = [];
+      
+      // Diagnosis status
+      if (answers.q1_diagnosis === 'yes') {
+        notes.push('✓ Confirmed Parkinson\'s diagnosis');
+      } else if (answers.q1_diagnosis === 'suspected') {
+        notes.push('⚠ Suspected but unconfirmed diagnosis - may need neurologist referral');
+      }
+
+      // Motor symptoms
+      const hasModerateMotor = [answers.q4_tremor, answers.q5_rigidity, answers.q6_bradykinesia]
+        .some(s => s === 'moderate' || s === 'severe');
+      if (hasModerateMotor) {
+        notes.push('• Significant motor symptoms present - good treatment candidate');
+      }
+
+      // Medication response
+      if (answers.q14_effectiveness === 'minimally' || answers.q14_effectiveness === 'none') {
+        notes.push('• Poor medication response - may benefit from advanced therapies');
+      }
+
+      // Travel capability
+      if (answers.q19_travel === 'yes_alone' || answers.q19_travel === 'yes_assisted') {
+        notes.push('✓ Travel feasible for international treatment');
+      } else if (answers.q19_travel === 'no') {
+        notes.push('⚠ Travel not feasible - consider telemedicine consultation first');
+      }
+
+      // Timeframe
+      if (answers.q21_timeframe === 'immediate') {
+        notes.push('🔴 URGENT: Patient ready for immediate treatment');
+      } else if (answers.q21_timeframe === '1-3months') {
+        notes.push('🟡 Near-term interest - prioritize response');
+      }
+
+      // Preferred location
+      const locationMap = {
+        'cyprus': 'Cyprus',
+        'germany': 'Germany',
+        'austria': 'Austria',
+        'switzerland': 'Switzerland',
+        'flexible': 'Flexible/Any'
+      };
+      notes.push(`📍 Preferred location: ${locationMap[answers.q20_location]}`);
+
+      return notes.join('<br>');
+    }
+
+    // ========== RADIO BUTTON STYLING ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add visual feedback to radio selections
+      document.querySelectorAll('.radio-option input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          // Remove selected class from all options in this question
+          const name = e.target.name;
+          document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+            r.parentElement.classList.remove('selected');
+          });
+          // Add selected class to chosen option
+          e.target.parentElement.classList.add('selected');
+        });
+      });
+
+      // Initialize first section
+      showSection(1);
+    });
+
+    // ========== AUTO-SAVE TO LOCALSTORAGE ==========
+    function autoSave() {
+      const formData = new FormData(document.getElementById('questionnaireForm'));
+      const savedAnswers = {};
+      for (const [key, value] of formData.entries()) {
+        savedAnswers[key] = value;
+      }
+      localStorage.setItem('sozo_questionnaire_draft', JSON.stringify({
+        answers: savedAnswers,
+        currentSection,
+        savedAt: new Date().toISOString()
+      }));
+    }
+
+    // Auto-save every 30 seconds
+    setInterval(autoSave, 30000);
+
+    // Save on radio change
+    document.addEventListener('change', (e) => {
+      if (e.target.type === 'radio') {
+        autoSave();
+      }
+    });
+
+    // Restore saved progress on load
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('sozo_questionnaire_draft');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (confirm('You have a saved draft. Would you like to continue where you left off?')) {
+            // Restore answers
+            Object.entries(data.answers).forEach(([name, value]) => {
+              const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+              if (radio) {
+                radio.checked = true;
+                radio.parentElement.classList.add('selected');
+              }
+            });
+            // Restore section
+            currentSection = data.currentSection || 1;
+            showSection(currentSection);
+          }
+        } catch (e) {
+          console.error('Error restoring draft:', e);
+        }
+      }
+    });
+
+    // Clear draft on successful submission
+    document.getElementById('questionnaireForm').addEventListener('submit', () => {
+      localStorage.removeItem('sozo_questionnaire_draft');
+    });
+  </script>
+</body>
+</html>

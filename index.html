@@ -1717,6 +1717,7 @@ const MENU = {
     {key:'manageappts', label:'Manage Appointments', icon:'fa-calendar-check'},
     {key:'patientsearch', label:'Patient Search', icon:'fa-magnifying-glass'},
     {key:'doctorsearch', label:'Doctor Search', icon:'fa-stethoscope'},
+    {key:'international-patients', label:'International Patients', icon:'fa-globe'},
     {key:'profile', label:'My Profile', icon:'fa-user-circle'}
   ],
   admin: [
@@ -1726,6 +1727,7 @@ const MENU = {
     {key:'partnerships', label:'Partnerships', icon:'fa-handshake'},
     {key:'patients', label:'Patients DB', icon:'fa-users'},
     {key:'doctors', label:'Doctors DB', icon:'fa-user-doctor'},
+    {key:'international-patients', label:'International Patients', icon:'fa-globe'},
     {key:'medicalassessment', label:'Schedules/ appointments', icon:'fa-stethoscope', children: [
       {key:'schedule', label:'Today\'s Schedule'},
       {key:'appointments', label:'Appointments'},
@@ -2595,6 +2597,12 @@ function loadSection(key) {
     // Patient Journey - Open in new window for all roles
     if(key === 'patient-journey') {
       window.open('patient-journey.html', '_blank');
+      return;
+    }
+
+    // International Patients Questionnaire - Open in new window
+    if(key === 'international-patients') {
+      window.open('international-patients.html', '_blank');
       return;
     }
 
