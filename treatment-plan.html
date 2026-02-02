@@ -1,0 +1,4234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Plan - Neuromodulation System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        
+        .input-royal {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .input-royal:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-sozo {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Electrode animations */
+        @keyframes pulse-anode {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+        
+        @keyframes pulse-cathode {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+        
+        .electrode-anode {
+            animation: pulse-anode 2s infinite;
+        }
+        
+        .electrode-cathode {
+            animation: pulse-cathode 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="contentArea" class="container mx-auto"></div>
+    
+    <script>
+let treatmentPlanState = {
+  devices: [], // Array of up to 3 devices
+  activeDeviceTab: 0,
+  maxDevices: 3,
+  networkTabs: {}, // Track network tabs per device: {deviceIndex: [{networkId, networkName, isActive}]}
+  // Sub-tab inside Treatment Plan (either 'devices' or 'parameters')
+  activeTreatmentSubTab: 'devices',
+  // Main tabs for the Treatment Plan page: 'devices' or 'parameters' (full tab)
+  activeTreatmentMainTab: 'devices'
+};
+
+// Persistence Logic
+const STORAGE_KEY = 'sozo_treatment_plan';
+const CUSTOM_MONTAGES_KEY = 'sozo_custom_montages';
+
+// Custom Montages Storage
+let customMontagesLibrary = [];
+
+function switchTreatmentMainTab(tab) {
+  if (!['devices','parameters','details'].includes(tab)) return;
+  treatmentPlanState.activeTreatmentMainTab = tab;
+  // Re-render the whole treatment plan view to load the selected main tab
+  renderTreatmentPlan();
+}
+window.switchTreatmentMainTab = switchTreatmentMainTab;
+
+
+function loadCustomMontages() {
+  try {
+    const saved = localStorage.getItem(CUSTOM_MONTAGES_KEY);
+    if (saved) {
+      customMontagesLibrary = JSON.parse(saved);
+      console.log('Custom Montages loaded from storage:', customMontagesLibrary.length, 'montages');
+    }
+  } catch (e) {
+    console.error('Error loading custom montages:', e);
+  }
+  return customMontagesLibrary;
+}
+
+function saveCustomMontageToLibrary(montageName, anodes, cathode, deviceType, baseNetwork) {
+  console.log('[saveCustomMontageToLibrary] Saving:', { montageName, anodes, cathode, deviceType, baseNetwork });
+  
+  const customMontage = {
+    id: `custom_${Date.now()}`,
+    name: montageName,
+    anodes: anodes,
+    cathode: cathode,
+    deviceType: deviceType,
+    baseNetwork: baseNetwork,
+    createdAt: new Date().toISOString(),
+    description: `Custom montage: ${anodes.join(', ')} → ${cathode}`
+  };
+  
+  customMontagesLibrary.push(customMontage);
+  console.log('[saveCustomMontageToLibrary] Library now has', customMontagesLibrary.length, 'montages');
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    console.log('[saveCustomMontageToLibrary] Saved to localStorage successfully');
+  } catch (e) {
+    console.error('[saveCustomMontageToLibrary] Failed to save to localStorage:', e);
+  }
+  
+  return customMontage;
+}
+
+function getCustomMontagesForDevice(deviceType) {
+  return customMontagesLibrary.filter(m => m.deviceType === deviceType);
+}
+
+function loadTreatmentPlanState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      treatmentPlanState = JSON.parse(saved);
+      console.log('Treatment Plan loaded from storage');
+    }
+  } catch (e) {
+    console.error('Failed to load treatment plan state', e);
+  }
+}
+
+function saveTreatmentPlanState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(treatmentPlanState));
+    console.log('Treatment Plan saved to storage');
+  } catch (e) {
+    console.error('Failed to save treatment plan state', e);
+  }
+}
+
+function renderTreatmentPlanParameters() {
+  // Render a full-viewport Parameters tab for the treatment plan showing per-device parameters
+  return `
+    <div class="card p-8">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Treatment Plan Parameters</h3>
+      <p class="text-sm text-slate-600 mb-4">Configure and review parameters for all devices in a single view.</p>
+      <div class="space-y-4">
+        ${treatmentPlanState.devices.length === 0 ? '<p class="text-slate-500 italic">No devices added yet</p>' : treatmentPlanState.devices.map((device, idx) => `
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <h5 class="font-semibold text-slate-800 mb-2">Device ${idx + 1}: ${device.name}</h5>
+            ${renderParametersContent(device, idx)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+window.switchTreatmentMainTab = switchTreatmentMainTab;
+window.renderTreatmentPlanParameters = renderTreatmentPlanParameters;
+
+function renderTreatmentPlanDetails() {
+  const devices = treatmentPlanState.devices || [];
+
+  if (devices.length === 0) {
+    return `
+      <div class="card p-6 text-sm text-slate-600">
+        <p>No devices added yet. Add devices first to add details.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold">Device Details</h3>
+        <div class="">
+          <label class="text-xs text-slate-600 mr-2">Select device</label>
+          <select onchange="switchDetailsDevice(this.value)" class="input-royal">
+            ${devices.map((d, i) => `<option value="${i}" ${i === selIndex ? 'selected' : ''}>Device ${i+1}: ${d.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="border rounded-lg p-4 bg-white">
+        <div class="mb-2 font-semibold text-slate-800">Selected: Device ${selIndex + 1} — ${device.name}</div>
+        <textarea id="deviceDetails_${selIndex}" class="input-royal w-full text-sm" rows="8" placeholder="Enter notes or device-specific details for the doctor..." oninput="updateDeviceDetails(${selIndex}, this.value)">${(device.details || '')}</textarea>
+      </div>
+    </div>
+    </div>
+  `;
+}
+
+function updateDeviceDetails(deviceIndex, value) {
+  if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
+  treatmentPlanState.devices[deviceIndex].details = value;
+  saveTreatmentPlanState();
+}
+
+function switchTreatmentSubTab(subTab) {
+  if (!['devices','parameters'].includes(subTab)) return;
+  treatmentPlanState.activeTreatmentSubTab = subTab;
+  // Re-render the treatment plan area to reflect the sub-tab change
+  renderTreatmentPlan();
+}
+
+function renderParametersContent(device, deviceIndex) {
+  if (!device) return '<p class="text-slate-500">No device selected</p>';
+
+  // Ensure parameters object exists
+  if (!device.parameters) device.parameters = { duration: '', intensity: '', ramp: '', daysPerWeek: '', selectedDays: '', timeOfDay: '' };
+
+  const params = device.parameters;
+
+  return `
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <h5 class="text-sm font-bold text-slate-900 mb-3">Device Parameters - Device ${deviceIndex + 1}: ${device.name}</h5>
+
+      <!-- Top row: Duration / Intensity / Ramp -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Duration</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'duration', this.value)" class="input-royal w-full">
+            <option value="">Duration</option>
+            <option value="10" ${params.duration === '10' ? 'selected' : ''}>10 min</option>
+            <option value="15" ${params.duration === '15' ? 'selected' : ''}>15 min</option>
+            <option value="20" ${params.duration === '20' ? 'selected' : ''}>20 min</option>
+            <option value="30" ${params.duration === '30' ? 'selected' : ''}>30 min</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Intensity</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'intensity', this.value)" class="input-royal w-full">
+            <option value="">Intensity</option>
+            <option value="low" ${params.intensity === 'low' ? 'selected' : ''}>Low</option>
+            <option value="medium" ${params.intensity === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="high" ${params.intensity === 'high' ? 'selected' : ''}>High</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Ramp</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'ramp', this.value)" class="input-royal w-full">
+            <option value="">Ramp</option>
+            <option value="slow" ${params.ramp === 'slow' ? 'selected' : ''}>Slow</option>
+            <option value="medium" ${params.ramp === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="fast" ${params.ramp === 'fast' ? 'selected' : ''}>Fast</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bottom row: Number of days/week / Select days / Time of day -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Number of days/week</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'daysPerWeek', this.value)" class="input-royal w-full">
+            <option value="">Number of days/week</option>
+            <option value="1" ${params.daysPerWeek === '1' ? 'selected' : ''}>1</option>
+            <option value="2" ${params.daysPerWeek === '2' ? 'selected' : ''}>2</option>
+            <option value="3" ${params.daysPerWeek === '3' ? 'selected' : ''}>3</option>
+            <option value="4" ${params.daysPerWeek === '4' ? 'selected' : ''}>4</option>
+            <option value="5" ${params.daysPerWeek === '5' ? 'selected' : ''}>5</option>
+            <option value="6" ${params.daysPerWeek === '6' ? 'selected' : ''}>6</option>
+            <option value="7" ${params.daysPerWeek === '7' ? 'selected' : ''}>7</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Select days</label>
+          <select multiple onchange="updateDeviceParameter(${deviceIndex}, 'selectedDays', Array.from(this.selectedOptions).map(o=>o.value).join(', '))" class="input-royal w-full h-28">
+            <option value="Mon" ${params.selectedDays?.includes('Mon') ? 'selected' : ''}>Mon</option>
+            <option value="Tue" ${params.selectedDays?.includes('Tue') ? 'selected' : ''}>Tue</option>
+            <option value="Wed" ${params.selectedDays?.includes('Wed') ? 'selected' : ''}>Wed</option>
+            <option value="Thu" ${params.selectedDays?.includes('Thu') ? 'selected' : ''}>Thu</option>
+            <option value="Fri" ${params.selectedDays?.includes('Fri') ? 'selected' : ''}>Fri</option>
+            <option value="Sat" ${params.selectedDays?.includes('Sat') ? 'selected' : ''}>Sat</option>
+            <option value="Sun" ${params.selectedDays?.includes('Sun') ? 'selected' : ''}>Sun</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Time of day</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'timeOfDay', this.value)" class="input-royal w-full">
+            <option value="">time of day</option>
+            <option value="morning" ${params.timeOfDay === 'morning' ? 'selected' : ''}>Morning</option>
+            <option value="midday" ${params.timeOfDay === 'midday' ? 'selected' : ''}>Midday</option>
+            <option value="afternoon" ${params.timeOfDay === 'afternoon' ? 'selected' : ''}>Afternoon</option>
+            <option value="evening" ${params.timeOfDay === 'evening' ? 'selected' : ''}>Evening</option>
+            <option value="night" ${params.timeOfDay === 'night' ? 'selected' : ''}>Night</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateDeviceParameter(deviceIndex, key, value) {
+  if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
+  if (!treatmentPlanState.devices[deviceIndex].parameters) treatmentPlanState.devices[deviceIndex].parameters = {};
+  treatmentPlanState.devices[deviceIndex].parameters[key] = value;
+  saveTreatmentPlanState();
+  // Update the deviceTabContent only to reflect changes
+  const contentEl = document.getElementById('deviceTabContent');
+  if (contentEl) {
+    contentEl.innerHTML = treatmentPlanState.activeTreatmentSubTab === 'parameters' ? renderParametersContent(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab) : renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab);
+  }
+}
+
+// Expose to global scope for inline handlers
+window.switchTreatmentSubTab = switchTreatmentSubTab;
+window.updateDeviceParameter = updateDeviceParameter;
+
+function switchTreatmentMainTab(tab) {
+  if (!['devices','parameters','details'].includes(tab)) return;
+  treatmentPlanState.activeTreatmentMainTab = tab;
+  // Re-render the whole treatment plan view to load the selected main tab
+  renderTreatmentPlan();
+}
+
+function renderTreatmentPlanParameters() {
+  // Render a full-viewport Parameters tab for the treatment plan showing per-device parameters
+  return `
+    <div class="card p-8">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Treatment Plan Parameters</h3>
+      <p class="text-sm text-slate-600 mb-4">Configure and review parameters for all devices in a single view.</p>
+      <div class="space-y-4">
+        ${treatmentPlanState.devices.length === 0 ? '<p class="text-slate-500 italic">No devices added yet</p>' : treatmentPlanState.devices.map((device, idx) => `
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <h5 class="font-semibold text-slate-800 mb-2">Device ${idx + 1}: ${device.name}</h5>
+            ${renderParametersContent(device, idx)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function switchDetailsDevice(index) {
+  const idx = parseInt(index);
+  if (isNaN(idx)) return;
+  treatmentPlanState.activeDetailsDevice = idx;
+  saveTreatmentPlanState();
+  const mainContentEl = document.getElementById('treatmentMainContent');
+  if (mainContentEl) mainContentEl.innerHTML = renderTreatmentPlanDetails();
+}
+
+window.switchDetailsDevice = switchDetailsDevice;
+
+window.switchTreatmentMainTab = switchTreatmentMainTab;
+window.renderTreatmentPlanParameters = renderTreatmentPlanParameters;
+// Load state on initialization
+loadTreatmentPlanState();
+loadCustomMontages();
+
+// Restore visual state from stored data
+function restoreTreatmentPlanHighlights() {
+  treatmentPlanState.devices.forEach((device, i) => {
+    // 1. Update Dropdown
+    const select = document.getElementById(`networkSelect_${i}`);
+    if (select && device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+      select.value = device.selectedNetwork;
+      document.getElementById(`networkDetails_${i}`).classList.remove('hidden');
+    }
+
+    // 2. Update Details Text
+    if (device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+       const networks = getDummyNetworks(device.value);
+       const network = networks[device.selectedNetwork];
+       if (network) {
+         const nameEl = document.getElementById(`networkName_${i}`);
+         if (nameEl) {
+             let name = network.name;
+             if (device.customMontageName) {
+                 name += ` ${device.customMontageName}`;
+             }
+             nameEl.textContent = name;
+         }
+         
+         const descEl = document.getElementById(`networkDesc_${i}`);
+         if (descEl) descEl.textContent = network.description;
+         
+         const indEl = document.getElementById(`networkIndication_${i}`);
+         if (indEl) indEl.textContent = network.indication;
+       }
+    }
+
+    // 3. Update Electrodes Text
+    const anodesEl = document.getElementById(`networkAnodes_${i}`);
+    if (anodesEl && device.montage.anodes) {
+        anodesEl.textContent = device.montage.anodes.join(', ');
+    }
+    
+    const cathodeEl = document.getElementById(`networkCathode_${i}`);
+    if (cathodeEl) {
+        cathodeEl.textContent = device.montage.cathode || '';
+    }
+    
+    // 4. Update Info Panel
+    const infoEl = document.getElementById(`networkInfo_${i}`);
+    if (infoEl && device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+       const networks = getDummyNetworks(device.value);
+       const network = networks[device.selectedNetwork];
+       if (network) {
+           infoEl.innerHTML = `
+            <p class="text-xs font-bold text-purple-900 mb-1">
+              <i class="fa-solid fa-bolt mr-1"></i>Active Network: ${network.name}${device.customMontageName ? ` ${device.customMontageName}` : ''}
+            </p>
+            <p class="text-xs text-purple-700">
+              Anodes: <span class="font-mono font-bold">${device.montage.anodes ? device.montage.anodes.join(', ') : ''}</span> | 
+              Cathode: <span class="font-mono font-bold">${device.montage.cathode || ''}</span>
+            </p>
+          `;
+       }
+    }
+
+    // 5. Highlight Electrodes (Only for brain devices)
+    if (usesBrainMontage(device.value) && device.montage && device.montage.anodes) {
+      highlightNetworkElectrodes(i, device.montage.anodes, device.montage.cathode);
+    }
+  });
+}
+
+function populateCustomMontagesForAllDevices() {
+  treatmentPlanState.devices.forEach((device, i) => {
+    if (usesBrainMontage(device.value)) {
+      populateCustomMontagesForDevice(i);
+    }
+  });
+}
+
+function populateCustomMontagesForDevice(deviceIndex) {
+  const optgroup = document.getElementById(`customMontagesOptgroup_${deviceIndex}`);
+  
+  if (!optgroup) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Get custom montages for this device type
+  const deviceMontages = customMontagesLibrary.filter(m => m.deviceType === device.value);
+  
+  if (deviceMontages.length === 0) {
+    optgroup.innerHTML = '<option value="" disabled>No custom montages saved</option>';
+    return;
+  }
+  
+  // Build options from array
+  let html = '';
+  deviceMontages.forEach(montage => {
+    html += `<option value="${montage.id}">⭐ ${montage.name}</option>`;
+  });
+  
+  optgroup.innerHTML = html;
+}
+
+// Original implementation preserved below for reference
+function populateCustomMontagesForDevice_OLD(deviceIndex) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device || !usesBrainMontage(device.value)) return;
+  
+  const customMontages = getCustomMontagesForDevice(device.value);
+  const listEl = document.getElementById(`customMontagesList_${deviceIndex}`);
+  const countEl = document.getElementById(`customMontageCount_${deviceIndex}`);
+  
+  if (countEl) {
+    countEl.textContent = customMontages.length;
+  }
+  
+  if (listEl) {
+    if (customMontages.length === 0) {
+      listEl.innerHTML = '<p class="text-xs text-slate-500 italic text-center py-2">No custom montages saved yet</p>';
+    } else {
+      listEl.innerHTML = customMontages.map(montage => `
+        <button 
+          onclick="loadCustomMontage(${deviceIndex}, '${montage.id}')"
+          class="w-full text-left px-3 py-2 rounded hover:bg-purple-50 transition-colors text-xs border border-transparent hover:border-purple-300 group"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-semibold text-purple-900">${montage.name}</span>
+              <div class="text-[10px] text-purple-600">${montage.description}</div>
+            </div>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="fa-solid fa-arrow-right text-purple-500 text-xs"></i>
+            </div>
+          </div>
+        </button>
+      `).join('');
+    }
+  }
+}
+
+function loadCustomMontage(deviceIndex, montageId) {
+  const customMontage = customMontagesLibrary.find(m => m.id === montageId);
+  if (!customMontage) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Apply the custom montage
+  device.montage.anodes = [...customMontage.anodes];
+  device.montage.cathode = customMontage.cathode;
+  device.customMontageName = `(${customMontage.name})`;
+  device.selectedNetwork = ''; // Clear network selection as this is custom
+  
+  // Update UI
+  highlightNetworkElectrodes(deviceIndex, customMontage.anodes, customMontage.cathode);
+  
+  // Update network details panel
+  document.getElementById(`networkDetails_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`networkName_${deviceIndex}`).textContent = `Custom: ${customMontage.name}`;
+  document.getElementById(`networkDesc_${deviceIndex}`).textContent = customMontage.description;
+  document.getElementById(`networkAnodes_${deviceIndex}`).textContent = customMontage.anodes.join(', ');
+  document.getElementById(`networkCathode_${deviceIndex}`).textContent = customMontage.cathode;
+  document.getElementById(`networkIndication_${deviceIndex}`).textContent = `Custom montage created from ${customMontage.baseNetwork}`;
+  
+  // Update left panel info
+  document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+    <p class="text-xs font-bold text-purple-900 mb-1">
+      <i class="fa-solid fa-star mr-1"></i>Custom Montage: ${customMontage.name}
+    </p>
+    <p class="text-xs text-purple-700">
+      Anodes: <span class="font-mono font-bold">${customMontage.anodes.join(', ')}</span> | 
+      Cathode: <span class="font-mono font-bold">${customMontage.cathode}</span>
+    </p>
+  `;
+  
+  saveTreatmentPlanState();
+}
+
+function renderTreatmentPlan() {
+  const area = document.getElementById('contentArea');
+  // For patient role, auto-select their own patient context
+  if(currentRole === 'patient' && !globalSelectedPatientId) {
+    const ap = getActivePatient();
+    if(ap?.id) globalSelectedPatientId = ap.id;
+  }
+  
+  // Auto-populate patient details if globalSelectedPatientId is set
+  if(globalSelectedPatientId && !globalState.currentPatient) {
+    const selectedPatient = sampleData.patients.find(p => p.id === globalSelectedPatientId);
+    if(selectedPatient) {
+      globalState.currentPatient = selectedPatient;
+    }
+  }
+  
+  const p = globalState.currentPatient || getActivePatient();
+  if (!p) {
+    area.innerHTML = `
+      <div class="p-8">
+        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+          <p class="text-yellow-800 font-bold">No patient selected</p>
+          <p class="text-sm text-yellow-700 mt-2">Please select a patient to view their treatment plan.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  area.innerHTML = `
+    <div class="p-8">
+    
+    
+    
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">Treatment Plan</h2>
+        <p class="text-slate-500">Neuromodulation Treatment Planning & Documentation</p>
+      </div>
+      ${currentRole !== 'patient' ? `
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <select id="patientNavigationSelectTreatment" class="input-royal pr-10 font-bold text-slate-900 bg-white border-2 border-orange-300">
+            <option value="">Select Patient...</option>
+            ${sampleData.patients.map(patient => `
+              <option value="${patient.id}" ${globalState.currentPatient?.id === patient.id ? 'selected' : ''}>
+                ${patient.name} (${patient.id})
+              </option>
+            `).join('')}
+          </select>
+          <i class="fa-solid fa-user-group absolute right-3 top-3 text-orange-600 pointer-events-none"></i>
+        </div>
+        <button onclick="loadSection('patienthistory')" class="btn-secondary text-sm" title="Back to Patient History">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Patient View
+        </button>
+      </div>
+      ` : ''}
+    </div>
+
+    ${globalState.currentPatient && currentRole !== 'patient' ? `
+    <!-- Auto-populated Patient Context -->
+    <div class="card p-6 mb-8 border-l-4 border-l-orange-600 bg-gradient-to-r from-orange-50 to-slate-50">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-orange-900"><i class="fa-solid fa-user-circle mr-2"></i>Patient: ${p.name}</h3>
+        <span class="badge badge-sozo">ID: ${p.id}</span>
+      </div>
+      <div class="grid grid-cols-3 gap-4 text-sm">
+        <div><span class="font-bold text-slate-700">Age:</span> <span class="text-slate-900">${p.age}</span></div>
+        <div><span class="font-bold text-slate-700">Gender:</span> <span class="text-slate-900">${p.gender}</span></div>
+        <div><span class="font-bold text-slate-700">Status:</span> <span class="badge badge-info">${p.status || 'Active'}</span></div>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Treatment Plan Main Tabs -->
+      <div class="mb-4 flex gap-2 items-center">
+      <button id="tpMain_devices" onclick="switchTreatmentMainTab('devices')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'devices' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Devices</button>
+      <button id="tpMain_parameters" onclick="switchTreatmentMainTab('parameters')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'parameters' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Parameters</button>
+      <button id="tpMain_details" onclick="switchTreatmentMainTab('details')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'details' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Details</button>
+    </div>
+
+    <div id="treatmentMainContent">
+    <div class="card p-8">
+      
+      <!-- Step 1: Device Selection (Max 3) -->
+      <div class="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-300">
+        <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          Choose Devices (Maximum 3)
+        </h3>
+        
+        <div class="flex flex-wrap gap-3 mb-4">
+          ${treatmentPlanState.devices.map((device, idx) => `
+            <div class="bg-white px-4 py-2 rounded-lg border-2 border-blue-400 flex items-center gap-2 shadow">
+              <i class="fa-solid fa-microchip text-blue-600"></i>
+              <span class="font-semibold text-slate-800">${device.name}</span>
+              <button onclick="removeDevice(${idx})" class="ml-2 text-red-500 hover:text-red-700" ${currentRole === 'patient' ? 'disabled' : ''}>
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          `).join('')}
+          ${treatmentPlanState.devices.length === 0 ? '<p class="text-slate-500 italic">No devices selected yet</p>' : ''}
+        </div>
+        
+        ${treatmentPlanState.devices.length < treatmentPlanState.maxDevices ? `
+        <div class="flex gap-3 items-center">
+          <select id="newDeviceSelect" class="input-royal flex-1" ${currentRole === 'patient' ? 'disabled' : ''}>
+            <option value="">-- Select a Device to Add --</option>
+            <optgroup label="tDCS/tACS Devices">
+              <option value="plato">Plato Neurostimulation - 4 specialized electrode blocks</option>
+              <option value="newronika">Newronika - 10-20 system placement</option>
+            </optgroup>
+            <optgroup label="Alpha Stim Devices">
+              <option value="alpha_stim_aid">Alpha Stim AID - Earlobe clips</option>
+              <option value="alpha_stim_met">Alpha Stim MET - Earlobe clips + probe</option>
+            </optgroup>
+            <optgroup label="VNS & Other">
+              <option value="tvns">tVNS - Cymba area (left ear)</option>
+              <option value="tps">TPS (Transcranial Pulse Stimulation)</option>
+            </optgroup>
+            <optgroup label="Standard Placement">
+              <option value="flow">Flow Device - Standard placement</option>
+              <option value="robotic_arm">Robotic Arm - Standard placement</option>
+            </optgroup>
+          </select>
+          <button onclick="addDevice()" class="btn-primary" ${currentRole === 'patient' ? 'disabled' : ''}>
+            <i class="fa-solid fa-plus mr-2"></i>Add Device
+          </button>
+        </div>
+        ` : '<p class="text-orange-600 font-semibold"><i class="fa-solid fa-info-circle mr-2"></i>Maximum of 3 devices reached</p>'}
+      </div>
+
+      ${treatmentPlanState.devices.length > 0 ? `
+      <!-- Step 2: Device Journey Tabs -->
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-route"></i>
+          </div>
+          Configure Each Device Journey
+        </h3>
+        
+        <!-- Device Tabs -->
+        <div class="flex border-b-2 border-slate-200 mb-6 overflow-x-auto">
+          ${treatmentPlanState.devices.map((device, idx) => `
+            <button 
+              onclick="switchDeviceTab(${idx})" 
+              class="px-6 py-3 font-semibold transition-all border-b-4 ${treatmentPlanState.activeDeviceTab === idx ? 'border-purple-600 text-purple-600 bg-purple-50' : 'border-transparent text-slate-600 hover:bg-slate-50'}"
+            >
+              <i class="fa-solid fa-microchip mr-2"></i>
+              Device ${idx + 1}: ${device.name}
+            </button>
+          `).join('')}
+        </div>
+        
+        <!-- Active Device Tab Content -->
+        <div>
+          <div id="deviceTabContent">
+            ${renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab)}
+          </div>
+        </div>
+      </div>
+      ` : ''}
+
+      
+
+      <!-- Disease Selection & Automated Brain Region Mapping -->
+      <!--for previous treatment plan -->
+      <!-- Medication Suggestions Section -->
+      <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">
+          <i class="fa-solid fa-pills mr-2"></i>Medication Suggestions
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-semibold text-slate-700 block mb-2">Prescribed Medications</label>
+            <textarea 
+              id="medicationSuggestions" 
+              class="input-royal w-full text-sm" 
+              rows="8" 
+              placeholder="Enter medication suggestions, dosages, and instructions...&#10;&#10;Example:&#10;1. Medication Name: [Drug name]&#10;   Dosage: [Amount and frequency]&#10;   Duration: [Treatment period]&#10;   Instructions: [Special instructions]&#10;&#10;2. ..." 
+              ${currentRole === 'patient' ? 'readonly' : ''}
+            ></textarea>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-info-circle text-blue-600 text-xl mt-1"></i>
+              <div class="text-sm text-blue-800">
+                <p class="font-semibold mb-1">Clinical Notes:</p>
+                <ul class="list-disc list-inside space-y-1 text-xs">
+                  <li>Include medication name, dosage, frequency, and duration</li>
+                  <li>Note any contraindications or interactions with neuromodulation</li>
+                  <li>Specify timing relative to treatment sessions if applicable</li>
+                  <li>Document any medication adjustments based on treatment response</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      ${currentRole !== 'patient' ? `
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="saveTreatmentPlanBtn" class="btn-primary">
+          <i class="fa-solid fa-save mr-2"></i>Save Treatment Plan
+        </button>
+      </div>
+      ` : ''}
+    </div>
+    </div>
+    </div>
+  `;
+  
+  // Attach event listeners
+  setTimeout(() => {
+    // Restore saved visualizations
+    restoreTreatmentPlanHighlights();
+    populateCustomMontagesForAllDevices();
+    
+    // Clean up any malformed network tabs
+    if (treatmentPlanState.networkTabs) {
+      Object.keys(treatmentPlanState.networkTabs).forEach(deviceIndex => {
+        if (treatmentPlanState.networkTabs[deviceIndex]) {
+          treatmentPlanState.networkTabs[deviceIndex] = treatmentPlanState.networkTabs[deviceIndex]
+            .filter(tab => tab && tab.networkId !== undefined && tab.networkName);
+        }
+      });
+    }
+    
+    // Initialize network tabs for all devices
+    treatmentPlanState.devices.forEach((device, index) => {
+      if (usesBrainMontage(device.value)) {
+        renderNetworkTabs(index);
+      }
+    });
+
+    // Render main treatment content according to selected main tab
+    const mainContentEl = document.getElementById('treatmentMainContent');
+    if (mainContentEl) {
+      if (treatmentPlanState.activeTreatmentMainTab === 'parameters') {
+        mainContentEl.innerHTML = renderTreatmentPlanParameters();
+      } else if (treatmentPlanState.activeTreatmentMainTab === 'details') {
+        mainContentEl.innerHTML = renderTreatmentPlanDetails();
+      } else {
+        // Ensure device tab content is up-to-date for devices main tab
+        const deviceTabContent = document.getElementById('deviceTabContent');
+        if (deviceTabContent) {
+          deviceTabContent.innerHTML = treatmentPlanState.activeTreatmentSubTab === 'parameters' ? renderParametersContent(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab) : renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab);
+        }
+      }
+    }
+
+    // Clinical Indication Dropdown - trigger initial update if needed
+    const clinicalSelect = document.getElementById('clinicalIndicationSelect');
+    if (clinicalSelect) {
+      // Populate custom montages in dropdown
+      populateCustomMontagesDropdown();
+      
+      // Initialize montage display if there's a pre-selected value
+      if (clinicalSelect.value) {
+        updateMontageMapping();
+      }
+    }
+    
+    // Patient Navigation Dropdown
+    const patientNavSelect = document.getElementById('patientNavigationSelectTreatment');
+    if (patientNavSelect) {
+      patientNavSelect.addEventListener('change', (e) => {
+        const patientId = e.target.value;
+        if (patientId) {
+          const patient = sampleData.patients.find(p => p.id === patientId);
+          if (patient) {
+            globalSelectedPatientId = patient.id;
+            globalState.currentPatient = patient;
+            renderTreatmentPlan();
+          }
+        }
+      });
+    }
+    
+    // Save Button Handler
+    const saveBtn = document.getElementById('saveTreatmentPlanBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        // Collect treatment plan data
+        const treatmentData = {
+          patientId: p.id,
+          patientName: document.getElementById('treatmentPatientName')?.value,
+          treatmentDate: document.getElementById('treatmentDate')?.value,
+          session1: {
+            number: document.getElementById('session1Number')?.value,
+            protocol: document.getElementById('session1Protocol')?.value,
+            duration: document.getElementById('session1Duration')?.value,
+            frequency: document.getElementById('session1Frequency')?.value,
+            notes: document.getElementById('session1Notes')?.value,
+            targetArea: document.getElementById('session1TargetArea')?.value,
+            modality: document.getElementById('session1Modality')?.value,
+            intensity: document.getElementById('session1Intensity')?.value,
+            outcome: document.getElementById('session1Outcome')?.value
+          },
+          session2: {
+            number: document.getElementById('session2Number')?.value,
+            protocol: document.getElementById('session2Protocol')?.value,
+            duration: document.getElementById('session2Duration')?.value,
+            frequency: document.getElementById('session2Frequency')?.value,
+            notes: document.getElementById('session2Notes')?.value,
+            targetArea: document.getElementById('session2TargetArea')?.value,
+            modality: document.getElementById('session2Modality')?.value,
+            intensity: document.getElementById('session2Intensity')?.value,
+            outcome: document.getElementById('session2Outcome')?.value
+          }
+        };
+        
+        console.log('Treatment Plan Saved:', treatmentData);
+        
+        // Show success message
+        saveBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Saved!';
+        saveBtn.classList.remove('bg-sozo-600');
+        saveBtn.classList.add('bg-green-500');
+        setTimeout(() => {
+          saveBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save Treatment Plan';
+          saveBtn.classList.remove('bg-green-500');
+          saveBtn.classList.add('bg-sozo-600');
+        }, 2000);
+      });
+    }
+  }, 100);
+}
+
+function updateMontageMapping() {
+  const selection = document.getElementById('clinicalIndicationSelect')?.value;
+  const montageSection = document.getElementById('montageDetailsSection');
+  
+  if (!selection || !montageSection) return;
+  
+  // Define montage configurations based on the table
+  const montageConfigs = {
+    ruminative_depression: {
+      category: 'Montage Category 1 - Standard 1-channel',
+      clinicalIndication: 'Ruminative, melancholic depression; low drive; cognitive slowing',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: '—',
+      anodePlacement: 'F3 (left executive hub), F4 (right-biased affective profile), optional Fz',
+      anodeOptions: 'Limbic regulation, indirect DMN disengagement',
+      cathodePlacement: 'Shoulder / torso (preferred); FPz or Cz if cephalic required',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Strengthens top-down executive control; reduces rumination indirectly via improved network switching',
+      anodes: ['F3', 'F4'],
+      cathodes: ['FPZ'],
+      extracephalic: true,
+      recommendedDevice: 'device1' // TMS for targeted DLPFC stimulation
+    },
+    cognitive_depression: {
+      category: 'Montage Category 2 - Standard 1-channel',
+      clinicalIndication: 'Cognitive depression, attentional inefficiency',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: 'DAN / parietal integration',
+      anodePlacement: 'F3 / F4 / Fz',
+      anodeOptions: '',
+      cathodePlacement: 'P3 / P4 (integrational integration) or extracephalic',
+      cathodeType: 'Cephalic or extracephalic (case-dependent)',
+      fnonLogic: 'Treats depression as network inefficiency rather than mood deficit',
+      anodes: ['F3', 'F4'],
+      cathodes: ['P3'],
+      extracephalic: false,
+      recommendedDevice: 'device2' // tDCS for broader cortical coverage
+    },
+    anxious_depression: {
+      category: 'Montage Category 3 - Standard 1-channel',
+      clinicalIndication: 'Anxious depression, hypervigilance, stress sensitivity',
+      networkTarget: 'SN (Salience Network - regulatory)',
+      secondaryNetwork: 'CEN stabilization',
+      anodePlacement: 'FCz, FC1 / FC2',
+      anodeOptions: '',
+      cathodePlacement: 'Shoulder / torso preferred; Cz or FPz if cephalic',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Normalizes pathological salience attribution and improves switching',
+      anodes: ['FCZ', 'FC1'],
+      cathodes: ['CZ'],
+      extracephalic: true,
+      recommendedDevice: 'device3' // VNS for stress and anxiety via vagus nerve
+    }
+  };
+  
+  let config;
+  
+  // Show/hide delete button based on selection
+  const deleteBtn = document.getElementById('deleteCustomMontageBtn');
+  
+  // Check if selection is a custom montage
+  if (selection.startsWith('custom_')) {
+    const customMontage = getCustomMontage(selection);
+    if (customMontage) {
+      // Transform custom montage to match expected config structure
+      config = {
+        category: customMontage.baseNetwork || 'Custom Montage',
+        networkTarget: customMontage.baseNetwork || '',
+        secondaryNetwork: '',
+        anodePlacement: customMontage.anodes?.join(', ') || '',
+        anodeOptions: '',
+        cathodePlacement: customMontage.cathode || '',
+        cathodeType: '',
+        fnonLogic: customMontage.description || `Custom montage: ${customMontage.name}`,
+        anodes: customMontage.anodes || [],
+        cathodes: customMontage.cathode ? [customMontage.cathode] : [],
+        recommendedDevice: customMontage.deviceType || ''
+      };
+    }
+    // Show delete button for custom montages
+    if (deleteBtn) {
+      deleteBtn.style.display = 'block';
+      deleteBtn.onclick = () => deleteCustomMontage(selection);
+    }
+  } else {
+    // Load standard configuration
+    config = montageConfigs[selection];
+    // Hide delete button for standard montages
+    if (deleteBtn) deleteBtn.style.display = 'none';
+  }
+  
+  // Load custom montages list
+  loadCustomMontagesList();
+  
+  if (config) {
+    // Show the montage section
+    montageSection.classList.remove('hidden');
+    
+    // Populate all fields
+    document.getElementById('montageCategory').value = config.category;
+    document.getElementById('networkTarget').value = config.networkTarget;
+    document.getElementById('secondaryNetwork').value = config.secondaryNetwork || config.secondaryNetwork;
+    document.getElementById('anodePlacement').value = config.anodePlacement || config.anodes?.join(', ') || '';
+    document.getElementById('anodeOptions').value = config.anodeOptions || '';
+    document.getElementById('cathodePlacement').value = config.cathodePlacement || config.cathodes?.join(', ') || '';
+    document.getElementById('cathodeType').value = config.cathodeType;
+    document.getElementById('useStage').value = 'Clinical treatment phase';
+    document.getElementById('fnonLogic').textContent = config.fnonLogic;
+    
+    // Update brain visualization
+    updateBrainVisualization(config);
+    
+    // Automatically select and display recommended device
+    const deviceSelect = document.getElementById('deviceSelect');
+    if (deviceSelect && config.recommendedDevice) {
+      deviceSelect.value = config.recommendedDevice;
+      updateDeviceVisualization();
+    }
+    
+    // Scroll to the montage section smoothly
+    setTimeout(() => {
+      montageSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  } else {
+    // Hide the section if no selection
+    montageSection.classList.add('hidden');
+    resetBrainVisualization();
+  }
+}
+
+// Render the Treatment Plan 'Details' main tab — per-device freeform notes entered by doctor
+function renderTreatmentPlanDetails() {
+  const devices = treatmentPlanState.devices || [];
+
+  if (devices.length === 0) {
+    return `
+      <div class="card p-6 text-sm text-slate-600">
+        <p>No devices added yet. Add devices first to add details.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card p-6 space-y-4">
+      <h3 class="text-lg font-bold">Device Details</h3>
+      ${devices.map((device, i) => `
+        <div class="border rounded-lg p-4 bg-white">
+          <div class="mb-2 font-semibold text-slate-800">Device ${i + 1}: ${device.name}</div>
+          <textarea id="deviceDetails_${i}" class="input-royal w-full text-sm" rows="6" placeholder="Enter notes or device-specific details for the doctor..." oninput="updateDeviceDetails(${i}, this.value)">${(device.details || '')}</textarea>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function updateDeviceDetails(deviceIndex, value) {
+  if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
+  treatmentPlanState.devices[deviceIndex].details = value;
+  saveTreatmentPlanState();
+}
+
+// Expose details update to global scope for inline handlers
+window.renderTreatmentPlanDetails = renderTreatmentPlanDetails;
+window.updateDeviceDetails = updateDeviceDetails;
+
+// Update brain diagram visualization with electrode highlights
+function updateBrainVisualization(config) {
+  // Reset all electrodes first
+  resetBrainVisualization();
+  
+  if (!config) return;
+  
+  // Highlight anodes (red/orange)
+  if (config.anodes && config.anodes.length > 0) {
+    config.anodes.forEach(electrode => {
+      const el = document.getElementById(electrode.toLowerCase() + '-electrode');
+      if (el) {
+        const circle = el.querySelector('circle');
+        const text = el.querySelector('text');
+        if (circle) {
+          circle.setAttribute('fill', 'url(#anodeGradient)');
+          circle.setAttribute('stroke', '#dc2626');
+          circle.setAttribute('stroke-width', '3');
+        }
+        if (text) {
+          text.setAttribute('fill', '#ffffff');
+          text.setAttribute('font-weight', 'bold');
+        }
+      }
+    });
+  }
+  
+  // Highlight cathodes (blue)
+  if (config.cathodes && config.cathodes.length > 0) {
+    config.cathodes.forEach(electrode => {
+      const el = document.getElementById(electrode.toLowerCase() + '-electrode');
+      if (el) {
+        const circle = el.querySelector('circle');
+        const text = el.querySelector('text');
+        if (circle) {
+          circle.setAttribute('fill', 'url(#cathodeGradient)');
+          circle.setAttribute('stroke', '#2563eb');
+          circle.setAttribute('stroke-width', '3');
+        }
+        if (text) {
+          text.setAttribute('fill', '#ffffff');
+          text.setAttribute('font-weight', 'bold');
+        }
+      }
+    });
+  }
+  
+  // Show/hide extracephalic note
+  const extracephalicNote = document.getElementById('extracephalicNote');
+  if (extracephalicNote) {
+    if (config.extracephalic) {
+      extracephalicNote.classList.remove('hidden');
+    } else {
+      extracephalicNote.classList.add('hidden');
+    }
+  }
+  
+  // Update active montage info
+  const activeAnodes = document.getElementById('activeAnodes');
+  const activeCathodes = document.getElementById('activeCathodes');
+  const activeNetwork = document.getElementById('activeNetwork');
+  
+  if (activeAnodes) activeAnodes.textContent = config.anodes.join(', ');
+  if (activeCathodes) {
+    if (config.extracephalic) {
+      activeCathodes.textContent = 'Shoulder/Torso (extracephalic)';
+    } else {
+      activeCathodes.textContent = config.cathodes.join(', ');
+    }
+  }
+  if (activeNetwork) activeNetwork.textContent = config.networkTarget;
+  
+  // Add gradients to SVG if they don't exist
+  addSVGGradients();
+  
+  // Enable cathode drag-and-drop for doctors
+  if (currentRole === 'doctor' || currentRole === 'admin') {
+    enableCathodeCustomization();
+  }
+}
+// Update device visualization function to work with tabs
+function updateDeviceVisualization() {
+  const deviceSelect = document.getElementById('deviceSelect');
+  const visualizationSection = document.getElementById('deviceVisualizationSection');
+  
+  if (!deviceSelect || !visualizationSection) return;
+  
+  const selectedDevice = deviceSelect.value;
+  
+  // Hide all device visualizations
+  const allDeviceVizIds = [
+    'device1Viz', 'device2Viz', 'device3Viz',
+    'platoViz', 'newronikaViz', 'alpha_stim_aidViz', 
+    'alpha_stim_metViz', 'tvnsViz', 'tpsViz',
+    'flowViz', 'robotic_armViz'
+  ];
+  
+  allDeviceVizIds.forEach(id => {
+    document.getElementById(id)?.classList.add('hidden');
+  });
+  
+  if (!selectedDevice) {
+    visualizationSection.classList.add('hidden');
+    return;
+  }
+  
+  // Show the visualization section
+  visualizationSection.classList.remove('hidden');
+  
+  // Map device values to their visualization IDs
+  const deviceVizMap = {
+    'device1': 'device1Viz',
+    'device2': 'device2Viz',
+    'device3': 'device3Viz',
+    'plato': 'platoViz',
+    'newronika': 'newronikaViz',
+    'alpha_stim_aid': 'alpha_stim_aidViz',
+    'alpha_stim_met': 'alpha_stim_metViz',
+    'tvns': 'tvnsViz',
+    'tps': 'tpsViz',
+    'flow': 'flowViz',
+    'robotic_arm': 'robotic_armViz'
+  };
+  
+  // Show the selected device visualization
+  const vizId = deviceVizMap[selectedDevice];
+  if (vizId) {
+    document.getElementById(vizId)?.classList.remove('hidden');
+  }
+  
+  // Auto-switch to device tab when device is selected
+  switchTab('device');
+}
+
+function switchTab(tabName) {
+  // Remove active class from all tabs
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.classList.remove('active-tab');
+    btn.classList.add('text-slate-700');
+    btn.style.borderBottomColor = 'transparent';
+  });
+  
+  // Hide all tab content
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  
+  // Show selected tab content and activate tab
+  if (tabName === 'montage') {
+    const montageTab = document.getElementById('montageTab');
+    const montageTabContent = document.getElementById('montageTabContent');
+    if (montageTab) {
+      montageTab.classList.add('active-tab');
+      montageTab.classList.remove('text-slate-700');
+      montageTab.classList.add('text-purple-600');
+      montageTab.style.borderBottomColor = '#9333ea';
+    }
+    if (montageTabContent) {
+      montageTabContent.classList.remove('hidden');
+    }
+  } else if (tabName === 'device') {
+    const deviceTab = document.getElementById('deviceTab');
+    const deviceTabContent = document.getElementById('deviceTabContent');
+    if (deviceTab) {
+      deviceTab.classList.add('active-tab');
+      deviceTab.classList.remove('text-slate-700');
+      deviceTab.classList.add('text-orange-600');
+      deviceTab.style.borderBottomColor = '#ea580c';
+    }
+    if (deviceTabContent) {
+      deviceTabContent.classList.remove('hidden');
+    }
+    
+    // Show device visualization if device is selected
+    const deviceSelect = document.getElementById('deviceSelect');
+    const deviceVisualizationSection = document.getElementById('deviceVisualizationSection');
+    if (deviceSelect && deviceSelect.value && deviceVisualizationSection) {
+      deviceVisualizationSection.classList.remove('hidden');
+    }
+  }
+}
+
+// Initialize default tab
+document.addEventListener('DOMContentLoaded', function() {
+  // Only switch tab if we're in the treatment plan context
+  if (document.getElementById('montageTab')) {
+    switchTab('montage'); // Default to montage tab
+  }
+});
+
+// Device Management Functions for Treatment Plan
+function addDevice() {
+  const select = document.getElementById('newDeviceSelect');
+  if (!select || !select.value) {
+    alert('Please select a device first');
+    return;
+  }
+  
+  if (treatmentPlanState.devices.length >= treatmentPlanState.maxDevices) {
+    alert('Maximum of 3 devices reached');
+    return;
+  }
+  
+  const deviceValue = select.value;
+  const deviceText = select.options[select.selectedIndex].text;
+  
+  // Check if device already added
+  if (treatmentPlanState.devices.some(d => d.value === deviceValue)) {
+    alert('This device has already been added');
+    return;
+  }
+  
+  // Add device with default configuration
+  treatmentPlanState.devices.push({
+    value: deviceValue,
+    name: deviceText,
+    symptoms: [],
+    network: '',
+    montage: {
+      type: 'blank',
+      anode: null,
+      cathode: null
+    }
+  });
+  
+  // Reset select and re-render
+  select.value = '';
+  saveTreatmentPlanState();
+  renderTreatmentPlan();
+}
+
+function removeDevice(index) {
+  if (confirm('Are you sure you want to remove this device?')) {
+    treatmentPlanState.devices.splice(index, 1);
+    
+    // Adjust active tab if needed
+    if (treatmentPlanState.activeDeviceTab >= treatmentPlanState.devices.length) {
+      treatmentPlanState.activeDeviceTab = Math.max(0, treatmentPlanState.devices.length - 1);
+    }
+    
+    saveTreatmentPlanState();
+    renderTreatmentPlan();
+  }
+}
+
+function switchDeviceTab(index) {
+  treatmentPlanState.activeDeviceTab = index;
+  saveTreatmentPlanState();
+  
+  // Re-render just the tab content
+  const content = document.getElementById('deviceTabContent');
+  if (content) {
+    content.innerHTML = renderDeviceJourney(treatmentPlanState.devices[index], index);
+    // Restore styling and functionality
+    restoreTreatmentPlanHighlights();
+    populateCustomMontagesForDevice(index);
+  }
+  
+  // Update tab styling
+  document.querySelectorAll('[onclick^="switchDeviceTab"]').forEach((tab, idx) => {
+    if (idx === index) {
+      tab.classList.add('border-purple-600', 'text-purple-600', 'bg-purple-50');
+      tab.classList.remove('border-transparent', 'text-slate-600');
+    } else {
+      tab.classList.remove('border-purple-600', 'text-purple-600', 'bg-purple-50');
+      tab.classList.add('border-transparent', 'text-slate-600');
+    }
+  });
+}
+
+// Switch between Network Selection and Custom Montage tabs
+function switchMontageTab(deviceIndex, tabType) {
+  const networkTab = document.getElementById(`networkTab_${deviceIndex}`);
+  const customTab = document.getElementById(`customTab_${deviceIndex}`);
+  const networkContent = document.getElementById(`networkTabContent_${deviceIndex}`);
+  const customContent = document.getElementById(`customTabContent_${deviceIndex}`);
+  
+  if (tabType === 'network') {
+    // Show network tab
+    if (networkTab) {
+      networkTab.classList.add('border-green-600', 'text-green-700', 'bg-green-100');
+      networkTab.classList.remove('border-transparent', 'text-slate-600');
+    }
+    if (customTab) {
+      customTab.classList.remove('border-purple-600', 'text-purple-700', 'bg-purple-100');
+      customTab.classList.add('border-transparent', 'text-slate-600');
+    }
+    if (networkContent) networkContent.classList.remove('hidden');
+    if (customContent) customContent.classList.add('hidden');
+  } else if (tabType === 'custom') {
+    // Show custom montage tab
+    if (networkTab) {
+      networkTab.classList.remove('border-green-600', 'text-green-700', 'bg-green-100');
+      networkTab.classList.add('border-transparent', 'text-slate-600');
+    }
+    if (customTab) {
+      customTab.classList.add('border-purple-600', 'text-purple-700', 'bg-purple-100');
+      customTab.classList.remove('border-transparent', 'text-slate-600');
+    }
+    if (networkContent) networkContent.classList.add('hidden');
+    if (customContent) customContent.classList.remove('hidden');
+    
+    // Populate custom montages when tab is opened
+    populateCustomMontagesForDevice(deviceIndex);
+  }
+}
+
+// Network Tab Management Functions
+function addNetworkTab(deviceIndex, networkId) {
+  try {
+    console.log('addNetworkTab called with:', {deviceIndex, networkId, type_deviceIndex: typeof deviceIndex, type_networkId: typeof networkId});
+    
+    const idx = Number(deviceIndex);
+
+    if (
+      Number.isNaN(idx) ||
+      !treatmentPlanState.devices ||
+      !treatmentPlanState.devices[idx]
+    ) {
+      console.error('Invalid device index', deviceIndex, 'Parsed:', idx, 'Devices:', treatmentPlanState.devices);
+      return;
+    }
+
+    const deviceValue = treatmentPlanState.devices[idx].value;
+    const networks = getDummyNetworks(deviceValue);
+    
+    console.log('Device and networks:', {deviceValue, networks: networks ? networks.length : 'null'});
+
+    if (!Array.isArray(networks)) {
+      console.error('Networks not found for device', deviceValue, 'Got:', networks);
+      return;
+    }
+
+    const nid = Number(networkId);
+    console.log('Network ID conversion:', {networkId, nid, isNaN: Number.isNaN(nid), networkExists: !!networks[nid]});
+    
+    if (Number.isNaN(nid) || !networks[nid]) {
+      console.error('Invalid networkId', networkId, 'Parsed:', nid, 'Available networks:', networks.length);
+      return;
+    }
+
+    // Double-check that the network object has required properties
+    if (!networks[nid].name) {
+      console.error('Network missing required properties:', networks[nid]);
+      return;
+    }
+
+    // Ensure networkTabs object exists
+    if (!treatmentPlanState.networkTabs) {
+      treatmentPlanState.networkTabs = {};
+    }
+    
+    if (!treatmentPlanState.networkTabs[idx]) {
+      treatmentPlanState.networkTabs[idx] = [];
+    }
+
+    const existing = treatmentPlanState.networkTabs[idx]
+      .find(tab => tab && tab.networkId === nid);
+
+    if (existing) {
+      switchNetworkTab(idx, nid);
+      applyNetworkToDevice(idx, nid);
+      return;
+    }
+
+    treatmentPlanState.networkTabs[idx].forEach(tab => {
+      if (tab) tab.isActive = false;
+    });
+
+    treatmentPlanState.networkTabs[idx].push({
+      networkId: nid,
+      networkName: networks[nid].name,
+      isActive: true
+    });
+
+    applyNetworkToDevice(idx, nid);
+    saveTreatmentPlanState();
+    renderNetworkTabs(idx);
+
+  } catch (err) {
+    console.error('addNetworkTab error:', err);
+  }
+}
+
+
+function removeNetworkTab(deviceIndex, networkId) {
+  if (!treatmentPlanState.networkTabs?.[deviceIndex]) return;
+
+  const tabs = treatmentPlanState.networkTabs[deviceIndex];
+  const tabIndex = tabs.findIndex(tab => tab && tab.networkId === networkId);
+  
+  if (tabIndex === -1) return; // Tab not found
+  
+  // Check if the tab being removed was active
+  const wasActive = tabs[tabIndex].isActive;
+  
+  // Remove the tab
+  tabs.splice(tabIndex, 1);
+
+  // If the removed tab was active and there are remaining tabs, activate the last one
+  if (wasActive && tabs.length > 0) {
+    tabs[tabs.length - 1].isActive = true;
+    // Apply the network for the newly activated tab
+    applyNetworkToDevice(deviceIndex, tabs[tabs.length - 1].networkId);
+  }
+
+  saveTreatmentPlanState();
+  renderNetworkTabs(deviceIndex);
+}
+
+
+function switchNetworkTab(deviceIndex, networkId) {
+  if (!treatmentPlanState.networkTabs[deviceIndex]) return;
+  
+  console.log('Switching to network tab:', {deviceIndex, networkId});
+  
+  // Deactivate all tabs
+  treatmentPlanState.networkTabs[deviceIndex].forEach(tab => {
+    if (tab) tab.isActive = false;
+  });
+  
+  // Activate selected tab
+  const selectedTab = treatmentPlanState.networkTabs[deviceIndex].find(tab => tab && tab.networkId === parseInt(networkId));
+  if (selectedTab) {
+    selectedTab.isActive = true;
+    console.log('Activated tab:', selectedTab.networkName);
+    
+    // Apply the network configuration and highlight the montage
+    applyNetworkToDevice(deviceIndex, networkId);
+  } else {
+    console.error('Network tab not found:', {deviceIndex, networkId, availableTabs: treatmentPlanState.networkTabs[deviceIndex]});
+  }
+  
+  saveTreatmentPlanState();
+  renderNetworkTabs(deviceIndex);
+}
+
+function renderNetworkTabs(deviceIndex) {
+  const tabsContainer = document.getElementById(`networkTabsContainer_${deviceIndex}`);
+  if (!tabsContainer) {
+    console.warn('Network tabs container not found for device:', deviceIndex);
+    return;
+  }
+  
+  const networkTabs = (treatmentPlanState.networkTabs[deviceIndex] || [])
+    .filter(tab => tab && tab.networkId !== undefined && tab.networkName);
+  
+  console.log('Rendering network tabs for device:', deviceIndex, 'Tab count:', networkTabs.length);
+  
+  if (networkTabs.length === 0) {
+    tabsContainer.innerHTML = '<p class="text-sm text-slate-500 italic">No networks selected. Choose networks from the dropdown above.</p>';
+    return;
+  }
+  
+  tabsContainer.innerHTML = `
+    <div class="flex flex-wrap gap-2 mb-4">
+      ${networkTabs.map(tab => `
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+          tab.isActive 
+            ? 'border-purple-600 bg-purple-50 text-purple-900' 
+            : 'border-slate-300 bg-white text-slate-600 hover:border-purple-300'
+        }">
+          <button 
+            onclick="switchNetworkTab(${deviceIndex}, ${tab.networkId})"
+            class="flex items-center gap-2 hover:bg-purple-100 rounded px-2 py-1 transition-colors"
+          >
+            <i class="fa-solid fa-brain text-sm"></i>
+            <span class="font-medium text-sm">${tab.networkName}</span>
+          </button>
+          <button 
+            onclick="removeNetworkTab(${deviceIndex}, ${tab.networkId})"
+            class="text-slate-400 hover:text-red-500 text-xs ml-1 p-1 rounded hover:bg-red-50 transition-colors"
+            title="Close network tab"
+          >
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+      `).join('')}
+    </div>
+    
+    <!-- Active Network Content -->
+    <div id="activeNetworkContent_${deviceIndex}">
+      ${renderActiveNetworkContent(deviceIndex)}
+    </div>
+  `;
+}
+
+function renderActiveNetworkContent(deviceIndex) {
+  const networkTabs = (treatmentPlanState.networkTabs[deviceIndex] || [])
+    .filter(tab => tab && tab.networkId !== undefined);
+  const activeTab = networkTabs.find(tab => tab && tab.isActive);
+  
+  if (!activeTab || !activeTab.networkId) {
+    return '<p class="text-sm text-slate-500 italic">No active network selected.</p>';
+  }
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    return '<p class="text-sm text-red-500">Device not found.</p>';
+  }
+  
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  if (!networks) {
+    return '<p class="text-sm text-red-500">Networks not available for this device.</p>';
+  }
+  
+  const network = networks[activeTab.networkId];
+  
+  if (!network) {
+    return '<p class="text-sm text-red-500">Network configuration not found.</p>';
+  }
+  
+  return `
+    <div class="bg-white border-2 border-purple-200 rounded-lg p-4">
+      <div class="mb-4">
+        <h4 class="font-bold text-purple-900 text-lg flex items-center gap-2">
+          <i class="fa-solid fa-bolt"></i>
+          ${network.name}
+        </h4>
+        <p class="text-sm text-slate-600 mt-1">${network.description}</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Anodes</label>
+          <div class="bg-red-50 border border-red-200 rounded px-3 py-2">
+            <span class="font-mono text-sm text-red-800">${network.anodes.join(', ')}</span>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Cathode</label>
+          <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2">
+            <span class="font-mono text-sm text-blue-800">${network.cathode}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="text-xs font-bold text-slate-700 block mb-1">Clinical Indication</label>
+        <p class="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded px-3 py-2">${network.indication}</p>
+      </div>
+      
+      <div class="flex justify-end gap-2">
+        <button 
+          onclick="applyNetworkToDevice(${deviceIndex}, '${activeTab.networkId}')"
+          class="btn-primary text-sm"
+        >
+          <i class="fa-solid fa-check mr-1"></i>Apply to Device
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function applyNetworkToDevice(deviceIndex, networkId) {
+  console.log('Applying network to device:', {deviceIndex, networkId});
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    console.error('Device not found at index:', deviceIndex);
+    return;
+  }
+  
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  if (!networks || networks.length === 0) {
+    console.error('Networks not available for device:', treatmentPlanState.devices[deviceIndex].value);
+    return;
+  }
+  
+  const nid = parseInt(networkId);
+  const network = networks[nid];
+  if (!network) {
+    console.error('Network not found with ID:', networkId, 'Available networks:', networks.length);
+    return;
+  }
+  
+  console.log('Applying network:', network);
+  
+  // Apply network configuration to device
+  treatmentPlanState.devices[deviceIndex].montage = {
+    type: 'network',
+    anodes: [...network.anodes],
+    cathode: network.cathode,
+    network: network.name
+  };
+  
+  treatmentPlanState.devices[deviceIndex].selectedNetwork = networkId;
+  
+  // Update UI - highlight brain montage if this device uses brain montage
+  if (usesBrainMontage(treatmentPlanState.devices[deviceIndex].value)) {
+    highlightNetworkElectrodes(deviceIndex, network.anodes, network.cathode);
+    
+    // Update network info panel
+    const networkInfo = document.getElementById(`networkInfo_${deviceIndex}`);
+    if (networkInfo) {
+      networkInfo.innerHTML = `
+        <p class="text-xs font-bold text-purple-900 mb-1">
+          <i class="fa-solid fa-network-wired mr-1"></i>${network.name}
+        </p>
+        <p class="text-xs text-purple-700">
+          Anodes: ${network.anodes?.join(', ') || 'None'} | Cathode: ${network.cathode || 'None'}
+        </p>
+      `;
+    }
+    
+    // Update network details panel
+    const networkDetails = document.getElementById(`networkDetails_${deviceIndex}`);
+    if (networkDetails) {
+      networkDetails.classList.remove('hidden');
+      
+      const networkName = document.getElementById(`networkName_${deviceIndex}`);
+      const networkDesc = document.getElementById(`networkDesc_${deviceIndex}`);
+      const networkAnodes = document.getElementById(`networkAnodes_${deviceIndex}`);
+      const networkCathode = document.getElementById(`networkCathode_${deviceIndex}`);
+      const networkIndication = document.getElementById(`networkIndication_${deviceIndex}`);
+      
+      if (networkName) networkName.textContent = network.name;
+      if (networkDesc) networkDesc.textContent = network.description || '';
+      if (networkAnodes) networkAnodes.textContent = network.anodes?.join(', ') || 'None';
+      if (networkCathode) networkCathode.textContent = network.cathode || 'None';
+      if (networkIndication) networkIndication.textContent = network.indication || '';
+    }
+  }
+  
+  // Show success message
+  showNotification(`Network "${network.name}" applied to device successfully!`, 'success');
+  
+  saveTreatmentPlanState();
+}
+
+// Add network from dropdown to tabs
+function addNetworkFromDropdown(deviceIndex) {
+  const select = document.getElementById(`networkSelect_${deviceIndex}`);
+  if (!select || !select.value) {
+    console.warn('No network select or no value selected for device:', deviceIndex);
+    alert('Please select a network to add.');
+    return;
+  }
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    console.error('Device not found at index:', deviceIndex);
+    alert('Device not found.');
+    return;
+  }
+  
+  const networkId = parseInt(select.value);
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  
+  console.log('Adding network:', {deviceIndex, networkId, deviceValue: treatmentPlanState.devices[deviceIndex].value, networksAvailable: networks?.length || 0});
+  
+  if (!networks || networks.length === 0) {
+    console.error('Networks not available for device:', treatmentPlanState.devices[deviceIndex].value);
+    alert('Networks not available for this device.');
+    return;
+  }
+  
+  const network = networks[networkId];
+  
+  if (!network) {
+    console.error('Network not found with ID:', networkId, 'Available networks:', networks.length);
+    alert('Network not found.');
+    return;
+  }
+  
+  console.log('Selected network:', network);
+  
+  // Add network tab
+  addNetworkTab(deviceIndex, networkId);
+  
+  // Reset dropdown
+  select.value = '';
+}
+
+// Expose functions to global scope for onclick handlers
+window.addNetworkTab = addNetworkTab;
+window.removeNetworkTab = removeNetworkTab;
+window.switchNetworkTab = switchNetworkTab;
+window.renderNetworkTabs = renderNetworkTabs;
+window.applyNetworkToDevice = applyNetworkToDevice;
+window.addNetworkFromDropdown = addNetworkFromDropdown;
+
+// Dummy Network Data Generator - Device-Specific Montages
+function getDummyNetworks(deviceValue) {
+  // Device-specific network configurations based on device capabilities
+  
+  const deviceNetworks = {
+    // TMS - Transcranial Magnetic Stimulation: Frontal targeting
+    'device1': [
+      {
+        name: 'Left DLPFC Targeting',
+        description: 'Primary left dorsolateral prefrontal cortex stimulation for depression',
+        anodes: ['F3', 'F7'],
+        cathode: 'Fp1',
+        indication: 'Major Depressive Disorder, Treatment-Resistant Depression'
+      },
+      {
+        name: 'Right DLPFC Protocol',
+        description: 'Right dorsolateral prefrontal cortex for cognitive enhancement',
+        anodes: ['F4', 'F8'],
+        cathode: 'Fp2',
+        indication: 'Cognitive Enhancement, Executive Function'
+      },
+      {
+        name: 'Bilateral Frontal',
+        description: 'Bilateral frontal quadrant stimulation',
+        anodes: ['F3', 'F4'],
+        cathode: 'Fz',
+        indication: 'Anxiety with Depression, Mood Regulation'
+      }
+    ],
+    
+    // tDCS - Transcranial Direct Current: Full brain coverage
+    'device2': [
+      {
+        name: 'Frontal-Parietal Circuit',
+        description: 'Full cortical stimulation for mood and cognition',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Pz',
+        indication: 'Depression with Cognitive Symptoms'
+      },
+      {
+        name: 'Motor-Prefrontal Link',
+        description: 'Motor cortex to prefrontal connection',
+        anodes: ['C3', 'F3'],
+        cathode: 'P4',
+        indication: 'Movement Disorders, Chronic Pain'
+      },
+      {
+        name: 'Central Executive Enhancement',
+        description: 'Dorsolateral prefrontal enhancement protocol',
+        anodes: ['F3', 'F4'],
+        cathode: 'Cz',
+        indication: 'ADHD, Working Memory Deficits'
+      },
+      {
+        name: 'Global Connectivity',
+        description: 'Distributed network activation',
+        anodes: ['Fz', 'Cz'],
+        cathode: 'O1',
+        indication: 'General Neuroplasticity, Recovery'
+      }
+    ],
+    
+    // VNS - Vagus Nerve Stimulation: Neck/ear region
+    'device3': [
+      {
+        name: 'Left Vagus Nerve',
+        description: 'Standard left cervical vagus nerve stimulation',
+        anodes: ['T3', 'T5'],
+        cathode: 'C3',
+        indication: 'Treatment-Resistant Depression, Epilepsy'
+      },
+      {
+        name: 'Bilateral Vagal Tone',
+        description: 'Bilateral vagus nerve modulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Autonomic Regulation, Anxiety'
+      }
+    ],
+    
+    // Plato - Multi-target precision
+    'plato': [
+      {
+        name: 'Block 1 Standard',
+        description: 'Standard electrode placement - right frontal-parietal region',
+        anodes: ['F4', 'C4', 'P4'],
+        cathode: 'Fp2',
+        indication: 'Standard therapeutic protocol for depression and cognitive enhancement'
+      },
+      {
+        name: 'Block 2 Middle Device Place',
+        description: 'Middle device placement - right temporal targeting',
+        anodes: ['C4', 'T4'],
+        cathode: 'C3',
+        indication: 'Lateral cortical stimulation for mood regulation'
+      },
+      {
+        name: 'Block 3 Middle Device Placement, Improved',
+        description: 'Improved middle device placement - left posterior focus',
+        anodes: ['P3'],
+        cathode: 'O1',
+        indication: 'Targeted posterior cortical modulation'
+      },
+      {
+        name: 'Block 4 Back Device Placement, Invasive Back',
+        description: 'Back device placement - invasive posterior targeting',
+        anodes: ['P3', 'O1'],
+        cathode: 'T3',
+        indication: 'Deep posterior network stimulation for complex cases'
+      }
+    ],
+    
+    // Newronika - Closed-loop adaptive
+    'newronika': [
+      {
+        name: 'Adaptive DMN Regulation',
+        description: 'Closed-loop default mode network modulation',
+        anodes: ['F3', 'P3'],
+        cathode: 'Fz',
+        indication: 'Adaptive Depression Treatment'
+      },
+      {
+        name: 'Dynamic Attention Network',
+        description: 'Real-time attention network optimization',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Cz',
+        indication: 'ADHD with Real-time Feedback'
+      },
+      {
+        name: 'Feedback-Driven Motor',
+        description: 'Motor network with recording feedback',
+        anodes: ['C3', 'C4'],
+        cathode: 'Pz',
+        indication: 'Movement Disorders, Rehabilitation'
+      }
+    ],
+    
+    // Alpha Stim AID - Earlobe clips (cranial electrotherapy)
+    'alpha_stim_aid': [
+      {
+        name: 'Bilateral CES Mode',
+        description: 'Cranial electrotherapy stimulation via ear clips',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Anxiety, Insomnia, Depression'
+      },
+      {
+        name: 'Left-Dominant CES',
+        description: 'Left-ear focused cranial stimulation',
+        anodes: ['T3', 'F7'],
+        cathode: 'Fp2',
+        indication: 'Anxiety Disorders, Stress'
+      },
+      {
+        name: 'Balanced Hemispheric',
+        description: 'Balanced bilateral ear stimulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Fz',
+        indication: 'Mood Stabilization, Pain Management'
+      }
+    ],
+    
+    // Alpha Stim MET - Microcurrent with probe
+    'alpha_stim_met': [
+      {
+        name: 'Microcurrent Pain Relief',
+        description: 'Localized microcurrent therapy for pain',
+        anodes: ['C3', 'T3'],
+        cathode: 'P3',
+        indication: 'Chronic Pain, Muscle Tension'
+      },
+      {
+        name: 'Probe-Based Targeting',
+        description: 'Precise probe placement for tissue healing',
+        anodes: ['F3', 'C3'],
+        cathode: 'T5',
+        indication: 'Inflammation, Tissue Repair'
+      },
+      {
+        name: 'Full-Body Circuit',
+        description: 'Extended microcurrent pathway',
+        anodes: ['Fp1', 'T3'],
+        cathode: 'O1',
+        indication: 'Systemic Pain, Fibromyalgia'
+      }
+    ],
+    
+    // tVNS - Transcutaneous vagus (ear-based)
+    'tvns': [
+      {
+        name: 'Left Auricular Cymba',
+        description: 'Left ear cymba conchae stimulation',
+        anodes: ['T3', 'T5'],
+        cathode: 'F7',
+        indication: 'Depression, PTSD, Inflammation'
+      },
+      {
+        name: 'Bilateral Auricular',
+        description: 'Bilateral ear vagus stimulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Autonomic Balance, Anxiety'
+      }
+    ],
+    
+    // TPS - Transcranial Pulse (ultrasound-based)
+    'tps': [
+      {
+        name: 'Deep Brain Targeting',
+        description: 'Ultrasound pulse for deep brain structures',
+        anodes: ['Fz', 'Cz'],
+        cathode: 'Pz',
+        indication: 'Alzheimer\'s, Deep Brain Stimulation'
+      },
+      {
+        name: 'Frontal Lobe Focus',
+        description: 'Frontal ultrasound pulse therapy',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'O1',
+        indication: 'Cognitive Decline, Memory'
+      },
+      {
+        name: 'Temporal-Hippocampal',
+        description: 'Temporal lobe ultrasound targeting',
+        anodes: ['T3', 'T5'],
+        cathode: 'Cz',
+        indication: 'Memory Formation, Dementia'
+      }
+    ],
+    
+    // Flow - Standard placement device
+    'flow': [
+      {
+        name: 'Standard Placement',
+        description: 'Fixed standard placement for Flow device (non-customizable)',
+        anodes: ['F3', 'F7'],
+        cathode: 'Fp2',
+        indication: 'Standard therapeutic placement'
+      }
+    ],
+    
+    // Robotic Arm - Automated precision
+    'robotic_arm': [
+      {
+        name: 'Standard Robotic Placement',
+        description: 'Single standard robotic placement option (non-customizable)',
+        anodes: ['F3', 'F7'],
+        cathode: 'Cz',
+        indication: 'Standard robotic placement'
+      }
+    ]
+  };
+  
+  // Return device-specific networks or default networks
+  return deviceNetworks[deviceValue] || [
+    {
+      name: 'Default Mode Network',
+      description: 'General purpose stimulation protocol',
+      anodes: ['F3', 'F4'],
+      cathode: 'Pz',
+      indication: 'General Neuromodulation'
+    },
+    {
+      name: 'Central Executive Network',
+      description: 'Attention and cognitive control',
+      anodes: ['Fp1', 'Fp2'],
+      cathode: 'Cz',
+      indication: 'Cognitive Enhancement'
+    }
+  ];
+}
+
+// UI State for custom montage editing
+const customMontageState = {
+  isEditing: false,
+  activeDeviceIndex: null,
+  activeTool: 'anode' // 'anode' or 'cathode'
+};
+
+function startCustomMontage(deviceIndex) {
+  customMontageState.isEditing = true;
+  customMontageState.activeDeviceIndex = deviceIndex;
+  customMontageState.activeTool = 'anode';
+  
+  // Clear current montage for editing (blank template)
+  const device = treatmentPlanState.devices[deviceIndex];
+  device.montage.anodes = [];
+  device.montage.cathode = '';
+  highlightNetworkElectrodes(deviceIndex, [], '');
+  
+  // Reset Name input
+  const nameInput = document.getElementById(`customMontageName_${deviceIndex}`);
+  if (nameInput) nameInput.value = '';
+  
+  document.getElementById(`customMontageControls_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`startCustomBtn_${deviceIndex}`).classList.add('hidden');
+  
+  updateToolUI(deviceIndex);
+}
+
+function setElectrodeTool(deviceIndex, tool) {
+  customMontageState.activeTool = tool;
+  updateToolUI(deviceIndex);
+}
+
+function updateToolUI(deviceIndex) {
+  const anodeBtn = document.getElementById(`toolAnode_${deviceIndex}`);
+  const cathodeBtn = document.getElementById(`toolCathode_${deviceIndex}`);
+  const label = document.getElementById(`currentToolLabel_${deviceIndex}`);
+  
+  if (customMontageState.activeTool === 'anode') {
+    anodeBtn.classList.add('ring-2', 'ring-red-400', 'bg-red-50');
+    anodeBtn.classList.remove('bg-white', 'border-red-200');
+    anodeBtn.classList.add('border-red-400');
+    
+    cathodeBtn.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
+    cathodeBtn.classList.add('bg-white', 'border-blue-200');
+    
+    label.textContent = 'Anode (+)';
+    label.className = 'font-bold text-red-600';
+  } else {
+    cathodeBtn.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50');
+    cathodeBtn.classList.remove('bg-white', 'border-blue-200');
+    cathodeBtn.classList.add('border-blue-400');
+    
+    anodeBtn.classList.remove('ring-2', 'ring-red-400', 'bg-red-50');
+    anodeBtn.classList.add('bg-white', 'border-red-200');
+    
+    label.textContent = 'Cathode (-)';
+    label.className = 'font-bold text-blue-600';
+  }
+}
+
+function handleElectrodeClick(deviceIndex, electrodeId) {
+  if (!customMontageState.isEditing || customMontageState.activeDeviceIndex !== deviceIndex) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  
+  let anodes = new Set(device.montage.anodes);
+  // Ensure cathode is a string for single cathode logic
+  let cathode = device.montage.cathode; 
+  
+  if (customMontageState.activeTool === 'anode') {
+    // If clicking on existing cathode, remove it from cathode
+    if (cathode === electrodeId) {
+        cathode = '';
+    }
+    
+    // Toggle anode
+    if (anodes.has(electrodeId)) {
+      anodes.delete(electrodeId);
+    } else {
+        // Enforce Max 2 Anodes
+        if (anodes.size < 2) {
+            anodes.add(electrodeId);
+        } else {
+            alert('Maximum of 2 anodes allowed.');
+        }
+    }
+  } else if (customMontageState.activeTool === 'cathode') {
+    // If clicking on existing anode, remove it
+    if (anodes.has(electrodeId)) {
+      anodes.delete(electrodeId);
+    }
+    
+    // Toggle cathode (single cathode logic)
+    if (cathode === electrodeId) {
+      cathode = '';
+    } else {
+      cathode = electrodeId;
+    }
+  }
+  
+  // Update state
+  device.montage.anodes = Array.from(anodes);
+  device.montage.cathode = cathode;
+  
+  // Update visualization
+  highlightNetworkElectrodes(deviceIndex, device.montage.anodes, device.montage.cathode);
+}
+
+function applySameMontage(deviceIndex) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  const networks = getDummyNetworks(device.value);
+  const selectedIndex = device.selectedNetwork;
+  
+  if (selectedIndex !== '') {
+    const network = networks[selectedIndex];
+    device.montage.anodes = [...network.anodes];
+    device.montage.cathode = network.cathode;
+    highlightNetworkElectrodes(deviceIndex, device.montage.anodes, device.montage.cathode);
+  }
+}
+
+function saveCustomMontage(deviceIndex) {
+  customMontageState.isEditing = false;
+  customMontageState.activeDeviceIndex = null;
+  
+  document.getElementById(`customMontageControls_${deviceIndex}`).classList.add('hidden');
+  document.getElementById(`startCustomBtn_${deviceIndex}`).classList.remove('hidden');
+  
+  // Feedback to user
+  const networkName = document.getElementById(`networkName_${deviceIndex}`);
+  const customNameInput = document.getElementById(`customMontageName_${deviceIndex}`);
+  
+  let displayName = '(Custom)';
+  if (customNameInput && customNameInput.value.trim() !== '') {
+      displayName = `(${customNameInput.value.trim()})`;
+  }
+  
+  if (networkName) {
+      const currentName = networkName.textContent.split('(')[0].trim(); // Remove existing custom suffix if any
+      networkName.textContent = `${currentName} ${displayName}`;
+  }
+  
+  // Save custom name to state
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device && customNameInput && customNameInput.value.trim() !== '') {
+      device.customMontageName = displayName;
+      
+      // Save to custom montages library
+      const baseNetworkName = networkName ? networkName.textContent.split('(')[0].trim() : 'Unknown Network';
+      console.log('[saveCustomMontage] Saving to library with data:', {
+        name: customNameInput.value.trim(),
+        anodes: device.montage.anodes,
+        cathode: device.montage.cathode,
+        deviceType: device.value,
+        baseNetwork: baseNetworkName
+      });
+      
+      const savedMontage = saveCustomMontageToLibrary(
+        customNameInput.value.trim(),
+        device.montage.anodes,
+        device.montage.cathode,
+        device.value,
+        baseNetworkName
+      );
+      
+      console.log('[saveCustomMontage] Saved montage:', savedMontage);
+      
+      // Update all device dropdowns with the new montage
+      populateCustomMontagesForAllDevices();
+      
+      showNotification(`✓ Custom montage "${customNameInput.value.trim()}" saved successfully!`, 'success', 4000);
+  } else {
+    console.log('[saveCustomMontage] Skipping library save - no custom name provided');
+  }
+  
+  saveTreatmentPlanState();
+}
+
+// Generate electrode SVG elements for network visualization
+function generateNetworkElectrodes(deviceIndex) {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => `
+    <g id="electrode_${deviceIndex}_${e.id}" 
+       onclick="handleElectrodeClick(${deviceIndex}, '${e.id}')"
+       class="electrode-node transition-all duration-300 cursor-pointer hover:opacity-80">
+      <circle cx="${e.cx}" cy="${e.cy}" r="10" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e293b">${e.id}</text>
+    </g>
+  `).join('');
+}
+
+// Select and visualize a network
+function selectNetwork(deviceIndex, networkIndex) {
+  if (networkIndex === '') {
+    // Clear selection
+    clearNetworkHighlights(deviceIndex);
+    document.getElementById(`networkDetails_${deviceIndex}`).classList.add('hidden');
+    document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+      <p class="text-xs font-semibold text-purple-900 text-center">
+        Select a network from the right panel to view montage
+      </p>
+    `;
+    return;
+  }
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  const networks = getDummyNetworks(device.value);
+  const network = networks[networkIndex];
+  
+  if (!network) return;
+  
+  // Update right panel details
+  document.getElementById(`networkDetails_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`networkName_${deviceIndex}`).textContent = network.name;
+  document.getElementById(`networkDesc_${deviceIndex}`).textContent = network.description;
+  document.getElementById(`networkAnodes_${deviceIndex}`).textContent = network.anodes.join(', ');
+  document.getElementById(`networkCathode_${deviceIndex}`).textContent = network.cathode;
+  document.getElementById(`networkIndication_${deviceIndex}`).textContent = network.indication;
+  
+  // Update left panel info
+  document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+    <p class="text-xs font-bold text-purple-900 mb-1">
+      <i class="fa-solid fa-bolt mr-1"></i>Active Network: ${network.name}
+    </p>
+    <p class="text-xs text-purple-700">
+      Anodes: <span class="font-mono font-bold">${network.anodes.join(', ')}</span> | 
+      Cathode: <span class="font-mono font-bold">${network.cathode}</span>
+    </p>
+  `;
+  
+  // Highlight electrodes on brain montage
+  highlightNetworkElectrodes(deviceIndex, network.anodes, network.cathode);
+  
+  // Store selected network in device state
+  device.selectedNetwork = networkIndex;
+  device.montage.anodes = network.anodes;
+  device.montage.cathode = network.cathode;
+  
+  // Clear custom name as we reset to standard
+  delete device.customMontageName;
+  saveTreatmentPlanState();
+}
+
+// Highlight electrodes based on network configuration
+function highlightNetworkElectrodes(deviceIndex, anodes, cathode) {
+  console.log('Highlighting electrodes for device:', deviceIndex, 'Anodes:', anodes, 'Cathode:', cathode);
+  
+  // First, reset all electrodes
+  clearNetworkHighlights(deviceIndex);
+  
+  // Highlight anodes in red
+  anodes.forEach(anodeId => {
+    const electrode = document.getElementById(`electrode_${deviceIndex}_${anodeId}`);
+    console.log('Looking for anode electrode:', `electrode_${deviceIndex}_${anodeId}`, 'Found:', !!electrode);
+    if (electrode) {
+      const circle = electrode.querySelector('circle');
+      const text = electrode.querySelector('text');
+      if (circle) {
+        circle.setAttribute('fill', '#ef4444');
+        circle.setAttribute('stroke', '#dc2626');
+        circle.setAttribute('stroke-width', '3');
+        circle.style.filter = 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))';
+      }
+      if (text) {
+        text.setAttribute('fill', '#ffffff');
+      }
+    }
+  });
+  
+  // Highlight cathode in blue
+  if (cathode) {
+    const cathodeElectrode = document.getElementById(`electrode_${deviceIndex}_${cathode}`);
+    console.log('Looking for cathode electrode:', `electrode_${deviceIndex}_${cathode}`, 'Found:', !!cathodeElectrode);
+    if (cathodeElectrode) {
+      const circle = cathodeElectrode.querySelector('circle');
+      const text = cathodeElectrode.querySelector('text');
+      if (circle) {
+        circle.setAttribute('fill', '#3b82f6');
+        circle.setAttribute('stroke', '#2563eb');
+        circle.setAttribute('stroke-width', '3');
+        circle.style.filter = 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))';
+      }
+      if (text) {
+        text.setAttribute('fill', '#ffffff');
+      }
+    }
+  }
+}
+
+// Clear all electrode highlights
+function clearNetworkHighlights(deviceIndex) {
+  const allElectrodes = document.querySelectorAll(`[id^="electrode_${deviceIndex}_"]`);
+  allElectrodes.forEach(electrode => {
+    const circle = electrode.querySelector('circle');
+    const text = electrode.querySelector('text');
+    if (circle) {
+      circle.setAttribute('fill', '#e2e8f0');
+      circle.setAttribute('stroke', '#64748b');
+      circle.setAttribute('stroke-width', '2');
+      circle.style.filter = 'none';
+    }
+    if (text) {
+      text.setAttribute('fill', '#1e293b');
+    }
+  });
+}
+
+// Helper function to determine if device uses brain montage
+function usesBrainMontage(deviceValue) {
+  // Devices that use a brain montage visualization (including standard-placement devices)
+  const brainDevices = ['device1', 'device2', 'newronika', 'tps', 'flow', 'robotic_arm'];
+  return brainDevices.includes(deviceValue);
+}
+
+// Helper to determine whether custom montage editing is allowed for a device
+function allowsCustomMontage(deviceValue) {
+  // Disable custom montage editing for devices that have fixed/standard placements
+  const disallowed = ['flow', 'robotic_arm'];
+  return usesBrainMontage(deviceValue) && !disallowed.includes(deviceValue);
+}
+
+// Helper function to get device-specific visualization
+function getDeviceVisualization(deviceValue, deviceIndex) {
+  // VNS - Neck Region
+  if (deviceValue === 'device3') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="VNS Device Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-purple-700">VNS Device</p>
+          <p class="text-xs text-slate-600">Vagus Nerve Stimulation</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Alpha Stim AID - Cranial Electrotherapy
+  if (deviceValue === 'alpha_stim_aid') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="Alpha Stim AID Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-orange-700">Alpha Stim AID</p>
+          <p class="text-xs text-slate-600">Cranial Electrotherapy (CES Mode)</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Alpha Stim MET - Microcurrent Therapy
+  if (deviceValue === 'alpha_stim_met') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="Alpha Stim MET Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-green-700">Alpha Stim MET</p>
+          <p class="text-xs text-slate-600">Microcurrent Therapy</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // tVNS - Transcutaneous Vagus Nerve (Ear-based)
+  if (deviceValue === 'tvns') {
+    return `
+      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2 mx-auto">
+        <!-- Ear outline -->
+        <path d="M 120 100 Q 150 80 180 100 Q 200 150 180 200 Q 150 220 120 200 Q 100 150 120 100" fill="none" stroke="#94a3b8" stroke-width="3"/>
+        <path d="M 130 110 Q 150 90 170 110 Q 185 150 170 190 Q 150 210 130 190 Q 115 150 130 110" fill="#fee2e2" fill-opacity="0.6" stroke="#ef4444" stroke-width="2"/>
+        
+        <!-- tVNS electrode on ear -->
+        <circle cx="150" cy="150" r="12" fill="#7c3aed" fill-opacity="0.8" stroke="#5b21b6" stroke-width="3"/>
+        <text x="150" y="155" text-anchor="middle" font-size="8" font-weight="bold" fill="white">tVNS</text>
+        
+        <!-- Nerve pathway -->
+        <path d="M 150 150 Q 120 180 90 220" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="3,3"/>
+        
+        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#7c3aed">Auricular</text>
+      </svg>
+    `;
+  }
+  
+  // Plato - 4 Brain Region Blocks
+  if (deviceValue === 'plato') {
+    return `
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Block 1: Forehead -->
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border-2 border-purple-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block1.png" alt="Block 1 - Forehead Placement" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-purple-700 text-center">Block 1</p>
+            <p class="text-xs text-purple-600 text-center">Forehead</p>
+          </div>
+          
+          <!-- Block 2: Middle Device Placement -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border-2 border-blue-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block2.png" alt="Block 2 - Middle Device Placement" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-blue-700 text-center">Block 2</p>
+            <p class="text-xs text-blue-600 text-center">Middle Device</p>
+          </div>
+          
+          <!-- Block 3: Middle Device Placement (Inverted) -->
+          <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border-2 border-green-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block3.png" alt="Block 3 - Middle Device Placement (Inverted)" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-green-700 text-center">Block 3</p>
+            <p class="text-xs text-green-600 text-center">Middle Device (Inverted)</p>
+          </div>
+          
+          <!-- Block 4: Back Device Placement (Inverted) -->
+          <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border-2 border-red-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block4.png" alt="Block 4 - Back Device Placement (Inverted)" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-red-700 text-center">Block 4</p>
+            <p class="text-xs text-red-600 text-center">Back Device (Inverted)</p>
+          </div>
+        </div>
+        
+        <!-- Overall Plato Device Info -->
+        <div class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200">
+          <p class="text-sm font-semibold text-purple-900 text-center mb-1">
+            <i class="fa-solid fa-microchip mr-2"></i>Plato Neurostimulation System
+          </p>
+          <p class="text-xs text-purple-700 text-center">
+            4 specialized electrode blocks targeting specific brain regions
+          </p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Default return empty if no specific visualization
+  return '';
+}
+
+function renderDeviceJourney(device, deviceIndex) {
+  if (!device) return '<p class="text-slate-500">No device selected</p>';
+  
+  // Get dummy networks for this device
+  const networks = getDummyNetworks(device.value);
+  const showBrainMontage = usesBrainMontage(device.value);
+  const deviceViz = getDeviceVisualization(device.value, deviceIndex);
+  
+  // Debug logging
+  console.log('Rendering device journey for:', {
+    deviceValue: device.value,
+    deviceIndex,
+    networksCount: networks?.length || 0,
+    showBrainMontage,
+    networks: networks?.map(n => n.name) || []
+  });
+  
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- LEFT PANEL: Visualization (Brain Montage or Device-Specific) -->
+      <div class="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl border-2 border-slate-300 shadow-lg">
+        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i class="fa-solid ${showBrainMontage ? 'fa-brain text-purple-600' : 'fa-microchip text-orange-600'}"></i>
+          ${showBrainMontage ? 'Brain Montage Visualization' : 'Device Placement Visualization'}
+        </h4>
+        
+        <div class="bg-white p-4 rounded-lg border border-slate-200">
+          <p class="text-xs text-slate-600 mb-3 text-center">
+            <i class="fa-solid fa-info-circle mr-1 text-blue-500"></i>
+            ${showBrainMontage ? '10-20 Electrode System - Network-based highlighting' : 'Device-specific placement zones'}
+          </p>
+          
+          ${showBrainMontage ? `
+          <!-- Interactive Brain Montage SVG -->
+          <svg id="brainMontage_${deviceIndex}" viewBox="0 0 300 300" class="w-full max-w-md mx-auto">
+            <!-- Brain outline -->
+            <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
+            <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+            
+            <!-- Reference markers -->
+            <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+            <text x="150" y="25" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">NASION</text>
+            
+            <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+            <text x="150" y="285" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">INION</text>
+            
+            <!-- All electrode positions -->
+            ${generateNetworkElectrodes(deviceIndex)}
+          </svg>
+          
+          <!-- Legend -->
+          <div class="mt-4 flex items-center justify-center gap-4 text-xs">
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <span class="text-slate-700">Anode (+)</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span class="text-slate-700">Cathode (-)</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-slate-300"></div>
+              <span class="text-slate-700">Inactive</span>
+            </div>
+          </div>
+          ` : `
+          <!-- Device-Specific Visualization -->
+          ${deviceViz}
+          
+          <!-- Device-specific legend -->
+          <div class="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
+            <p class="text-xs text-amber-900 text-center">
+              <i class="fa-solid fa-lightbulb mr-1"></i>
+              ${device.value === 'device3' ? 'This device uses neck-based stimulation' : 
+                device.value === 'plato' ? 'Multi-region brain stimulation with 4 specialized blocks' : 
+                'This device uses ear-based stimulation'}
+            </p>
+          </div>
+          `}
+          
+          <!-- Current Network Info -->
+          <div id="networkInfo_${deviceIndex}" class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <p class="text-xs font-semibold text-purple-900 text-center">
+              Select a network from the right panel to view ${showBrainMontage ? 'montage' : 'configuration'}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- RIGHT PANEL: Tabbed Interface for Network Selection & Custom Montages -->
+      <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl border-2 border-green-300 shadow-lg">
+        <!-- Tab Headers -->
+        <div class="flex border-b-2 border-green-300 mb-4">
+          <button 
+            id="networkTab_${deviceIndex}" 
+            onclick="switchMontageTab(${deviceIndex}, 'network')" 
+            class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-green-600 text-green-700 bg-green-100"
+          >
+            <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
+          </button>
+          ${(showBrainMontage && allowsCustomMontage(device.value)) ? `
+          <button 
+            id="customTab_${deviceIndex}" 
+            onclick="switchMontageTab(${deviceIndex}, 'custom')" 
+            class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-transparent text-slate-600 hover:bg-slate-50"
+          >
+            <i class="fa-solid fa-star mr-2"></i>Custom Montage
+          </button>
+          ` : ''}
+        </div>
+        
+        <!-- Network Selection Tab Content -->
+        <div id="networkTabContent_${deviceIndex}" class="space-y-4">
+          <!-- Add Network to Tabs -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              <i class="fa-solid fa-sitemap mr-1"></i>
+              Add Network to Tabs
+            </label>
+            <div class="flex gap-2">
+              <select 
+                id="networkSelect_${deviceIndex}" 
+                class="input-royal flex-1"
+              >
+                <option value="">-- Choose a Brain Network to Add --</option>
+                ${networks && networks.length > 0 ? networks.map((network, idx) => `
+                  <option value="${idx}">Network ${idx + 1}: ${network.name}</option>
+                `).join('') : '<option value="" disabled>No networks available for this device</option>'}
+              </select>
+              <button 
+                onclick="addNetworkFromDropdown(${deviceIndex})"
+                class="btn-primary text-sm whitespace-nowrap"
+              >
+                <i class="fa-solid fa-plus mr-1"></i>Add Tab
+              </button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Select networks to compare them side by side in tabs</p>
+          </div>
+          
+          <!-- Network Tabs Container -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Open Network Tabs</label>
+            <div id="networkTabsContainer_${deviceIndex}">
+              <!-- Network tabs will be rendered here -->
+            </div>
+          </div>
+          
+          <!-- Selected Network Details (Legacy - still used for compatibility) -->
+          <div id="networkDetails_${deviceIndex}" class="hidden">
+            <div class="bg-white p-4 rounded-lg border border-green-300 space-y-3">
+              <div>
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Network Name</p>
+                <p id="networkName_${deviceIndex}" class="text-sm font-semibold text-slate-900"></p>
+              </div>
+              
+              <div>
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Description</p>
+                <p id="networkDesc_${deviceIndex}" class="text-sm text-slate-700"></p>
+              </div>
+              
+              <div class="pt-3 border-t border-green-200">
+                <p class="text-xs font-bold text-slate-500 uppercase mb-2">Electrode Configuration</p>
+                <div class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
+                    <div class="text-xs">
+                      <span class="font-semibold text-red-700">Anodes (+):</span>
+                      <span id="networkAnodes_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
+                    <div class="text-xs">
+                      <span class="font-semibold text-blue-700">Cathode (-):</span>
+                      <span id="networkCathode_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="pt-3 border-t border-green-200">
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Clinical Indication</p>
+                <p id="networkIndication_${deviceIndex}" class="text-xs text-slate-700 mb-4"></p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Network Summary -->
+          <div class="bg-white p-4 rounded-lg border border-green-200">
+            <p class="text-xs font-semibold text-green-900 mb-2">
+              <i class="fa-solid fa-list mr-1"></i>
+              Available Networks: ${networks.length}
+            </p>
+            <div class="space-y-1 max-h-48 overflow-y-auto">
+              ${networks.map((network, idx) => `
+                <button 
+                  onclick="selectNetwork(${deviceIndex}, ${idx})"
+                  class="w-full text-left px-3 py-2 rounded hover:bg-green-50 transition-colors text-xs border border-transparent hover:border-green-300"
+                >
+                  <span class="font-semibold text-slate-900">Network ${idx + 1}:</span>
+                  <span class="text-slate-600 ml-1">${network.name}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button onclick="showFullMontageGuide()" class="btn-secondary text-sm flex-1">
+              <i class="fa-solid fa-book mr-2"></i>Guide
+            </button>
+          </div>
+        </div>
+        
+        <!-- Custom Montage Tab Content (Only for brain devices that allow custom editing) -->
+        ${(showBrainMontage && allowsCustomMontage(device.value)) ? `
+        <div id="customTabContent_${deviceIndex}" class="hidden space-y-4">
+          <!-- Load Saved Custom Montages Section -->
+          <div class="bg-white p-4 rounded-lg border border-purple-200">
+            <h5 class="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-star"></i>
+              Load Saved Custom Montages
+            </h5>
+            <select 
+              id="customMontageSelect_${deviceIndex}" 
+              class="input-royal w-full text-sm mb-2" 
+              onchange="loadCustomMontageForDevice(${deviceIndex}, this.value)"
+            >
+              <option value="">-- Select Custom Montage --</option>
+              <optgroup label="Custom Montages" id="customMontagesOptgroup_${deviceIndex}">
+                <!-- Custom montages will be populated here -->
+              </optgroup>
+            </select>
+            <div class="flex gap-2">
+              <button 
+                id="deleteCustomMontageBtn_${deviceIndex}" 
+                onclick="deleteCustomMontageForDevice(${deviceIndex})" 
+                class="hidden flex-1 px-3 py-2 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                title="Delete selected custom montage"
+              >
+                <i class="fa-solid fa-trash mr-1"></i>Delete Selected
+              </button>
+            </div>
+            <p class="text-[9px] text-purple-600 mt-2 text-center">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              Select a saved custom montage to load it, or create a new one below
+            </p>
+          </div>
+          
+          <!-- Create Custom Montage Section -->
+          <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+            <h5 class="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-plus-circle"></i>
+              Create New Custom Montage
+            </h5>
+            
+            <div id="startCustomBtn_${deviceIndex}">
+               <button onclick="startCustomMontage(${deviceIndex})" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                 <i class="fa-solid fa-sliders"></i> 
+                 Start Custom Configuration
+               </button>
+               <p class="text-[10px] text-slate-500 text-center mt-2">Click to modify electrode placement for this patient</p>
+            </div>
+            
+            <!-- Custom Edit Controls (Hidden by default) -->
+            <div id="customMontageControls_${deviceIndex}" class="hidden mt-4 pt-4 border-t-2 border-dashed border-indigo-200">
+                <h6 class="text-xs font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-pen-to-square"></i> Configuration Mode Active
+                </h6>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button id="toolAnode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'anode')" class="p-2 bg-white border border-red-200 rounded text-xs font-bold text-red-700 hover:bg-red-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div> Place Anode
+                    </button>
+                    <button id="toolCathode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'cathode')" class="p-2 bg-white border border-blue-200 rounded text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div> Place Cathode
+                    </button>
+                </div>
+                
+                <p class="text-[10px] text-indigo-600 text-center mb-3 bg-white/60 p-1.5 rounded border border-indigo-100">
+                  <i class="fa-solid fa-mouse-pointer mr-1"></i>
+                  Click nodes on the left to place <span id="currentToolLabel_${deviceIndex}" class="font-bold">Anode</span>
+                  <br><span class="text-[9px] text-indigo-400">(Max 2 Anodes, 1 Cathode)</span>
+                </p>
+                
+                <div class="mb-3">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custom Montage Name</label>
+                    <input type="text" id="customMontageName_${deviceIndex}" placeholder="e.g., Patient Specific F3-F4" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                </div>
+                
+                <div class="space-y-2">
+                     <button onclick="applySameMontage(${deviceIndex})" class="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 p-2 rounded text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                       <i class="fa-solid fa-rotate-left"></i> Reset to Base Network
+                     </button>
+                     <button onclick="saveCustomMontage(${deviceIndex})" class="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded text-xs font-bold shadow transition-colors flex items-center justify-center gap-2">
+                       <i class="fa-solid fa-check"></i> Save Custom Configuration
+                     </button>
+                </div>
+            </div>
+          </div>
+          
+          <!-- Help Section -->
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <p class="text-xs text-blue-900 mb-2">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              <strong>Custom Montage Guide:</strong>
+            </p>
+            <ul class="text-[10px] text-blue-800 space-y-1 ml-4 list-disc">
+              <li>Start with a base network or create from scratch</li>
+              <li>Click electrodes on the brain visualization to place anodes and cathodes</li>
+              <li>Save your configuration with a descriptive name</li>
+              <li>Saved montages can be loaded anytime from the dropdown above</li>
+            </ul>
+          </div>
+        </div>
+        ` : ''}
+              <i class="fa-solid fa-book mr-2"></i>Guide
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Custom Montage Section (Hidden by default) -->
+    <div id="customMontageSection_${deviceIndex}" class="mt-6 bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-300 hidden">
+      <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <span class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
+        Custom Montage Configuration
+        <button onclick="toggleCustomMontage(${deviceIndex})" class="ml-auto text-red-500 hover:text-red-700" title="Close">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </h4>
+        
+        <div class="space-y-4">
+          <p class="text-sm text-slate-600"><i class="fa-solid fa-hand-pointer mr-2 text-purple-600"></i>Click on electrodes below to set Anode (+) and Cathode (-) positions</p>
+          
+          <!-- Electrode Mode Selection -->
+          <div class="flex gap-3 mb-4">
+            <button 
+              onclick="setElectrodeMode(${deviceIndex}, 'anode')" 
+              class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${device.montage.anode ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}"
+            >
+              <i class="fa-solid fa-plus mr-2"></i>Anode (+)
+              ${device.montage.anode ? `<span class="ml-2 text-xs">${device.montage.anode}</span>` : ''}
+            </button>
+            <button 
+              onclick="setElectrodeMode(${deviceIndex}, 'cathode')" 
+              class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${device.montage.cathode ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}"
+            >
+              <i class="fa-solid fa-minus mr-2"></i>Cathode (-)
+              ${device.montage.cathode ? `<span class="ml-2 text-xs">${device.montage.cathode}</span>` : ''}
+            </button>
+          </div>
+          
+          <!-- Interactive Montage Builder -->
+          <div class="bg-white p-4 rounded-lg border-2 border-purple-300">
+            <svg id="customMontage_${deviceIndex}" viewBox="0 0 300 300" class="w-full max-w-md mx-auto">
+              <!-- Brain outline -->
+              <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              
+              <!-- Interactive electrodes -->
+              ${generateInteractiveElectrodes(deviceIndex, device.montage)}
+            </svg>
+          </div>
+          
+          ${device.montage.anode && device.montage.cathode ? `
+          <div class="mt-4 p-4 bg-white rounded-lg border-2 border-purple-400">
+            <p class="text-sm font-bold text-purple-900 mb-2"><i class="fa-solid fa-check-circle mr-2"></i>Montage Configured:</p>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-red-50 p-3 rounded border border-red-300">
+                <span class="font-semibold text-red-700">Anode (+):</span>
+                <span class="ml-2 text-red-900 font-bold">${device.montage.anode}</span>
+              </div>
+              <div class="bg-blue-50 p-3 rounded border border-blue-300">
+                <span class="font-semibold text-blue-700">Cathode (-):</span>
+                <span class="ml-2 text-blue-900 font-bold">${device.montage.cathode}</span>
+              </div>
+            </div>
+            <button onclick="resetMontage(${deviceIndex})" class="mt-3 btn-secondary text-sm w-full">
+              <i class="fa-solid fa-redo mr-2"></i>Reset Montage
+            </button>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Helper function to generate blank electrodes
+function generateBlankElectrodes() {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => `
+    <g class="electrode">
+      <circle cx="${e.cx}" cy="${e.cy}" r="10" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e293b">${e.id}</text>
+    </g>
+  `).join('');
+}
+
+// Helper function to generate interactive electrodes
+function generateInteractiveElectrodes(deviceIndex, montage) {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => {
+    let fill = '#e2e8f0';
+    let stroke = '#64748b';
+    let strokeWidth = 2;
+    
+    if (montage.anode === e.id) {
+      fill = '#ef4444';
+      stroke = '#dc2626';
+      strokeWidth = 3;
+    } else if (montage.cathode === e.id) {
+      fill = '#3b82f6';
+      stroke = '#2563eb';
+      strokeWidth = 3;
+    }
+    
+    return `
+      <g class="electrode cursor-pointer" onclick="selectElectrode(${deviceIndex}, '${e.id}')" style="cursor: pointer;">
+        <circle cx="${e.cx}" cy="${e.cy}" r="12" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" class="transition-all hover:opacity-80"/>
+        <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff" pointer-events="none">${e.id}</text>
+      </g>
+    `;
+  }).join('');
+}
+
+// Electrode selection functions
+let currentElectrodeMode_device = {}; // Track mode per device
+
+function setElectrodeMode(deviceIndex, mode) {
+  currentElectrodeMode_device[deviceIndex] = mode;
+}
+
+function selectElectrode(deviceIndex, electrodeId) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  const mode = currentElectrodeMode_device[deviceIndex] || 'anode';
+  
+  if (mode === 'anode') {
+    device.montage.anode = electrodeId;
+  } else if (mode === 'cathode') {
+    device.montage.cathode = electrodeId;
+  }
+  
+  // Re-render the device journey
+  const content = document.getElementById('deviceTabContent');
+  if (content) {
+    content.innerHTML = renderDeviceJourney(device, deviceIndex);
+  }
+}
+
+function resetMontage(deviceIndex) {
+  if (confirm('Are you sure you want to reset this montage configuration?')) {
+    const device = treatmentPlanState.devices[deviceIndex];
+    if (device) {
+      device.montage = {
+        type: 'blank',
+        anode: null,
+        cathode: null
+      };
+      
+      // Re-render
+      const content = document.getElementById('deviceTabContent');
+      if (content) {
+        content.innerHTML = renderDeviceJourney(device, deviceIndex);
+      }
+    }
+  }
+}
+
+function updateDeviceSymptoms(deviceIndex, symptom) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device && symptom) {
+    device.symptoms = [symptom]; // For now, single selection
+    
+    // Re-render to show updated state
+    const content = document.getElementById('deviceTabContent');
+    if (content) {
+      content.innerHTML = renderDeviceJourney(device, deviceIndex);
+    }
+  }
+}
+
+function updateDeviceNetwork(deviceIndex, network) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device) {
+    device.network = network;
+    
+    // Re-render to show updated state
+    const content = document.getElementById('deviceTabContent');
+    if (content) {
+      content.innerHTML = renderDeviceJourney(device, deviceIndex);
+    }
+  }
+}
+
+function showFullMontageGuide() {
+  alert('Complete 10-20 Montage Guide:\n\nThis would open a detailed guide showing all electrode positions, measurement techniques, and standard montage configurations.');
+}
+
+function toggleCustomMontage(deviceIndex) {
+  const section = document.getElementById(`customMontageSection_${deviceIndex}`);
+  if (section) {
+    section.classList.toggle('hidden');
+    
+    // Scroll to the section if it's being shown
+    if (!section.classList.contains('hidden')) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  }
+}
+
+
+// Global state for custom electrode placement
+let customMontageConfig = null;
+// Treatment plan specific functions continue...
+
+// Get custom montage from storage if exists
+function getCustomMontage(montageId) {
+  return customMontagesLibrary.find(m => m.id === montageId) || null;
+}
+
+// Set electrode mode (anode, cathode, or remove)
+function setElectrodeMode(mode) {
+  currentElectrodeMode = mode;
+  
+  // Update button styles
+  const anodeBtn = document.getElementById('selectAnodeMode');
+  const cathodeBtn = document.getElementById('selectCathodeMode');
+  const removeBtn = document.getElementById('selectRemoveMode');
+  const modeIndicator = document.getElementById('activeModeIndicator');
+  
+  // Reset all buttons to inactive state
+  anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-red-700 border-red-300 hover:border-red-400';
+  cathodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-blue-700 border-blue-300 hover:border-blue-400';
+  removeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-slate-700 border-slate-300 hover:border-slate-400';
+  
+  if (mode === 'anode') {
+    // Active anode button style
+    anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-md bg-gradient-to-br from-red-500 to-red-600 text-white border-red-700';
+    
+    // Update mode indicator
+    if (modeIndicator) {
+      modeIndicator.textContent = 'ANODE MODE';
+      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white';
+    }
+    
+    // Add cursor indicator to brain diagram
+    updateBrainCursorMode('anode');
+  } else if (mode === 'cathode') {
+    // Active cathode button style
+    cathodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-md bg-gradient-to-br from-blue-500 to-blue-600 text-white border-blue-700';
+    
+    // Update mode indicator
+    if (modeIndicator) {
+      modeIndicator.textContent = 'CATHODE MODE';
+      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white';
+    }
+    
+    // Add cursor indicator to brain diagram
+    updateBrainCursorMode('cathode');
+  } else if (mode === 'remove') {
+    // Active remove button style
+    removeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-md bg-gradient-to-br from-slate-600 to-slate-700 text-white border-slate-800';
+    
+    // Update mode indicator
+    if (modeIndicator) {
+      modeIndicator.textContent = 'REMOVE MODE';
+      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-slate-600 text-white';
+    }
+    
+    // Add cursor indicator to brain diagram
+    updateBrainCursorMode('remove');
+  }
+  
+  // Log mode change for debugging
+  console.log(`🔄 Electrode mode changed to: ${mode.toUpperCase()}`);
+}
+
+// Update brain diagram cursor to reflect active mode
+function updateBrainCursorMode(mode) {
+  const svg = document.getElementById('brainLayoutTopView');
+  if (!svg) return;
+  
+  // Add data attribute to track mode
+  svg.setAttribute('data-active-mode', mode);
+  
+  // Update cursor style based on mode
+  const electrodes = document.querySelectorAll('.electrode circle');
+  electrodes.forEach(circle => {
+    if (mode === 'anode') {
+      circle.style.cursor = 'crosshair'; // Different cursor for anode mode
+    } else if (mode === 'remove') {
+      circle.style.cursor = 'not-allowed'; // Remove cursor
+    } else {
+      circle.style.cursor = 'pointer'; // Default cursor for cathode mode
+    }
+  });
+}
+
+// Enable electrode customization via click on electrodes
+function enableCathodeCustomization() {
+  // Show electrode mode selector for doctors
+  const modeSelector = document.getElementById('electrodeModeSelector');
+  if (modeSelector) {
+    modeSelector.classList.remove('hidden');
+    // Do NOT set a default mode - force doctor to explicitly choose
+    // This prevents accidental cathode assignments
+    currentElectrodeMode = null;
+    
+    // Set neutral button states
+    const anodeBtn = document.getElementById('selectAnodeMode');
+    const cathodeBtn = document.getElementById('selectCathodeMode');
+    const removeBtn = document.getElementById('selectRemoveMode');
+    const modeIndicator = document.getElementById('activeModeIndicator');
+    
+    if (anodeBtn) {
+      anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-red-700 border-red-300 hover:border-red-400';
+    }
+    if (cathodeBtn) {
+      cathodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-blue-700 border-blue-300 hover:border-blue-400';
+    }
+    if (removeBtn) {
+      removeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-slate-700 border-slate-300 hover:border-slate-400';
+    }
+    if (modeIndicator) {
+      modeIndicator.textContent = 'SELECT MODE';
+      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-gray-400 text-white animate-pulse';
+    }
+  }
+  const electrodes = document.querySelectorAll('.electrode');
+  
+  electrodes.forEach(el => {
+    const circle = el.querySelector('circle');
+    if (circle) {
+      // Make cursor pointer to indicate clickable
+      circle.style.cursor = 'pointer';
+      
+      // Add click handler
+      circle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const electrodeId = el.id.replace('-electrode', '').toUpperCase();
+        toggleElectrodeSelection(electrodeId, el);
+      });
+      
+      // Add hover effect
+      circle.addEventListener('mouseenter', function() {
+        if (currentRole === 'doctor' || currentRole === 'admin') {
+          circle.style.opacity = '0.7';
+        }
+      });
+      
+      circle.addEventListener('mouseleave', function() {
+        circle.style.opacity = '1';
+      });
+    }
+  });
+}
+
+// Toggle electrode selection (anode or cathode)
+function toggleElectrodeSelection(electrodeId, electrodeElement) {
+  // Debounce rapid clicks to prevent performance issues
+  const currentTime = Date.now();
+  if (currentTime - lastElectrodeClickTime < 150) {
+    return; // Ignore clicks within 150ms
+  }
+  lastElectrodeClickTime = currentTime;
+  
+  // Safety check: Ensure mode is selected
+  if (!currentElectrodeMode) {
+    // Clear any existing notification timeout
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout);
+    }
+    showNotification('⚠️ Please select Anode or Cathode mode first', 'error');
+    
+    // Highlight the mode selector
+    const modeSelector = document.getElementById('electrodeModeSelector');
+    if (modeSelector) {
+      modeSelector.style.animation = 'pulse 0.5s ease-in-out 3';
+      setTimeout(() => {
+        modeSelector.style.animation = '';
+      }, 1500);
+    }
+    return;
+  }
+  
+  // Initialize custom config if not exists
+  if (!customMontageConfig) {
+    const selection = document.getElementById('clinicalIndicationSelect')?.value;
+    const customStored = getCustomMontage(selection);
+    const montageConfigs = getMontageConfigs();
+    
+    if (customStored) {
+      customMontageConfig = JSON.parse(JSON.stringify(customStored));
+    } else {
+      customMontageConfig = JSON.parse(JSON.stringify(montageConfigs[selection] || {}));
+    }
+    
+    // Ensure arrays exist
+    if (!customMontageConfig.anodes) customMontageConfig.anodes = [];
+    if (!customMontageConfig.cathodes) customMontageConfig.cathodes = [];
+  }
+  
+  let actionTaken = '';
+  let showSuccessNotification = false;
+  
+  if (currentElectrodeMode === 'remove') {
+    // Handle removal of electrode
+    const anodeIndex = customMontageConfig.anodes?.indexOf(electrodeId);
+    const cathodeIndex = customMontageConfig.cathodes?.indexOf(electrodeId);
+    
+    if (anodeIndex > -1) {
+      customMontageConfig.anodes.splice(anodeIndex, 1);
+      document.getElementById('anodePlacement').value = customMontageConfig.anodes.join(', ');
+      actionTaken = `Removed ${electrodeId} from anodes`;
+      showSuccessNotification = true;
+    } else if (cathodeIndex > -1) {
+      customMontageConfig.cathodes.splice(cathodeIndex, 1);
+      document.getElementById('cathodePlacement').value = customMontageConfig.cathodes.join(', ');
+      actionTaken = `Removed ${electrodeId} from cathodes`;
+      showSuccessNotification = true;
+    } else {
+      return; // Electrode wasn't selected, no action needed
+    }
+  } else if (currentElectrodeMode === 'cathode') {
+    // Handle cathode selection
+    const cathodeIndex = customMontageConfig.cathodes?.indexOf(electrodeId);
+    
+    if (cathodeIndex > -1) {
+      // Deselect: Remove from cathodes
+      customMontageConfig.cathodes.splice(cathodeIndex, 1);
+      actionTaken = `Removed ${electrodeId} cathode`;
+    } else {
+      // Check limit: Maximum 1 cathode allowed
+      if (customMontageConfig.cathodes.length >= 1) {
+        showNotification('Maximum 1 cathode allowed', 'error', 2000);
+        return;
+      }
+      
+      // Remove from anodes if present (prevent conflict)
+      const anodeIndex = customMontageConfig.anodes?.indexOf(electrodeId);
+      if (anodeIndex > -1) {
+        customMontageConfig.anodes.splice(anodeIndex, 1);
+        document.getElementById('anodePlacement').value = customMontageConfig.anodes.join(', ');
+      }
+      
+      customMontageConfig.cathodes.push(electrodeId);
+      actionTaken = `Added ${electrodeId} as cathode`;
+      showSuccessNotification = true;
+    }
+    
+    // Update cathode placement text field
+    document.getElementById('cathodePlacement').value = customMontageConfig.cathodes.join(', ');
+  } else if (currentElectrodeMode === 'anode') {
+    // Handle anode selection
+    const anodeIndex = customMontageConfig.anodes?.indexOf(electrodeId);
+    
+    if (anodeIndex > -1) {
+      // Deselect: Remove from anodes
+      customMontageConfig.anodes.splice(anodeIndex, 1);
+      actionTaken = `Removed ${electrodeId} anode`;
+    } else {
+      // Check limit: Maximum 2 anodes allowed
+      if (customMontageConfig.anodes.length >= 2) {
+        showNotification('Maximum 2 anodes allowed', 'error', 2000);
+        return;
+      }
+      
+      // Remove from cathodes if present (prevent conflict)
+      const cathodeIndex = customMontageConfig.cathodes?.indexOf(electrodeId);
+      if (cathodeIndex > -1) {
+        customMontageConfig.cathodes.splice(cathodeIndex, 1);
+        document.getElementById('cathodePlacement').value = customMontageConfig.cathodes.join(', ');
+      }
+      
+      customMontageConfig.anodes.push(electrodeId);
+      actionTaken = `Added ${electrodeId} as anode`;
+      showSuccessNotification = true;
+    }
+    
+    // Update anode placement text field
+    document.getElementById('anodePlacement').value = customMontageConfig.anodes.join(', ');
+  }
+  
+  // Optimized: Only update visualization if there was a change
+  if (actionTaken) {
+    // Batch DOM updates using requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      updateBrainVisualization(customMontageConfig);
+      addElectrodeClickFeedback(electrodeElement, currentElectrodeMode);
+    });
+    
+    // Mark as having unsaved changes
+    hasUnsavedChanges = true;
+    updateUnsavedChangesIndicator();
+    showSaveButton();
+  }
+}
+
+// Remove the last selected electrode of a specific type
+function removeLastElectrode(type) {
+  if (!customMontageConfig) {
+    showNotification('No electrodes to remove', 'info');
+    return;
+  }
+  
+  let removed = false;
+  let electrodeId = '';
+  
+  if (type === 'anode') {
+    if (customMontageConfig.anodes && customMontageConfig.anodes.length > 0) {
+      electrodeId = customMontageConfig.anodes.pop();
+      document.getElementById('anodePlacement').value = customMontageConfig.anodes.join(', ');
+      removed = true;
+    }
+  } else if (type === 'cathode') {
+    if (customMontageConfig.cathodes && customMontageConfig.cathodes.length > 0) {
+      electrodeId = customMontageConfig.cathodes.pop();
+      document.getElementById('cathodePlacement').value = customMontageConfig.cathodes.join(', ');
+      removed = true;
+    }
+  }
+  
+  if (removed) {
+    // Update visualization
+    updateBrainVisualization(customMontageConfig);
+    
+    // Mark as having unsaved changes
+    hasUnsavedChanges = true;
+    
+    // Show notification
+    showNotification(`Removed ${electrodeId} from ${type.toUpperCase()}S`, 'success');
+    
+    // Update unsaved changes indicator
+    updateUnsavedChangesIndicator();
+    
+    // Show save button
+    showSaveButton();
+  } else {
+    showNotification(`No ${type}s to remove`, 'info');
+  }
+}
+
+// Reset all electrode selections
+function resetAllElectrodes() {
+  if (!confirm('Clear all electrode selections? This will remove all anodes and cathodes.')) {
+    return;
+  }
+  
+  if (customMontageConfig) {
+    customMontageConfig.anodes = [];
+    customMontageConfig.cathodes = [];
+    
+    // Update fields
+    document.getElementById('anodePlacement').value = '';
+    document.getElementById('cathodePlacement').value = '';
+    
+    // Update visualization
+    updateBrainVisualization(customMontageConfig);
+    
+    // Reset unsaved changes flag
+    hasUnsavedChanges = false;
+    
+    showNotification('All electrode selections cleared', 'info');
+  }
+}
+
+// Add visual feedback when electrode is clicked
+function addElectrodeClickFeedback(electrodeElement, mode) {
+  if (!electrodeElement) return;
+  
+  const circle = electrodeElement.querySelector('circle');
+  if (!circle) return;
+  
+  // Clean up any existing feedback animations to prevent DOM buildup
+  const existingAnimations = circle.getAnimations();
+  existingAnimations.forEach(animation => animation.cancel());
+  
+  // Remove any lingering ripple effects
+  const existingRipples = electrodeElement.querySelectorAll('circle:not(:first-child)');
+  existingRipples.forEach(ripple => ripple.remove());
+  
+  // Store original properties
+  const originalStroke = circle.getAttribute('stroke') || '#374151';
+  const originalStrokeWidth = circle.getAttribute('stroke-width') || '2';
+  const originalFilter = circle.style.filter || '';
+  
+  // Determine feedback color based on mode
+  const feedbackColor = mode === 'anode' ? '#f59e0b' : 
+                       mode === 'cathode' ? '#3b82f6' : '#6b7280';
+  
+  // Apply immediate visual feedback
+  circle.setAttribute('stroke', feedbackColor);
+  circle.setAttribute('stroke-width', '3');
+  circle.style.filter = `drop-shadow(0 0 4px ${feedbackColor}60)`;
+  
+  // Use CSS animation for better performance instead of DOM manipulation
+  circle.style.animation = 'electrode-pulse 0.3s ease-out';
+  
+  // Reset properties after feedback animation - reduced timeout for snappier response
+  setTimeout(() => {
+    if (circle.parentNode) { // Check if element still exists
+      circle.setAttribute('stroke', originalStroke);
+      circle.setAttribute('stroke-width', originalStrokeWidth);
+      circle.style.filter = originalFilter;
+      circle.style.animation = '';
+    }
+  }, 300);
+}
+
+// Show/update unsaved changes indicator
+function updateUnsavedChangesIndicator() {
+  const indicator = document.getElementById('unsavedChangesIndicator');
+  if (indicator) {
+    if (hasUnsavedChanges) {
+      indicator.classList.remove('hidden');
+    } else {
+      indicator.classList.add('hidden');
+    }
+  }
+}
+
+// Show save button when changes are made
+function showSaveButton() {
+  const saveSection = document.getElementById('saveCustomMontageSection');
+  if (saveSection && hasUnsavedChanges) {
+    saveSection.classList.remove('hidden');
+  }
+}
+
+// Hide save button
+function hideSaveButton() {
+  const saveSection = document.getElementById('saveCustomMontageSection');
+  if (saveSection) {
+    saveSection.classList.add('hidden');
+  }
+}
+
+// Show save changes popup
+function showSaveChangesPopup() {
+  // Check if there are actually changes to save
+  if (!hasUnsavedChanges) {
+    showNotification('No changes to save', 'info');
+    return;
+  }
+  
+  // Validate that we have at least one electrode selected
+  if (!customMontageConfig || 
+      (!customMontageConfig.anodes?.length && !customMontageConfig.cathodes?.length)) {
+    showNotification('Please select at least one electrode before saving', 'error');
+    return;
+  }
+  
+  // Remove existing popup if any
+  const existingPopup = document.getElementById('saveChangesPopup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+  
+  // Create popup
+  const popup = document.createElement('div');
+  popup.id = 'saveChangesPopup';
+  popup.className = 'modal';
+  popup.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-save text-orange-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Save as New Montage</h3>
+            <p class="text-sm text-slate-600">Create a custom montage configuration</p>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-slate-700 block mb-2">
+            <i class="fa-solid fa-tag mr-1"></i>Montage Name *
+          </label>
+          <input type="text" id="newMontageName" class="input-royal w-full" placeholder="e.g., Custom DLPFC Protocol" />
+          <p class="text-xs text-slate-500 mt-1">This will be saved as a new custom montage</p>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <p class="text-sm text-blue-800 mb-2">
+            <i class="fa-solid fa-info-circle mr-1"></i>
+            <strong>Configuration:</strong>
+          </p>
+          <div class="text-xs text-blue-900 space-y-1">
+            <div><strong class="text-orange-700">Device:</strong> <span id="popupDeviceInfo"></span></div>
+            <div><strong class="text-red-700">Anode(s):</strong> <span id="popupAnodeList"></span></div>
+            <div><strong class="text-blue-700">Cathode(s):</strong> <span id="popupCathodeList"></span></div>
+          </div>
+        </div>
+        
+        <div class="bg-amber-50 border border-amber-300 rounded-lg p-3 mb-4">
+          <p class="text-xs text-amber-800">
+            <i class="fa-solid fa-info-circle mr-1"></i>
+            <strong>Note:</strong> The original montage will remain unchanged. This creates a new custom configuration.
+          </p>
+        </div>
+        
+        <div class="flex gap-3 justify-end">
+          <button onclick="cancelMontageChanges()" class="btn-secondary px-4 py-2">
+            <i class="fa-solid fa-times mr-2"></i>Cancel
+          </button>
+          <button onclick="saveNewMontage()" class="btn-primary px-4 py-2">
+            <i class="fa-solid fa-check mr-2"></i>Save as New
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  // Get selected device info
+  const deviceSelect = document.getElementById('deviceSelect');
+  const selectedDevice = deviceSelect ? deviceSelect.value : '';
+  const deviceText = selectedDevice ? 
+    (deviceSelect.options[deviceSelect.selectedIndex]?.text || selectedDevice) : 
+    'None selected';
+  
+  // Update electrode lists and device info in popup
+  if (document.getElementById('popupDeviceInfo')) {
+    document.getElementById('popupDeviceInfo').textContent = deviceText;
+  }
+  if (customMontageConfig?.anodes) {
+    document.getElementById('popupAnodeList').textContent = customMontageConfig.anodes.join(', ') || 'None';
+  }
+  if (customMontageConfig?.cathodes) {
+    document.getElementById('popupCathodeList').textContent = customMontageConfig.cathodes.join(', ') || 'None';
+  }
+}
+
+// Save as new montage
+function saveNewMontage() {
+  if (!customMontageConfig) return;
+  
+  // Get montage name
+  const montageName = document.getElementById('newMontageName')?.value?.trim();
+  
+  if (!montageName) {
+    showNotification('Please enter a montage name', 'error');
+    return;
+  }
+  
+  // Get current clinical indication as base reference
+  const selection = document.getElementById('clinicalIndicationSelect')?.value;
+  const montageConfigs = getMontageConfigs();
+  const baseConfig = montageConfigs[selection];
+  
+  // Get selected device from dropdown
+  const deviceSelect = document.getElementById('deviceSelect');
+  const selectedDevice = deviceSelect ? deviceSelect.value : '';
+  
+  // Create new montage object
+  const newMontage = {
+    ...customMontageConfig,
+    name: montageName,
+    basedOn: selection,
+    baseCategory: baseConfig?.category || '',
+    baseNetworkTarget: baseConfig?.networkTarget || '',
+    selectedDevice: selectedDevice, // Save the selected device
+    recommendedDevice: selectedDevice, // Also save as recommended for this montage
+    timestamp: new Date().toISOString(),
+    createdBy: currentRole,
+    isCustom: true
+  };
+  
+  // Generate unique ID for the montage
+  const montageId = 'custom_' + Date.now();
+  
+  // Save to local storage
+  const saved = saveCustomMontageToStorage(montageId, newMontage);
+  if (!saved) {
+    showNotification('Failed to save custom montage', 'error');
+    return;
+  }
+  
+  // Update the placement fields
+  document.getElementById('anodePlacement').value = customMontageConfig.anodes?.join(', ') || '';
+  document.getElementById('cathodePlacement').value = customMontageConfig.cathodes?.join(', ') || '';
+  
+  // Mark as saved
+  hasUnsavedChanges = false;
+  updateUnsavedChangesIndicator();
+  hideSaveButton();
+  
+  // Close popup
+  const popup = document.getElementById('saveChangesPopup');
+  if (popup) popup.remove();
+  
+  // Show success notification with more details
+  showNotification(`✓ Custom montage "${montageName}" saved successfully!`, 'success', 4000);
+  
+  // Add to dropdown
+  populateCustomMontagesDropdown();
+  
+  // Set the dropdown to the newly created montage
+  const clinicalSelect = document.getElementById('clinicalIndicationSelect');
+  if (clinicalSelect) {
+    clinicalSelect.value = montageId;
+  }
+  
+  // Show delete button for the loaded custom montage
+  showDeleteButton(montageId);
+}
+
+// Show delete button for custom montages
+function showDeleteButton(montageId) {
+  let deleteBtn = document.getElementById('deleteCustomMontageBtn');
+  if (!deleteBtn) {
+    // Create delete button if it doesn't exist
+    deleteBtn = document.createElement('button');
+    deleteBtn.id = 'deleteCustomMontageBtn';
+    deleteBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors mt-2';
+    deleteBtn.innerHTML = '<i class="fas fa-trash mr-2"></i>Delete Custom Montage';
+    
+    // Find a good place to insert the button (after montage category field)
+    const categoryField = document.getElementById('montageCategory');
+    if (categoryField && categoryField.parentNode) {
+      categoryField.parentNode.insertAdjacentElement('afterend', deleteBtn);
+    }
+  }
+  
+  deleteBtn.style.display = 'block';
+  deleteBtn.onclick = () => deleteCustomMontage(montageId);
+}
+
+// Delete a custom montage for a specific device
+function deleteCustomMontageForDevice(deviceIndex) {
+  const select = document.getElementById(`customMontageSelect_${deviceIndex}`);
+  if (!select || !select.value) {
+    showNotification('Please select a custom montage to delete', 'error');
+    return;
+  }
+  
+  const montageId = select.value;
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
+  
+  if (!montage) {
+    showNotification('Montage not found', 'error');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to delete "${montage.name}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  // Remove from library
+  customMontagesLibrary = customMontagesLibrary.filter(m => m.id !== montageId);
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    showNotification(`Deleted custom montage "${montage.name}"`, 'success');
+    
+    // Reset the dropdown
+    select.value = '';
+    
+    // Hide delete button
+    const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+    
+    // Update all device dropdowns
+    populateCustomMontagesForAllDevices();
+    
+  } catch (e) {
+    console.error('Failed to delete montage:', e);
+    showNotification('Failed to delete montage', 'error');
+  }
+}
+
+// Legacy delete function
+function deleteCustomMontage(montageId) {
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
+  if (!montage) {
+    showNotification('Montage not found', 'error');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to delete "${montage.name}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  // Remove from library
+  customMontagesLibrary = customMontagesLibrary.filter(m => m.id !== montageId);
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    showNotification(`Deleted custom montage "${montage.name}"`, 'success');
+    
+    // Update all dropdowns
+    populateCustomMontagesForAllDevices();
+    populateCustomMontagesDropdown();
+    
+  } catch (e) {
+    console.error('Failed to delete montage:', e);
+    showNotification('Failed to delete montage', 'error');
+  }
+  
+  // Update active montage info
+  const activeAnodes = document.getElementById('activeAnodes');
+  const activeCathodes = document.getElementById('activeCathodes');
+  
+  if (activeAnodes) {
+    activeAnodes.textContent = customMontageConfig.anodes?.join(', ') || 'None';
+  }
+  if (activeCathodes) {
+    if (customMontageConfig.extracephalic && customMontageConfig.cathodes?.length === 0) {
+      activeCathodes.textContent = 'Shoulder/Torso (extracephalic)';
+    } else {
+      activeCathodes.textContent = customMontageConfig.cathodes?.join(', ') || 'None';
+    }
+  }
+  
+  // Refresh custom montage list
+  loadCustomMontagesList();
+}
+
+// Cancel montage changes
+function cancelMontageChanges() {
+  // Revert to original base configuration (not custom)
+  const selection = document.getElementById('clinicalIndicationSelect')?.value;
+  if (selection) {
+    const montageConfigs = getMontageConfigs();
+    const originalConfig = montageConfigs[selection];
+    
+    if (originalConfig) {
+      updateBrainVisualization(originalConfig);
+      document.getElementById('anodePlacement').value = originalConfig.anodePlacement || originalConfig.anodes?.join(', ') || '';
+      document.getElementById('cathodePlacement').value = originalConfig.cathodePlacement || originalConfig.cathodes?.join(', ') || '';
+    }
+  }
+  
+  // Reset custom config
+  customMontageConfig = null;
+  hasUnsavedChanges = false;
+  updateUnsavedChangesIndicator();
+  hideSaveButton();
+  
+  // Close popup
+  const popup = document.getElementById('saveChangesPopup');
+  if (popup) popup.remove();
+}
+
+// Helper function to show notification
+function showNotification(message, type = 'info', duration = 3000) {
+  // Prevent notification spam by clearing existing notifications of the same type
+  const existingNotifications = document.querySelectorAll(`[data-notification-type="${type}"]`);
+  existingNotifications.forEach(notif => {
+    if (notif.textContent.trim() === message.trim()) {
+      notif.remove(); // Remove duplicate notifications
+    }
+  });
+  
+  // Limit total notifications to prevent UI clutter
+  const allNotifications = document.querySelectorAll('[data-notification-type]');
+  if (allNotifications.length >= 3) {
+    allNotifications[0].remove(); // Remove oldest notification
+  }
+  
+  const notification = document.createElement('div');
+  notification.setAttribute('data-notification-type', type);
+  notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in`;
+  
+  const colors = {
+    success: 'bg-green-100 border-green-500 text-green-900',
+    error: 'bg-red-100 border-red-500 text-red-900',
+    info: 'bg-blue-100 border-blue-500 text-blue-900'
+  };
+  
+  notification.className += ` ${colors[type]} border-l-4`;
+  
+  const icons = {
+    success: 'fa-check-circle',
+    error: 'fa-exclamation-circle',
+    info: 'fa-info-circle'
+  };
+  
+  notification.innerHTML = `
+    <i class="fa-solid ${icons[type]} text-xl"></i>
+    <span class="font-semibold">${message}</span>
+  `;
+  
+  // Stack notifications vertically if there are multiple
+  const notificationCount = document.querySelectorAll('[data-notification-type]').length;
+  notification.style.top = `${4 + (notificationCount * 70)}px`;
+  
+  document.body.appendChild(notification);
+  
+  // Auto remove after specified duration
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 300);
+    }
+  }, duration);
+}
+
+// Populate custom montages dropdown
+function populateCustomMontagesDropdown() {
+  const optgroup = document.getElementById('customMontagesOptgroup');
+  
+  if (!optgroup) return;
+  
+  if (customMontagesLibrary.length === 0) {
+    optgroup.style.display = 'none';
+    optgroup.innerHTML = '';
+    return;
+  }
+  
+  optgroup.style.display = 'block';
+  
+  // Build options from array
+  let html = '';
+  customMontagesLibrary.forEach(montage => {
+    const deviceLabel = montage.deviceType || 'Unknown';
+    html += `<option value="${montage.id}">⭐ ${montage.name} (${deviceLabel})</option>`;
+  });
+  
+  optgroup.innerHTML = html;
+}
+
+// Load and display custom montages list
+function loadCustomMontagesList() {
+  const customMontages = loadCustomMontages();
+  const customMontagesList = document.getElementById('customMontagesList');
+  const customMontagesContent = document.getElementById('customMontagesContent');
+  
+  if (!customMontagesList || !customMontagesContent) return;
+  
+  const montageKeys = Object.keys(customMontages);
+  
+  if (montageKeys.length === 0) {
+    customMontagesList.classList.add('hidden');
+    return;
+  }
+  
+  customMontagesList.classList.remove('hidden');
+  
+  // Also populate dropdown
+  populateCustomMontagesDropdown();
+  
+  // Build montages list HTML
+  let html = '';
+  montageKeys.forEach(key => {
+    const montage = customMontages[key];
+    const date = new Date(montage.timestamp).toLocaleDateString();
+    html += `
+      <div class="bg-white p-3 rounded-lg border border-purple-200 hover:border-purple-400 transition-all">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <h5 class="font-bold text-sm text-purple-900">${montage.name}</h5>
+            <p class="text-xs text-slate-600 mt-1">
+              <i class="fa-solid fa-link mr-1"></i>Based on: ${getMontageLabel(montage.basedOn)}
+            </p>
+            <div class="mt-2 text-xs space-y-0.5">
+              <div><strong class="text-red-700">Anodes:</strong> ${montage.anodes?.join(', ') || 'None'}</div>
+              <div><strong class="text-blue-700">Cathodes:</strong> ${montage.cathodes?.join(', ') || 'None'}</div>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">
+              <i class="fa-solid fa-calendar mr-1"></i>${date} · ${montage.createdBy}
+            </p>
+          </div>
+          <div class="flex gap-1 ml-2">
+            <button onclick="loadCustomMontage('${key}')" class="px-2 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600" title="Load this montage">
+              <i class="fa-solid fa-upload"></i>
+            </button>
+            <button onclick="deleteCustomMontage('${key}')" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600" title="Delete this montage">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  customMontagesContent.innerHTML = html;
+}
+
+// Populate custom montages dropdown
+// Duplicate removed - consolidated above
+
+// Get readable label for montage type
+function getMontageLabel(key) {
+  const labels = {
+    'ruminative_depression': 'Ruminative Depression',
+    'cognitive_depression': 'Cognitive Depression',
+    'anxious_depression': 'Anxious Depression'
+  };
+  return labels[key] || key;
+}
+
+// Toggle custom montages list visibility
+function toggleCustomMontagesList() {
+  const content = document.getElementById('customMontagesContent');
+  const icon = document.getElementById('customMontagesToggleIcon');
+  
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    icon.className = 'fa-solid fa-chevron-up';
+  } else {
+    content.classList.add('hidden');
+    icon.className = 'fa-solid fa-chevron-down';
+  }
+}
+
+// Load a custom montage for a specific device
+function loadCustomMontageForDevice(deviceIndex, montageId) {
+  if (!montageId) {
+    // Clear selection - hide delete button
+    const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+    return;
+  }
+  
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
+  
+  if (!montage) {
+    showNotification('Custom montage not found', 'error');
+    return;
+  }
+  
+  // Apply montage to the device
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Update device montage configuration
+  device.montage = {
+    anodes: montage.anodes || [],
+    cathode: montage.cathode || ''
+  };
+  device.customMontageName = montage.name;
+  
+  // Update the visualization
+  highlightNetworkElectrodes(deviceIndex, montage.anodes || [], montage.cathode || '');
+  
+  // Update the network info display
+  const networkInfo = document.getElementById(`networkInfo_${deviceIndex}`);
+  if (networkInfo) {
+    networkInfo.innerHTML = `
+      <div class="text-xs">
+        <p class="font-bold text-purple-900 mb-2">🌟 ${montage.name}</p>
+        <div class="space-y-1">
+          <div><strong class="text-red-700">Anodes:</strong> <span class="font-mono">${montage.anodes?.join(', ') || 'None'}</span></div>
+          <div><strong class="text-blue-700">Cathode:</strong> <span class="font-mono">${montage.cathode || 'None'}</span></div>
+          ${montage.baseNetwork ? `<div class="mt-2 text-[10px] text-slate-600">Based on: ${montage.baseNetwork}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Update network details section
+  const networkName = document.getElementById(`networkName_${deviceIndex}`);
+  if (networkName) networkName.textContent = `${montage.baseNetwork || 'Custom'} (${montage.name})`;
+  
+  const networkAnodes = document.getElementById(`networkAnodes_${deviceIndex}`);
+  if (networkAnodes) networkAnodes.textContent = montage.anodes?.join(', ') || 'None';
+  
+  const networkCathode = document.getElementById(`networkCathode_${deviceIndex}`);
+  if (networkCathode) networkCathode.textContent = montage.cathode || 'None';
+  
+  // Show network details
+  const networkDetails = document.getElementById(`networkDetails_${deviceIndex}`);
+  if (networkDetails) networkDetails.classList.remove('hidden');
+  
+  // Show delete button
+  const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+  if (deleteBtn) deleteBtn.classList.remove('hidden');
+  
+  // Save state
+  saveTreatmentPlanState();
+  
+  showNotification(`Loaded custom montage "${montage.name}"`, 'success');
+}
+
+// Legacy function for backward compatibility
+function loadCustomMontage(montageId) {
+  loadCustomMontageForDevice(treatmentPlanState.activeDeviceTab || 0, montageId);
+}
+
+// Delete a custom montage
+// Duplicate removed - consolidated array-based version above
+function deleteCustomMontage_OLD(montageId) {
+  // This function has been replaced by the array-based version above
+  return;
+}
+
+// Delete the currently selected custom montage from dropdown
+function deleteSelectedCustomMontage() {
+  const clinicalSelect = document.getElementById('clinicalIndicationSelect');
+  if (!clinicalSelect) return;
+  
+  const selection = clinicalSelect.value;
+  
+  if (!selection || !selection.startsWith('custom_')) {
+    showNotification('Please select a custom montage to delete', 'error');
+    return;
+  }
+  
+  // Use the main deleteCustomMontage function
+  deleteCustomMontage(selection);
+}
+
+// Helper function to get montage configs
+function getMontageConfigs() {
+  return {
+    ruminative_depression: {
+      category: 'Montage Category 1 - Standard 1-channel',
+      clinicalIndication: 'Ruminative, melancholic depression; low drive; cognitive slowing',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: '—',
+      anodePlacement: 'F3 (left executive hub), F4 (right-biased affective profile), optional Fz',
+      anodeOptions: 'Limbic regulation, indirect DMN disengagement',
+      cathodePlacement: 'Shoulder / torso (preferred); FPz or Cz if cephalic required',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Strengthens top-down executive control; reduces rumination indirectly via improved network switching',
+      anodes: ['F3', 'F4', 'FZ'],
+      cathodes: ['FPZ', 'CZ'],
+      extracephalic: true
+    },
+    cognitive_depression: {
+      category: 'Montage Category 2 - Standard 1-channel',
+      clinicalIndication: 'Cognitive depression, attentional inefficiency',
+      networkTarget: 'CEN (Central Executive Network)',
+      secondaryNetwork: 'DAN / parietal integration',
+      anodePlacement: 'F3 / F4 / Fz',
+      anodeOptions: '',
+      cathodePlacement: 'P3 / P4 (integrational integration) or extracephalic',
+      cathodeType: 'Cephalic or extracephalic (case-dependent)',
+      fnonLogic: 'Treats depression as network inefficiency rather than mood deficit',
+      anodes: ['F3', 'F4', 'FZ'],
+      cathodes: ['P3', 'P4'],
+      extracephalic: false
+    },
+    anxious_depression: {
+      category: 'Montage Category 3 - Standard 1-channel',
+      clinicalIndication: 'Anxious depression, hypervigilance, stress sensitivity',
+      networkTarget: 'SN (Salience Network - regulatory)',
+      secondaryNetwork: 'CEN stabilization',
+      anodePlacement: 'FCz, FC1 / FC2',
+      anodeOptions: '',
+      cathodePlacement: 'Shoulder / torso preferred; Cz or FPz if cephalic',
+      cathodeType: 'Extracephalic preferred',
+      fnonLogic: 'Normalizes pathological salience attribution and improves switching',
+      anodes: ['FCZ', 'FC1', 'FC2'],
+      cathodes: ['CZ', 'FPZ'],
+      extracephalic: true
+    }
+  };
+}
+
+// Reset brain visualization to default state
+function resetBrainVisualization() {
+  const electrodes = document.querySelectorAll('.electrode');
+  electrodes.forEach(el => {
+    const circle = el.querySelector('circle');
+    const text = el.querySelector('text');
+    if (circle) {
+      circle.setAttribute('fill', '#e2e8f0');
+      circle.setAttribute('stroke', '#64748b');
+      circle.setAttribute('stroke-width', '2.5');
+      circle.style.animation = '';
+    }
+    if (text) {
+      text.setAttribute('fill', '#1e293b');
+      text.setAttribute('font-weight', 'bold');
+    }
+  });
+  
+  // Hide extracephalic note
+  const extracephalicNote = document.getElementById('extracephalicNote');
+  if (extracephalicNote) extracephalicNote.classList.add('hidden');
+  
+  // Reset active info
+  const activeAnodes = document.getElementById('activeAnodes');
+  const activeCathodes = document.getElementById('activeCathodes');
+  const activeNetwork = document.getElementById('activeNetwork');
+  
+  if (activeAnodes) activeAnodes.textContent = 'Not selected';
+  if (activeCathodes) activeCathodes.textContent = 'Not selected';
+  if (activeNetwork) activeNetwork.textContent = '—';
+}
+
+// Add SVG gradients for electrode highlighting
+function addSVGGradients() {
+  const svg = document.getElementById('brainLayoutTopView');
+  if (!svg) return;
+  
+  // Check if gradients already exist
+  if (document.getElementById('anodeGradient')) return;
+  
+  // Create defs element
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  
+  // Anode gradient (red to orange)
+  const anodeGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+  anodeGradient.setAttribute('id', 'anodeGradient');
+  anodeGradient.innerHTML = `
+    <stop offset="0%" style="stop-color:#f87171;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+  `;
+  
+  // Cathode gradient (blue to cyan)
+  const cathodeGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+  cathodeGradient.setAttribute('id', 'cathodeGradient');
+  cathodeGradient.innerHTML = `
+    <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+  `;
+  
+  defs.appendChild(anodeGradient);
+  defs.appendChild(cathodeGradient);
+  svg.insertBefore(defs, svg.firstChild);
+}
+
+
+
+// Initialize the application when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Treatment Plan System Initialized');
+    
+    // Set up some sample data if needed
+    if (typeof sampleData === 'undefined') {
+        window.sampleData = {
+            patients: [
+                { id: 'P001', name: 'John Doe', age: 45, gender: 'Male', status: 'Active' },
+                { id: 'P002', name: 'Jane Smith', age: 38, gender: 'Female', status: 'Active' },
+                { id: 'P003', name: 'Robert Johnson', age: 52, gender: 'Male', status: 'Active' }
+            ]
+        };
+    }
+    
+    if (typeof currentRole === 'undefined') {
+        window.currentRole = 'clinician';
+    }
+    
+    if (typeof globalState === 'undefined') {
+        window.globalState = {
+            currentPatient: sampleData.patients[0]
+        };
+    }
+    
+    if (typeof globalSelectedPatientId === 'undefined') {
+        window.globalSelectedPatientId = sampleData.patients[0].id;
+    }
+    
+    // Load and render the treatment plan
+    loadTreatmentPlanState();
+    loadCustomMontages();
+    renderTreatmentPlan();
+});
+    </script>
+</body>
+</html>
