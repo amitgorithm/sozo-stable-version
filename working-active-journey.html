@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Active Journey - Sozo Clinic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --orange-primary: rgb(244, 121, 32);
+            --blue-primary: rgb(0, 161, 228);
+            --green-primary: #10b981;
+            --slate-border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #0f172a;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container-journey {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--slate-border);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* ROLE SELECTOR */
+        .role-selector-container {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .role-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .role-select {
+            padding: 8px 16px;
+            border: 2px solid var(--slate-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .role-select:hover {
+            border-color: var(--orange-primary);
+        }
+
+        .role-select:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
+        }
+
+        /* PATIENT INFO BANNER */
+        .patient-info-banner {
+            background: rgba(244, 121, 32, 0.1);
+            border: 2px solid rgba(244, 121, 32, 0.3);
+            color: #0f172a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .patient-info-banner h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+
+        .patient-info-banner p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .patient-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .patient-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-meta-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+
+        /* BLOCKS CONTAINER */
+        .blocks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* BLOCK CARDS */
+        .block-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+
+        .block-card.can-start {
+            cursor: pointer;
+            border-color: rgba(244, 121, 32, 0.3);
+        }
+
+        .block-card.can-start:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            border-color: var(--orange-primary);
+        }
+
+        .block-card.locked {
+            opacity: 0.6;
+            background: #f8fafc;
+        }
+
+        .block-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .block-status.ready {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green-primary);
+        }
+
+        .block-status.locked {
+            background: rgba(100, 116, 139, 0.15);
+            color: #64748b;
+        }
+
+        .block-status.view-only {
+            background: rgba(0, 161, 228, 0.15);
+            color: var(--blue-primary);
+        }
+
+        .block-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: var(--orange-primary);
+        }
+
+        .block-card.locked .block-icon {
+            color: #94a3b8;
+        }
+
+        .block-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .block-card.locked .block-name {
+            color: #64748b;
+        }
+
+        .block-desc {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .block-actions {
+            margin-top: auto;
+        }
+
+        .start-button {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .start-button.primary {
+            background: var(--orange-primary);
+            color: white;
+        }
+
+        .start-button.primary:hover {
+            background: #dc6027;
+            transform: translateY(-1px);
+        }
+
+        .start-button.disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .start-button.view-only {
+            background: rgba(0, 161, 228, 0.1);
+            color: var(--blue-primary);
+            border: 2px solid rgba(0, 161, 228, 0.3);
+        }
+
+        /* TOOLTIP */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #0f172a;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 11px;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* PERMISSION LEGEND */
+        .permission-legend {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .permission-legend h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 16px;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .legend-badge.ready {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green-primary);
+        }
+
+        .legend-badge.locked {
+            background: rgba(100, 116, 139, 0.15);
+            color: #64748b;
+        }
+
+        .legend-badge.view-only {
+            background: rgba(0, 161, 228, 0.15);
+            color: var(--blue-primary);
+        }
+
+        .legend-text {
+            font-size: 13px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-journey">
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <h1 class="page-title">Working Active Journey</h1>
+            <p class="page-subtitle">Role-Based Clinical Assessment Start Permissions</p>
+        </div>
+
+        <!-- ROLE SELECTOR -->
+        <div class="role-selector-container">
+            <span class="role-label">View as:</span>
+            <select class="role-select" id="roleSelector" onchange="handleRoleChange()">
+                <option value="doctor">Doctor</option>
+                <option value="clinical-assistant">Clinical Assistant</option>
+                <option value="receptionist">Receptionist</option>
+                <option value="patient">Patient</option>
+            </select>
+        </div>
+
+        <!-- PATIENT INFO BANNER -->
+        <div class="patient-info-banner">
+            <h2>New Patient Check-In</h2>
+            <p>Patient has just arrived at the clinic</p>
+            <div class="patient-meta">
+                <div class="patient-meta-item">
+                    <div class="patient-meta-label">Patient Name</div>
+                    <div class="patient-meta-value">Sarah Mitchell</div>
+                </div>
+                <div class="patient-meta-item">
+                    <div class="patient-meta-label">Check-In Time</div>
+                    <div class="patient-meta-value">10:30 AM</div>
+                </div>
+                <div class="patient-meta-item">
+                    <div class="patient-meta-label">Assessment</div>
+                    <div class="patient-meta-value">Clinical Assessment 2</div>
+                </div>
+                <div class="patient-meta-item">
+                    <div class="patient-meta-label">Status</div>
+                    <div class="patient-meta-value">Ready to Begin</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOCKS CONTAINER -->
+        <div id="blocksContainer" class="blocks-container"></div>
+
+        <!-- PERMISSION LEGEND -->
+        <div class="permission-legend">
+            <h3>Permission Guide</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-badge ready">Can Start</span>
+                    <span class="legend-text">You can initiate this assessment</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge view-only">View Only</span>
+                    <span class="legend-text">Visible but requires doctor permission</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge locked">Locked</span>
+                    <span class="legend-text">Complete previous steps first</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ICON MAPPING
+        const iconMap = {
+            'fnon': 'fa-brain',
+            'brain-mapping': 'fa-head-side-virus',
+            'prs': 'fa-clipboard-list',
+            'doctors-notes': 'fa-stethoscope',
+            'treatment-plan': 'fa-file-prescription',
+            'final-report': 'fa-file-medical'
+        };
+
+        // BLOCKS DEFINITION
+        const clinicalBlocks = [
+            {
+                id: 'block-1',
+                type: 'fnon',
+                name: 'FNON Assessment',
+                desc: 'Functional neurological assessment across multiple domains',
+                requiresPrevious: false
+            },
+            {
+                id: 'block-2',
+                type: 'brain-mapping',
+                name: 'Brain Mapping',
+                desc: 'EEG data capture and neural activity analysis',
+                requiresPrevious: false
+            },
+            {
+                id: 'block-3',
+                type: 'prs',
+                name: 'PRS Evaluation',
+                desc: 'Disease-specific symptom assessment and scoring',
+                requiresPrevious: false
+            },
+            {
+                id: 'block-4',
+                type: 'doctors-notes',
+                name: "Doctor's Notes",
+                desc: 'Clinical observations and medical recommendations',
+                requiresPrevious: true
+            },
+            {
+                id: 'block-5',
+                type: 'treatment-plan',
+                name: 'Treatment Plan',
+                desc: 'Personalized therapy protocol and montage selection',
+                requiresPrevious: true
+            },
+            {
+                id: 'block-6',
+                type: 'final-report',
+                name: 'Final Report',
+                desc: 'Comprehensive assessment summary and outcomes',
+                requiresPrevious: true
+            }
+        ];
+
+        // CURRENT ROLE STATE
+        let currentRole = 'doctor';
+
+        // GET ROLE PERMISSIONS
+        function getRolePermissions(role) {
+            const permissions = {
+                'doctor': {
+                    canStart: ['fnon', 'brain-mapping', 'prs'],
+                    canView: ['fnon', 'brain-mapping', 'prs', 'doctors-notes', 'treatment-plan', 'final-report'],
+                    showStartButtons: true,
+                    label: 'Doctor'
+                },
+                'clinical-assistant': {
+                    canStart: ['prs'],
+                    canView: ['fnon', 'brain-mapping', 'prs', 'doctors-notes', 'treatment-plan', 'final-report'],
+                    showStartButtons: true,
+                    restrictedMessage: 'Only doctors can perform this assessment',
+                    label: 'Clinical Assistant'
+                },
+                'receptionist': {
+                    canStart: [],
+                    canView: ['fnon', 'brain-mapping', 'prs', 'doctors-notes', 'treatment-plan', 'final-report'],
+                    showStartButtons: false,
+                    label: 'Receptionist'
+                },
+                'patient': {
+                    canStart: [],
+                    canView: ['fnon', 'brain-mapping', 'prs', 'doctors-notes', 'treatment-plan', 'final-report'],
+                    showStartButtons: false,
+                    label: 'Patient'
+                }
+            };
+            return permissions[role];
+        }
+
+        // RENDER BLOCKS
+        function renderBlocks() {
+            const container = document.getElementById('blocksContainer');
+            const permissions = getRolePermissions(currentRole);
+            container.innerHTML = '';
+
+            clinicalBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                
+                const canStart = !block.requiresPrevious && permissions.canStart.includes(block.type);
+                const canView = permissions.canView.includes(block.type) && !canStart && !block.requiresPrevious;
+                const isLocked = block.requiresPrevious;
+
+                let statusClass = 'locked';
+                let statusText = 'Locked';
+                if (canStart) {
+                    statusClass = 'ready';
+                    statusText = 'Can Start';
+                } else if (canView) {
+                    statusClass = 'view-only';
+                    statusText = 'View Only';
+                }
+
+                blockDiv.className = `block-card ${canStart ? 'can-start' : ''} ${isLocked ? 'locked' : ''}`;
+                
+                let actionHTML = '';
+                if (permissions.showStartButtons && !isLocked) {
+                    if (canStart) {
+                        actionHTML = `
+                            <div class="block-actions">
+                                <button class="start-button primary" onclick="startBlock('${block.id}', '${block.name}')">
+                                    <i class="fa-solid fa-play"></i>
+                                    Start Assessment
+                                </button>
+                            </div>
+                        `;
+                    } else if (canView && currentRole === 'clinical-assistant') {
+                        actionHTML = `
+                            <div class="block-actions tooltip">
+                                <button class="start-button disabled">
+                                    <i class="fa-solid fa-lock"></i>
+                                    Restricted
+                                </button>
+                                <span class="tooltip-text">${permissions.restrictedMessage}</span>
+                            </div>
+                        `;
+                    }
+                } else if (!isLocked && currentRole === 'patient') {
+                    actionHTML = `
+                        <div class="block-actions">
+                            <button class="start-button view-only">
+                                <i class="fa-solid fa-eye"></i>
+                                View Information
+                            </button>
+                        </div>
+                    `;
+                }
+
+                if (isLocked) {
+                    actionHTML = `
+                        <div class="block-actions">
+                            <button class="start-button disabled">
+                                <i class="fa-solid fa-lock"></i>
+                                Complete Previous Steps
+                            </button>
+                        </div>
+                    `;
+                }
+
+                blockDiv.innerHTML = `
+                    <div class="block-status ${statusClass}">${statusText}</div>
+                    <div class="block-icon">
+                        <i class="fa-solid ${iconMap[block.type] || 'fa-circle'}"></i>
+                    </div>
+                    <div class="block-name">${block.name}</div>
+                    <div class="block-desc">${block.desc}</div>
+                    ${actionHTML}
+                `;
+
+                container.appendChild(blockDiv);
+            });
+        }
+
+        // HANDLE ROLE CHANGE
+        function handleRoleChange() {
+            currentRole = document.getElementById('roleSelector').value;
+            renderBlocks();
+        }
+
+        // START BLOCK
+        function startBlock(blockId, blockName) {
+            alert(`Starting: ${blockName}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface for data entry.`);
+        }
+
+        // INITIALIZE
+        renderBlocks();
+    </script>
+</body>
+</html>
