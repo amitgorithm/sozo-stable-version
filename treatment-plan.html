@@ -718,8 +718,6 @@ function renderTreatmentPlan() {
             <optgroup label="tDCS/tACS Devices">
               <option value="plato">Plato Neurostimulation - 4 specialized electrode blocks</option>
               <option value="newronika">Newronika - 10-20 system placement</option>
-              <option value="device1">TMS (Transcranial Magnetic Stimulation)</option>
-              <option value="device2">tDCS (Transcranial Direct Current)</option>
             </optgroup>
             <optgroup label="Alpha Stim Devices">
               <option value="alpha_stim_aid">Alpha Stim AID - Earlobe clips</option>
@@ -727,7 +725,6 @@ function renderTreatmentPlan() {
             </optgroup>
             <optgroup label="VNS & Other">
               <option value="tvns">tVNS - Cymba area (left ear)</option>
-              <option value="device3">VNS (Vagus Nerve Stimulation)</option>
               <option value="tps">TPS (Transcranial Pulse Stimulation)</option>
             </optgroup>
             <optgroup label="Standard Placement">
@@ -2020,43 +2017,22 @@ function getDummyNetworks(deviceValue) {
     // Flow - Standard placement device
     'flow': [
       {
-        name: 'Standard L-DLPFC Protocol',
-        description: 'Fixed left DLPFC placement - no customization',
+        name: 'Standard Placement',
+        description: 'Fixed standard placement for Flow device (non-customizable)',
         anodes: ['F3', 'F7'],
         cathode: 'Fp2',
-        indication: 'Depression - Standard Protocol'
-      },
-      {
-        name: 'Alternative Frontal',
-        description: 'Secondary frontal placement option',
-        anodes: ['F4', 'F8'],
-        cathode: 'Fp1',
-        indication: 'Depression - Alternative Protocol'
+        indication: 'Standard therapeutic placement'
       }
     ],
     
     // Robotic Arm - Automated precision
     'robotic_arm': [
       {
-        name: 'Automated DLPFC Target',
-        description: 'Robotic precision left DLPFC targeting',
+        name: 'Standard Robotic Placement',
+        description: 'Single standard robotic placement option (non-customizable)',
         anodes: ['F3', 'F7'],
         cathode: 'Cz',
-        indication: 'Precision Depression Treatment'
-      },
-      {
-        name: 'Motor Cortex Precision',
-        description: 'Automated motor cortex targeting',
-        anodes: ['C3', 'C4'],
-        cathode: 'Pz',
-        indication: 'Movement Disorders, Stroke Recovery'
-      },
-      {
-        name: 'Multi-Point Automation',
-        description: 'Sequential automated targeting',
-        anodes: ['F3', 'P3'],
-        cathode: 'Fz',
-        indication: 'Complex Multi-Target Protocol'
+        indication: 'Standard robotic placement'
       }
     ]
   };
@@ -2413,8 +2389,16 @@ function clearNetworkHighlights(deviceIndex) {
 
 // Helper function to determine if device uses brain montage
 function usesBrainMontage(deviceValue) {
-  const brainDevices = ['device1', 'device2', 'newronika', 'flow', 'robotic_arm', 'tps'];
+  // Devices that use a brain montage visualization (including standard-placement devices)
+  const brainDevices = ['device1', 'device2', 'newronika', 'tps', 'flow', 'robotic_arm'];
   return brainDevices.includes(deviceValue);
+}
+
+// Helper to determine whether custom montage editing is allowed for a device
+function allowsCustomMontage(deviceValue) {
+  // Disable custom montage editing for devices that have fixed/standard placements
+  const disallowed = ['flow', 'robotic_arm'];
+  return usesBrainMontage(deviceValue) && !disallowed.includes(deviceValue);
 }
 
 // Helper function to get device-specific visualization
@@ -2637,7 +2621,7 @@ function renderDeviceJourney(device, deviceIndex) {
           >
             <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
           </button>
-          ${showBrainMontage ? `
+          ${(showBrainMontage && allowsCustomMontage(device.value)) ? `
           <button 
             id="customTab_${deviceIndex}" 
             onclick="switchMontageTab(${deviceIndex}, 'custom')" 
@@ -2751,8 +2735,8 @@ function renderDeviceJourney(device, deviceIndex) {
           </div>
         </div>
         
-        <!-- Custom Montage Tab Content (Only for brain devices) -->
-        ${showBrainMontage ? `
+        <!-- Custom Montage Tab Content (Only for brain devices that allow custom editing) -->
+        ${(showBrainMontage && allowsCustomMontage(device.value)) ? `
         <div id="customTabContent_${deviceIndex}" class="hidden space-y-4">
           <!-- Load Saved Custom Montages Section -->
           <div class="bg-white p-4 rounded-lg border border-purple-200">
