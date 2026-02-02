@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Patient Assessment | Sozo Brain Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sozo: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: 'rgb(244, 121, 32)',
+              700: 'rgb(202, 65, 12)',
+            },
+            brand: {
+              orange: 'rgb(244, 121, 32)',
+              'orange-dark': 'rgb(202, 65, 12)',
+              blue: 'rgb(0, 161, 228)',
+              'blue-dark': 'rgb(0, 130, 185)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --orange-primary: rgb(244, 121, 32);
+      --orange-dark: rgb(202, 65, 12);
+      --orange-light: rgba(244, 121, 32, 0.1);
+      --blue-primary: rgb(0, 161, 228);
+      --blue-dark: rgb(0, 130, 185);
+      --blue-light: rgba(0, 161, 228, 0.1);
+    }
+    
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; }
+    
+    .disease-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid #e2e8f0;
+      background: white;
+    }
+    
+    .disease-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(244, 121, 32, 0.15);
+      border-color: var(--orange-primary);
+    }
+    
+    .disease-card.selected {
+      border-color: var(--orange-primary);
+      background: linear-gradient(135deg, var(--orange-light) 0%, rgba(0, 161, 228, 0.05) 100%);
+      box-shadow: 0 8px 20px rgba(244, 121, 32, 0.2);
+    }
+    
+    .radio-option {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      background: white;
+    }
+    
+    .radio-option:hover {
+      background-color: #f1f5f9;
+      border-color: var(--orange-primary);
+    }
+    
+    input[type="radio"]:checked + .radio-label {
+      background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+      color: white;
+      border-color: var(--orange-primary);
+      font-weight: 600;
+    }
+    
+    .progress-step {
+      position: relative;
+      flex: 1;
+    }
+    
+    .progress-step:not(:last-child):after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: -1;
+    }
+    
+    .progress-step.completed:after {
+      background: var(--orange-primary);
+    }
+    
+    .progress-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin: 0 auto;
+    }
+    
+    .progress-step.active .progress-circle {
+      background: var(--orange-primary);
+      border-color: var(--orange-primary);
+      color: white;
+      box-shadow: 0 0 0 4px rgba(244, 121, 32, 0.2);
+    }
+    
+    .progress-step.completed .progress-circle {
+      background: var(--orange-primary);
+      border-color: var(--orange-primary);
+      color: white;
+    }
+    
+    .section-hidden {
+      display: none;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.4s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 4px 12px rgba(244, 121, 32, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: white;
+      border: 2px solid #e2e8f0;
+      color: #64748b;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--orange-primary);
+      color: var(--orange-primary);
+    }
+    
+    .metric-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    
+    .metric-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Container -->
+  <div class="max-w-5xl mx-auto p-4 md:p-6">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 mb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-sozo-600 to-sozo-700 rounded-lg flex items-center justify-center">
+            <i class="fas fa-brain text-white text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Sozo Brain Center</h1>
+            <p class="text-xs text-slate-500">International Patient Assessment</p>
+          </div>
+        </div>
+        <div class="text-right hidden md:block">
+          <p class="text-xs text-slate-500">Confidential Medical Inquiry</p>
+          <p class="text-xs text-slate-400">Auto-save enabled</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 fade-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-sozo-600 to-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-globe text-white text-2xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Welcome to Sozo Brain Center</h2>
+        <p class="text-sm text-slate-600 max-w-2xl mx-auto">
+          We're excited to learn about your medical needs. This brief assessment helps us understand your condition and determine how we can best support your journey to better health.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+          <i class="fas fa-clock text-sozo-600 text-xl mb-2"></i>
+          <p class="text-xs font-semibold text-slate-700">10-15 Minutes</p>
+          <p class="text-xs text-slate-500">Estimated time</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+          <i class="fas fa-shield-halved text-brand-blue text-xl mb-2"></i>
+          <p class="text-xs font-semibold text-slate-700">100% Confidential</p>
+          <p class="text-xs text-slate-500">Your privacy matters</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+          <i class="fas fa-headset text-sozo-600 text-xl mb-2"></i>
+          <p class="text-xs font-semibold text-slate-700">Expert Review</p>
+          <p class="text-xs text-slate-500">Within 24-48 hours</p>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button onclick="showDiseaseSelection()" class="btn-primary text-base px-8 py-3">
+          <i class="fas fa-play mr-2"></i>Start Assessment
+        </button>
+        <p class="text-xs text-slate-500 mt-4">
+          <i class="fas fa-info-circle mr-1"></i>
+          Your responses will be auto-saved as you progress
+        </p>
+      </div>
+    </div>
+
+    <!-- Disease Selection Screen -->
+    <div id="diseaseSelectionScreen" class="section-hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-4">
+        <h2 class="text-lg font-bold text-slate-900 mb-2">Select Your Condition</h2>
+        <p class="text-sm text-slate-600">Choose the primary condition you're seeking treatment for</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <!-- Parkinson's Disease -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('parkinsons')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-person-walking text-sozo-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Parkinson's Disease</h3>
+              <p class="text-xs text-slate-600 mb-2">Movement disorder affecting motor control and coordination</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Tremor</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Rigidity</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Bradykinesia</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- Multiple Sclerosis -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('ms')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-brain text-brand-blue text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Multiple Sclerosis</h3>
+              <p class="text-xs text-slate-600 mb-2">Autoimmune condition affecting the central nervous system</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Fatigue</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Numbness</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Vision issues</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- ALS -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('als')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-teal-100 to-teal-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-hand-sparkles text-teal-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">ALS</h3>
+              <p class="text-xs text-slate-600 mb-2">Amyotrophic Lateral Sclerosis (Motor Neuron Disease)</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Muscle weakness</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Fasciculations</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Speech</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- Stroke Recovery -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('stroke')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-heart-pulse text-red-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Stroke Recovery</h3>
+              <p class="text-xs text-slate-600 mb-2">Post-stroke rehabilitation and neurological recovery</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Hemiparesis</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Speech</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Mobility</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- Tinnitus -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('tinnitus')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-ear-listen text-purple-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Tinnitus</h3>
+              <p class="text-xs text-slate-600 mb-2">Persistent ringing or buzzing in the ears</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Ringing</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Sleep issues</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Concentration</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- Chronic Pain -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('chronic-pain')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-hand-dots text-amber-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Chronic Pain</h3>
+              <p class="text-xs text-slate-600 mb-2">Long-term pain management and relief</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Neuropathic</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Fibromyalgia</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Back pain</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+        <!-- Depression -->
+        <div class="disease-card rounded-xl p-5" onclick="selectDisease('depression')">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-head-side-virus text-indigo-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900 mb-1">Depression</h3>
+              <p class="text-xs text-slate-600 mb-2">Treatment-resistant depression and mood disorders</p>
+              <div class="flex flex-wrap gap-1">
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Low mood</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Anhedonia</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Fatigue</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button onclick="showStartScreen()" class="btn-secondary">
+          <i class="fas fa-arrow-left mr-2"></i>Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Questionnaire Screen -->
+    <div id="questionnaireScreen" class="section-hidden">
+      
+      <!-- Progress Indicator -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-slate-700" id="diseaseTitle">Assessment</span>
+          <span class="text-xs text-slate-500"><span id="currentSection">1</span> of <span id="totalSections">5</span></span>
+        </div>
+        
+        <div class="flex items-center gap-2" id="progressSteps">
+          <!-- Progress steps will be dynamically generated -->
+        </div>
+      </div>
+
+      <!-- Question Container -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 md:p-6 mb-4" id="questionContainer">
+        <!-- Questions will be dynamically loaded here -->
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex items-center justify-between gap-3">
+        <button onclick="previousSection()" id="btnPrevious" class="btn-secondary">
+          <i class="fas fa-arrow-left mr-2"></i>Previous
+        </button>
+        <button onclick="nextSection()" id="btnNext" class="btn-primary">
+          Next<i class="fas fa-arrow-right ml-2"></i>
+        </button>
+        <button onclick="submitAssessment()" id="btnSubmit" class="btn-primary section-hidden">
+          <i class="fas fa-check mr-2"></i>Submit Assessment
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="section-hidden fade-in">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 mb-4">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Assessment Complete</h2>
+          <p class="text-sm text-slate-600">Thank you for completing the assessment. Our medical team will review your responses.</p>
+        </div>
+
+        <!-- Patient Information Summary -->
+        <div class="bg-slate-50 rounded-lg p-4 mb-6">
+          <h3 class="text-sm font-bold text-slate-900 mb-3">Submission Summary</h3>
+          <div class="grid md:grid-cols-2 gap-3 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-600">Submission ID:</span>
+              <span class="font-semibold text-slate-900" id="submissionId">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">Date:</span>
+              <span class="font-semibold text-slate-900" id="submissionDate">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">Condition:</span>
+              <span class="font-semibold text-slate-900" id="submissionDisease">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">Status:</span>
+              <span class="font-semibold text-green-600">Under Review</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Qualification Metrics (Internal Use) -->
+        <div class="border-t border-slate-200 pt-6" id="internalMetrics">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-900">Internal Qualification Metrics</h3>
+            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">Staff Only</span>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 mb-4">
+            <!-- Clinical Score -->
+            <div class="metric-card">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-600">Clinical Relevance</span>
+                <i class="fas fa-stethoscope text-sozo-600"></i>
+              </div>
+              <div class="text-2xl font-bold text-slate-900 mb-1" id="clinicalScore">--</div>
+              <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-sozo-600 to-sozo-700 h-1.5 rounded-full" id="clinicalBar" style="width: 0%"></div>
+              </div>
+              <p class="text-xs text-slate-500 mt-1" id="clinicalLabel">--</p>
+            </div>
+
+            <!-- Travel Feasibility -->
+            <div class="metric-card">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-600">Travel Feasibility</span>
+                <i class="fas fa-plane text-brand-blue"></i>
+              </div>
+              <div class="text-2xl font-bold text-slate-900 mb-1" id="travelScore">--</div>
+              <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-brand-blue to-brand-blue-dark h-1.5 rounded-full" id="travelBar" style="width: 0%"></div>
+              </div>
+              <p class="text-xs text-slate-500 mt-1" id="travelLabel">--</p>
+            </div>
+
+            <!-- Financial Readiness -->
+            <div class="metric-card">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-600">Financial Readiness</span>
+                <i class="fas fa-euro-sign text-green-600"></i>
+              </div>
+              <div class="text-2xl font-bold text-slate-900 mb-1" id="financialScore">--</div>
+              <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 h-1.5 rounded-full" id="financialBar" style="width: 0%"></div>
+              </div>
+              <p class="text-xs text-slate-500 mt-1" id="financialLabel">--</p>
+            </div>
+          </div>
+
+          <!-- Overall Recommendation -->
+          <div class="bg-gradient-to-r from-sozo-50 to-blue-50 rounded-lg p-4 border border-sozo-200">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-star text-sozo-600"></i>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-sm font-bold text-slate-900 mb-1">Overall Qualification</h4>
+                <p class="text-2xl font-bold mb-2" id="overallCategory">--</p>
+                <p class="text-xs text-slate-700" id="recommendedAction">--</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clinical Notes -->
+          <div class="mt-4 bg-slate-50 rounded-lg p-4">
+            <h4 class="text-xs font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <i class="fas fa-notes-medical text-sozo-600"></i>
+              Clinical Summary Notes
+            </h4>
+            <div class="text-xs text-slate-700 space-y-1" id="clinicalNotes">
+              <!-- Generated notes will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-sm font-bold text-slate-900 mb-4">What Happens Next?</h3>
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-sozo-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="text-xs font-bold text-sozo-600">1</span>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-slate-900">Medical Review</h4>
+              <p class="text-xs text-slate-600">Our specialists will review your assessment within 24-48 hours</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-brand-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="text-xs font-bold text-brand-blue">2</span>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-slate-900">Personal Contact</h4>
+              <p class="text-xs text-slate-600">We'll reach out via email to discuss your treatment options</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="text-xs font-bold text-green-600">3</span>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-slate-900">Treatment Planning</h4>
+              <p class="text-xs text-slate-600">Together we'll create a personalized treatment plan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <button onclick="location.reload()" class="btn-secondary">
+            <i class="fas fa-redo mr-2"></i>Start New Assessment
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ========================================
+    // GLOBAL STATE
+    // ========================================
+    const assessmentState = {
+      currentScreen: 'start',
+      selectedDisease: null,
+      currentSection: 1,
+      totalSections: 5,
+      answers: {},
+      startTime: null,
+      submissionId: null
+    };
+
+    // ========================================
+    // DISEASE QUESTIONNAIRES
+    // ========================================
+    const QUESTIONNAIRES = {
+      parkinsons: {
+        name: "Parkinson's Disease",
+        sections: [
+          {
+            title: "Diagnosis & Disease Stage",
+            questions: [
+              { id: 'pd_diagnosis', text: 'Have you received a confirmed diagnosis of Parkinson\'s Disease?', options: ['Yes, confirmed by neurologist', 'Yes, confirmed by general practitioner', 'Suspected but not confirmed', 'No formal diagnosis yet'] },
+              { id: 'pd_duration', text: 'How long ago were you diagnosed or did symptoms begin?', options: ['Less than 1 year', '1-3 years', '3-5 years', '5-10 years', 'More than 10 years'] },
+              { id: 'pd_stage', text: 'What stage of Parkinson\'s would best describe your current condition?', options: ['Early stage (minimal symptoms)', 'Moderate (symptoms affect daily life)', 'Advanced (significant disability)', 'Not sure'] }
+            ]
+          },
+          {
+            title: "Motor Symptoms",
+            questions: [
+              { id: 'pd_tremor', text: 'How severe is your tremor?', options: ['No tremor', 'Mild (barely noticeable)', 'Moderate (interferes with some tasks)', 'Severe (affects most activities)'] },
+              { id: 'pd_rigidity', text: 'Do you experience muscle stiffness or rigidity?', options: ['No stiffness', 'Mild stiffness', 'Moderate (limits movement)', 'Severe (very limiting)'] },
+              { id: 'pd_bradykinesia', text: 'How would you rate your slowness of movement?', options: ['No slowness', 'Mild slowness', 'Moderate slowness', 'Severe slowness'] },
+              { id: 'pd_balance', text: 'Have you experienced falls or balance issues?', options: ['No issues', 'Occasional unsteadiness', 'Frequent balance problems', 'Multiple falls'] }
+            ]
+          },
+          {
+            title: "Non-Motor Symptoms",
+            questions: [
+              { id: 'pd_cognitive', text: 'Do you experience cognitive changes (memory, thinking)?', options: ['No changes', 'Mild changes', 'Moderate difficulties', 'Significant impairment'] },
+              { id: 'pd_sleep', text: 'How are your sleep patterns?', options: ['Sleep well', 'Mild sleep issues', 'Moderate insomnia', 'Severe sleep problems'] },
+              { id: 'pd_mood', text: 'Have you experienced depression or anxiety?', options: ['No mood changes', 'Mild symptoms', 'Moderate symptoms', 'Severe symptoms requiring treatment'] }
+            ]
+          },
+          {
+            title: "Current Treatment & Travel",
+            questions: [
+              { id: 'pd_medication', text: 'Are you currently taking medication for Parkinson\'s?', options: ['No medication yet', 'Yes, well-controlled', 'Yes, partially effective', 'Yes, but not effective'] },
+              { id: 'pd_travel', text: 'Are you able to travel internationally for treatment?', options: ['Yes, without assistance', 'Yes, with assistance', 'Limited ability', 'Unable to travel'] },
+              { id: 'pd_timeframe', text: 'When would you prefer to begin treatment?', options: ['Within 1 month', '1-3 months', '3-6 months', 'More than 6 months', 'Just exploring options'] }
+            ]
+          },
+          {
+            title: "Treatment Goals & Commitment",
+            questions: [
+              { id: 'pd_goals', text: 'What is your primary treatment goal?', options: ['Reduce tremor/motor symptoms', 'Improve mobility and balance', 'Better quality of life', 'Slow disease progression', 'All of the above'] },
+              { id: 'pd_funding', text: 'How do you plan to fund treatment?', options: ['Self-funded', 'Insurance coverage', 'Combination', 'Seeking financial assistance', 'Not sure yet'] },
+              { id: 'pd_commitment', text: 'How committed are you to pursuing treatment at Sozo?', options: ['Very committed, ready to proceed', 'Highly interested, need more info', 'Moderately interested', 'Just exploring options'] }
+            ]
+          }
+        ]
+      },
+      
+      ms: {
+        name: "Multiple Sclerosis",
+        sections: [
+          {
+            title: "Diagnosis & Disease Type",
+            questions: [
+              { id: 'ms_diagnosis', text: 'Have you been formally diagnosed with Multiple Sclerosis by a neurologist?', options: ['Yes', 'No', 'Suspected but not confirmed'] },
+              { id: 'ms_type', text: 'What type of MS have you been diagnosed with?', options: ['Relapsing-Remitting MS (RRMS)', 'Secondary Progressive MS (SPMS)', 'Primary Progressive MS (PPMS)', 'Clinically Isolated Syndrome (CIS)', 'Unsure'] },
+              { id: 'ms_duration', text: 'How long ago were you diagnosed (or symptoms began)?', options: ['Less than 1 year', '1–3 years', '3–5 years', 'More than 5 years'] }
+            ]
+          },
+          {
+            title: "Disease Activity",
+            questions: [
+              { id: 'ms_relapses', text: 'Have you experienced relapses in the last 12 months?', options: ['No', '1 relapse', '2–3 relapses', 'More than 3 relapses'] },
+              { id: 'ms_progression', text: 'Have your symptoms progressed over time?', options: ['No progression', 'Slow progression', 'Moderate progression', 'Rapid progression'] },
+              { id: 'ms_mri', text: 'When was your last MRI scan?', options: ['Within the last 6 months', '6–12 months ago', 'More than 12 months ago', 'Never / unsure'] }
+            ]
+          },
+          {
+            title: "Motor & Sensory Symptoms",
+            questions: [
+              { id: 'ms_weakness', text: 'Do you experience weakness in your limbs?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_spasticity', text: 'Do you experience spasticity or muscle stiffness?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_balance', text: 'Do you experience balance problems or unsteadiness?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_sensory', text: 'Do you experience numbness, tingling, or altered sensation?', options: ['No', 'Mild', 'Moderate', 'Severe'] }
+            ]
+          },
+          {
+            title: "Fatigue, Pain & Vision",
+            questions: [
+              { id: 'ms_fatigue', text: 'Do you experience fatigue that limits daily activities?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_pain', text: 'Do you experience chronic pain or neuropathic pain?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_vision', text: 'Do you experience vision problems (blurred vision, optic neuritis, double vision)?', options: ['No', 'Occasional', 'Frequent', 'Severe / ongoing'] }
+            ]
+          },
+          {
+            title: "Cognitive, Mood & Autonomic Symptoms",
+            questions: [
+              { id: 'ms_cognitive', text: 'Do you experience memory or concentration difficulties?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_mood', text: 'Do you experience anxiety or depression?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'ms_bladder', text: 'Do you experience bladder or bowel dysfunction?', options: ['No', 'Mild', 'Moderate', 'Severe'] }
+            ]
+          },
+          {
+            title: "Medication & Treatment History",
+            questions: [
+              { id: 'ms_dmt', text: 'Are you currently on disease-modifying therapy (DMT)?', options: ['Yes', 'No', 'Previously but stopped'] },
+              { id: 'ms_treatment_effect', text: 'How effective has your current or past treatment been?', options: ['Very effective', 'Moderately effective', 'Minimally effective', 'Not effective'] },
+              { id: 'ms_neuromod', text: 'Have you tried rehabilitation or neuromodulation-based therapies before?', options: ['No', 'Yes – limited benefit', 'Yes – moderate benefit', 'Yes – significant benefit'] }
+            ]
+          },
+          {
+            title: "Functional Independence",
+            questions: [
+              { id: 'ms_walking', text: 'Are you able to walk independently?', options: ['Yes, without aid', 'Yes, with walking aid', 'Wheelchair for long distances', 'Wheelchair dependent'] },
+              { id: 'ms_daily', text: 'Are you able to manage daily activities (dressing, bathing, cooking)?', options: ['Fully independent', 'Mild assistance', 'Moderate assistance', 'Full assistance'] }
+            ]
+          },
+          {
+            title: "Travel & Practical Readiness",
+            questions: [
+              { id: 'ms_travel', text: 'Are you able to travel internationally for treatment?', options: ['Yes, independently', 'Yes, with assistance', 'Possibly, depending on support', 'No'] },
+              { id: 'ms_location', text: 'Preferred treatment location (if applicable):', options: ['Cyprus', 'Germany', 'Austria', 'Switzerland', 'Flexible / Any recommended'] },
+              { id: 'ms_timeframe', text: 'How soon would you consider treatment if suitable?', options: ['Immediately (0–1 month)', '1–3 months', '3–6 months', 'Exploring options'] }
+            ]
+          },
+          {
+            title: "Financial Readiness",
+            questions: [
+              { id: 'ms_funding', text: 'How would you describe your readiness to fund treatment if recommended?', options: ['Ready and able', 'Able with planning', 'Requires discussion', 'Not currently feasible'] },
+              { id: 'ms_assistance', text: 'Would you like assistance with planning, logistics, and care coordination?', options: ['Yes', 'Maybe', 'No'] }
+            ]
+          },
+          {
+            title: "Goals & Motivation",
+            questions: [
+              { id: 'ms_goals', text: 'What is your primary goal?', options: ['Reduce progression', 'Improve mobility & balance', 'Reduce fatigue & pain', 'Improve cognition & quality of life', 'All of the above'] },
+              { id: 'ms_motivation', text: 'How motivated are you to engage in an intensive treatment program if recommended?', options: ['Very motivated', 'Moderately motivated', 'Unsure', 'Not ready'] }
+            ]
+          }
+        ]
+      },
+
+      als: {
+        name: "Amyotrophic Lateral Sclerosis (ALS)",
+        sections: [
+          {
+            title: "Diagnosis & Disease Type",
+            questions: [
+              { id: 'als_diagnosis', text: 'Have you been formally diagnosed with ALS by a neurologist?', options: ['Yes', 'No', 'Suspected but not confirmed'] },
+              { id: 'als_phenotype', text: 'What ALS phenotype best describes your condition?', options: ['Limb-onset ALS', 'Bulbar-onset ALS', 'Mixed (bulbar + limb)', 'Upper Motor Neuron dominant', 'Lower Motor Neuron dominant', 'Unsure'] },
+              { id: 'als_onset', text: 'How long ago did symptoms first appear?', options: ['Less than 6 months', '6–12 months', '1–2 years', 'More than 2 years'] }
+            ]
+          },
+          {
+            title: "Disease Progression",
+            questions: [
+              { id: 'als_progression_rate', text: 'How would you describe the rate of progression?', options: ['Slow', 'Moderate', 'Rapid', 'Unsure'] },
+              { id: 'als_recent_worsening', text: 'Have symptoms worsened in the last 3 months?', options: ['No', 'Mild worsening', 'Moderate worsening', 'Significant worsening'] }
+            ]
+          },
+          {
+            title: "Motor Function",
+            questions: [
+              { id: 'als_arm_weakness', text: 'Do you experience weakness in your arms or hands?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'als_leg_weakness', text: 'Do you experience weakness in your legs?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'als_spasticity', text: 'Do you experience muscle stiffness or spasticity?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'als_fasciculations', text: 'Do you experience muscle twitching (fasciculations) or cramps?', options: ['No', 'Occasionally', 'Frequently', 'Constantly'] }
+            ]
+          },
+          {
+            title: "Speech, Swallowing & Breathing",
+            questions: [
+              { id: 'als_speech', text: 'Do you experience difficulty with speech?', options: ['No', 'Mild slurring', 'Moderate difficulty', 'Severe / difficult to speak'] },
+              { id: 'als_swallowing', text: 'Do you experience difficulty swallowing?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'als_breathing', text: 'Do you experience breathing difficulties or shortness of breath?', options: ['No', 'With exertion', 'At rest', 'Using breathing support (e.g. NIV)'] }
+            ]
+          },
+          {
+            title: "Functional Independence",
+            questions: [
+              { id: 'als_walking', text: 'Are you able to walk independently?', options: ['Yes, without aid', 'Yes, with walking aid', 'Wheelchair for long distances', 'Wheelchair dependent'] },
+              { id: 'als_daily', text: 'Are you able to perform daily activities (dressing, eating, hygiene)?', options: ['Fully independent', 'Mild assistance', 'Moderate assistance', 'Full assistance'] }
+            ]
+          },
+          {
+            title: "Treatment History",
+            questions: [
+              { id: 'als_medication', text: 'Are you currently on ALS-specific medication?', options: ['Yes (e.g. Riluzole, Edaravone)', 'No', 'Previously but stopped'] },
+              { id: 'als_rehab', text: 'Have you tried rehabilitation or supportive therapies?', options: ['No', 'Yes – limited benefit', 'Yes – moderate benefit', 'Yes – significant benefit'] }
+            ]
+          },
+          {
+            title: "Cognitive, Emotional & Autonomic Features",
+            questions: [
+              { id: 'als_cognitive', text: 'Do you experience changes in thinking, behaviour, or decision-making?', options: ['No', 'Mild', 'Moderate', 'Significant'] },
+              { id: 'als_emotional', text: 'Do you experience anxiety or emotional distress related to your condition?', options: ['No', 'Mild', 'Moderate', 'Severe'] }
+            ]
+          },
+          {
+            title: "Travel & Practical Readiness",
+            questions: [
+              { id: 'als_travel', text: 'Are you able to travel internationally for treatment?', options: ['Yes, independently', 'Yes, with assistance', 'Possibly, depending on support', 'No'] },
+              { id: 'als_location', text: 'Preferred treatment location (if applicable):', options: ['Cyprus', 'Germany', 'Austria', 'Switzerland', 'Flexible / Any recommended'] },
+              { id: 'als_timeframe', text: 'How soon would you consider treatment if suitable?', options: ['Immediately (0–1 month)', '1–3 months', '3–6 months', 'Exploring options'] }
+            ]
+          },
+          {
+            title: "Financial Readiness",
+            questions: [
+              { id: 'als_funding', text: 'How would you describe your readiness to fund treatment if recommended?', options: ['Ready and able', 'Able with planning', 'Requires discussion', 'Not currently feasible'] },
+              { id: 'als_assistance', text: 'Would you like assistance with treatment planning, logistics, and coordination?', options: ['Yes', 'Maybe', 'No'] }
+            ]
+          },
+          {
+            title: "Goals & Motivation",
+            questions: [
+              { id: 'als_goals', text: 'What is your primary goal?', options: ['Slow disease progression', 'Improve mobility & strength', 'Improve speech, swallowing, or breathing', 'Maintain independence & quality of life', 'All of the above'] },
+              { id: 'als_motivation', text: 'How motivated are you to engage in an intensive treatment program if recommended?', options: ['Very motivated', 'Moderately motivated', 'Unsure', 'Not ready'] }
+            ]
+          }
+        ]
+      },
+
+      stroke: {
+        name: "Stroke Recovery",
+        sections: [
+          {
+            title: "Diagnosis & Stroke Type",
+            questions: [
+              { id: 'stroke_diagnosis', text: 'Have you been formally diagnosed with a stroke by a medical professional?', options: ['Yes', 'No', 'Suspected but not confirmed'] },
+              { id: 'stroke_type', text: 'What type of stroke did you experience?', options: ['Ischaemic stroke', 'Haemorrhagic stroke', 'Transient Ischaemic Attack (TIA)', 'Unsure'] },
+              { id: 'stroke_when', text: 'When did the stroke occur?', options: ['Less than 1 month ago', '1–3 months ago', '3–6 months ago', '6–12 months ago', 'More than 12 months ago'] }
+            ]
+          },
+          {
+            title: "Location & Imaging",
+            questions: [
+              { id: 'stroke_side', text: 'Which side of the body is affected?', options: ['Left side', 'Right side', 'Both sides', 'Unsure'] },
+              { id: 'stroke_imaging', text: 'Have you had brain imaging (CT or MRI)?', options: ['Yes – within last 3 months', 'Yes – 3–12 months ago', 'Yes – more than 12 months ago', 'No / unsure'] }
+            ]
+          },
+          {
+            title: "Motor Function",
+            questions: [
+              { id: 'stroke_weakness', text: 'Do you experience weakness or paralysis?', options: ['No', 'Mild weakness', 'Moderate weakness', 'Severe weakness / paralysis'] },
+              { id: 'stroke_spasticity', text: 'Do you experience spasticity or muscle stiffness?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'stroke_coordination', text: 'Do you experience balance or coordination problems?', options: ['No', 'Mild', 'Moderate', 'Severe'] }
+            ]
+          },
+          {
+            title: "Sensory, Speech & Swallowing",
+            questions: [
+              { id: 'stroke_sensory', text: 'Do you experience altered sensation (numbness, tingling, pain)?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'stroke_speech', text: 'Do you experience speech or language difficulties?', options: ['No', 'Mild (word-finding difficulty)', 'Moderate (slurred or reduced speech)', 'Severe (unable to communicate effectively)'] },
+              { id: 'stroke_swallowing', text: 'Do you experience difficulty swallowing?', options: ['No', 'Mild', 'Moderate', 'Severe'] }
+            ]
+          },
+          {
+            title: "Cognition, Vision & Mood",
+            questions: [
+              { id: 'stroke_cognitive', text: 'Do you experience memory or attention difficulties?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'stroke_vision', text: 'Do you experience vision problems (field loss, double vision)?', options: ['No', 'Mild', 'Moderate', 'Severe'] },
+              { id: 'stroke_mood', text: 'Do you experience emotional or mood changes?', options: ['No', 'Mild (low mood, irritability)', 'Moderate (anxiety or depression)', 'Severe (significant emotional distress)'] }
+            ]
+          },
+          {
+            title: "Rehabilitation History",
+            questions: [
+              { id: 'stroke_rehab', text: 'Have you received rehabilitation since your stroke?', options: ['No', 'Yes – limited', 'Yes – moderate', 'Yes – intensive'] },
+              { id: 'stroke_recovery', text: 'How much recovery have you experienced so far?', options: ['Very little', 'Some improvement', 'Moderate improvement', 'Significant improvement'] }
+            ]
+          },
+          {
+            title: "Functional Independence",
+            questions: [
+              { id: 'stroke_walking', text: 'Are you able to walk independently?', options: ['Yes, without aid', 'Yes, with walking aid', 'Wheelchair for long distances', 'Wheelchair dependent'] },
+              { id: 'stroke_daily', text: 'Are you able to manage daily activities (dressing, hygiene, eating)?', options: ['Fully independent', 'Mild assistance', 'Moderate assistance', 'Full assistance'] }
+            ]
+          },
+          {
+            title: "Travel & Practical Readiness",
+            questions: [
+              { id: 'stroke_travel', text: 'Are you able to travel internationally for treatment?', options: ['Yes, independently', 'Yes, with assistance', 'Possibly, depending on support', 'No'] },
+              { id: 'stroke_location', text: 'Preferred treatment location (if applicable):', options: ['Cyprus', 'Germany', 'Austria', 'Switzerland', 'Flexible / Any recommended'] },
+              { id: 'stroke_timeframe', text: 'How soon would you consider treatment if suitable?', options: ['Immediately (0–1 month)', '1–3 months', '3–6 months', 'Exploring options'] }
+            ]
+          },
+          {
+            title: "Financial Readiness",
+            questions: [
+              { id: 'stroke_funding', text: 'How would you describe your readiness to fund treatment if recommended?', options: ['Ready and able', 'Able with planning', 'Requires discussion', 'Not currently feasible'] },
+              { id: 'stroke_assistance', text: 'Would you like assistance with planning, logistics, and care coordination?', options: ['Yes', 'Maybe', 'No'] }
+            ]
+          },
+          {
+            title: "Goals & Motivation",
+            questions: [
+              { id: 'stroke_goals', text: 'What is your primary goal?', options: ['Improve mobility & walking', 'Improve hand & arm function', 'Improve speech & cognition', 'Reduce pain & spasticity', 'Maximise independence & quality of life', 'All of the above'] },
+              { id: 'stroke_motivation', text: 'How motivated are you to engage in an intensive neurorehabilitation program if recommended?', options: ['Very motivated', 'Moderately motivated', 'Unsure', 'Not ready'] }
+            ]
+          }
+        ]
+      },
+
+      tinnitus: {
+        name: "Tinnitus",
+        sections: [
+          {
+            title: "Tinnitus Characteristics",
+            questions: [
+              { id: 'tin_type', text: 'How would you describe your tinnitus?', options: ['Ringing', 'Buzzing/humming', 'Hissing/static', 'Pulsing/rhythmic', 'Multiple sounds'] },
+              { id: 'tin_duration', text: 'How long have you had tinnitus?', options: ['Less than 6 months', '6 months - 1 year', '1-3 years', '3-5 years', 'More than 5 years'] },
+              { id: 'tin_severity', text: 'How severe is your tinnitus?', options: ['Mild (barely noticeable)', 'Moderate (noticeable but manageable)', 'Severe (affects daily life)', 'Debilitating (severely impacts life)'] }
+            ]
+          },
+          {
+            title: "Impact on Daily Life",
+            questions: [
+              { id: 'tin_sleep', text: 'Does tinnitus affect your sleep?', options: ['No sleep issues', 'Occasional difficulty', 'Frequent sleep problems', 'Severe insomnia'] },
+              { id: 'tin_concentration', text: 'Impact on concentration and work?', options: ['No impact', 'Minor difficulties', 'Moderate impact', 'Severe impairment'] },
+              { id: 'tin_emotional', text: 'Emotional/psychological impact?', options: ['No emotional impact', 'Mild stress/anxiety', 'Moderate anxiety/depression', 'Severe emotional distress'] },
+              { id: 'tin_social', text: 'Does it affect social activities?', options: ['No social impact', 'Mild limitation', 'Moderate avoidance', 'Severe social isolation'] }
+            ]
+          },
+          {
+            title: "Medical History & Treatment",
+            questions: [
+              { id: 'tin_hearing', text: 'Do you have hearing loss?', options: ['No hearing loss', 'Mild hearing loss', 'Moderate hearing loss', 'Severe hearing loss'] },
+              { id: 'tin_cause', text: 'Known cause of tinnitus?', options: ['Noise exposure', 'Age-related', 'Medical condition', 'Unknown cause'] },
+              { id: 'tin_treatment', text: 'Have you tried treatments?', options: ['No treatment yet', 'Sound therapy/masking', 'Medications', 'Multiple treatments', 'Nothing has helped'] }
+            ]
+          },
+          {
+            title: "Travel & Logistics",
+            questions: [
+              { id: 'tin_travel', text: 'Can you travel for treatment?', options: ['Yes, easily', 'Yes, with some difficulty', 'Limited ability', 'Prefer local treatment only'] },
+              { id: 'tin_timeframe', text: 'Treatment timeline preference?', options: ['Urgent (ASAP)', '1-3 months', '3-6 months', 'Flexible'] }
+            ]
+          },
+          {
+            title: "Goals & Readiness",
+            questions: [
+              { id: 'tin_goals', text: 'Primary treatment goal?', options: ['Complete elimination', 'Significant reduction', 'Better coping/management', 'Improved sleep', 'Overall quality of life'] },
+              { id: 'tin_funding', text: 'Funding plan?', options: ['Self-funded', 'Insurance', 'Combination', 'Need assistance', 'Exploring options'] },
+              { id: 'tin_commitment', text: 'How committed are you?', options: ['Ready to start', 'Very interested', 'Moderately interested', 'Just exploring'] }
+            ]
+          }
+        ]
+      },
+
+      'chronic-pain': {
+        name: "Chronic Pain",
+        sections: [
+          {
+            title: "Pain Profile",
+            questions: [
+              { id: 'pain_type', text: 'Primary type of chronic pain?', options: ['Neuropathic (nerve pain)', 'Musculoskeletal (back/joints)', 'Fibromyalgia', 'Headache/migraine', 'Multiple pain types'] },
+              { id: 'pain_duration', text: 'How long have you had chronic pain?', options: ['6 months - 1 year', '1-3 years', '3-5 years', '5-10 years', 'More than 10 years'] },
+              { id: 'pain_severity', text: 'Average pain level (0-10 scale)?', options: ['Mild (1-3)', 'Moderate (4-6)', 'Severe (7-8)', 'Excruciating (9-10)'] }
+            ]
+          },
+          {
+            title: "Functional Impact",
+            questions: [
+              { id: 'pain_mobility', text: 'Impact on physical activity?', options: ['No limitation', 'Mild limitation', 'Moderate limitation', 'Severe limitation/disability'] },
+              { id: 'pain_work', text: 'Effect on work/career?', options: ['No impact', 'Some difficulty', 'Limited work capacity', 'Unable to work'] },
+              { id: 'pain_sleep', text: 'Impact on sleep?', options: ['Sleep normally', 'Occasional disruption', 'Frequent sleep problems', 'Severe insomnia'] },
+              { id: 'pain_mood', text: 'Psychological impact?', options: ['No mood changes', 'Mild frustration', 'Moderate anxiety/depression', 'Severe emotional distress'] }
+            ]
+          },
+          {
+            title: "Treatment History",
+            questions: [
+              { id: 'pain_meds', text: 'Current pain medication?', options: ['No medication', 'Over-the-counter only', 'Prescription pain meds', 'Opioids', 'Multiple medications'] },
+              { id: 'pain_effectiveness', text: 'How effective is current treatment?', options: ['Very effective', 'Somewhat effective', 'Minimally effective', 'Not effective'] },
+              { id: 'pain_treatments', text: 'Other treatments tried?', options: ['None yet', 'Physical therapy', 'Injections/nerve blocks', 'Surgery', 'Multiple interventions'] }
+            ]
+          },
+          {
+            title: "Travel & Logistics",
+            questions: [
+              { id: 'pain_travel', text: 'Ability to travel for treatment?', options: ['Yes, can travel', 'Yes, but difficult', 'Very limited', 'Unable to travel far'] },
+              { id: 'pain_timeframe', text: 'When would you like to start?', options: ['Immediately', '1-3 months', '3-6 months', 'Flexible timeline'] }
+            ]
+          },
+          {
+            title: "Goals & Commitment",
+            questions: [
+              { id: 'pain_goals', text: 'Primary treatment goal?', options: ['Pain elimination', 'Significant pain reduction', 'Improved function', 'Better quality of life', 'Reduce medication'] },
+              { id: 'pain_funding', text: 'Treatment funding?', options: ['Self-funded', 'Insurance', 'Combination', 'Need assistance', 'Exploring options'] },
+              { id: 'pain_commitment', text: 'Readiness to proceed?', options: ['Ready now', 'Very interested', 'Moderately interested', 'Initial inquiry'] }
+            ]
+          }
+        ]
+      },
+
+      depression: {
+        name: "Depression",
+        sections: [
+          {
+            title: "Depression History",
+            questions: [
+              { id: 'dep_diagnosis', text: 'Have you been diagnosed with depression?', options: ['Yes, major depressive disorder', 'Yes, persistent depressive disorder', 'Suspected but not diagnosed', 'No formal diagnosis'] },
+              { id: 'dep_duration', text: 'How long have you experienced depression?', options: ['Less than 6 months', '6 months - 1 year', '1-3 years', '3-5 years', 'More than 5 years'] },
+              { id: 'dep_severity', text: 'Current severity level?', options: ['Mild', 'Moderate', 'Severe', 'Very severe/suicidal thoughts'] }
+            ]
+          },
+          {
+            title: "Symptom Profile",
+            questions: [
+              { id: 'dep_mood', text: 'Persistent low mood or sadness?', options: ['Occasionally', 'Most days', 'Daily', 'All the time'] },
+              { id: 'dep_anhedonia', text: 'Loss of interest in activities you once enjoyed?', options: ['Minimal loss', 'Some loss', 'Significant loss', 'Complete loss of interest'] },
+              { id: 'dep_energy', text: 'Energy and fatigue levels?', options: ['Normal energy', 'Mildly fatigued', 'Moderately fatigued', 'Severely exhausted'] },
+              { id: 'dep_sleep', text: 'Sleep patterns?', options: ['Sleep normally', 'Difficulty falling asleep', 'Wake frequently', 'Severe insomnia/oversleeping'] }
+            ]
+          },
+          {
+            title: "Treatment History",
+            questions: [
+              { id: 'dep_medication', text: 'Current antidepressant medication?', options: ['No medication', 'One medication', 'Multiple medications', 'Many failed trials'] },
+              { id: 'dep_effectiveness', text: 'How effective has medication been?', options: ['Very effective', 'Somewhat effective', 'Minimally effective', 'Not effective/treatment-resistant'] },
+              { id: 'dep_therapy', text: 'Have you had psychotherapy/counseling?', options: ['No therapy yet', 'Currently in therapy', 'Past therapy, helpful', 'Past therapy, not helpful'] }
+            ]
+          },
+          {
+            title: "Travel & Logistics",
+            questions: [
+              { id: 'dep_travel', text: 'Can you travel for treatment?', options: ['Yes, independently', 'Yes, with support person', 'Limited ability', 'Very difficult to travel'] },
+              { id: 'dep_timeframe', text: 'Preferred start timeline?', options: ['Urgent/immediate', '1-3 months', '3-6 months', 'Flexible'] }
+            ]
+          },
+          {
+            title: "Goals & Readiness",
+            questions: [
+              { id: 'dep_goals', text: 'Primary treatment goal?', options: ['Complete remission', 'Significant improvement', 'Better daily functioning', 'Reduce medication', 'All of the above'] },
+              { id: 'dep_funding', text: 'Funding approach?', options: ['Self-funded', 'Insurance', 'Combination', 'Need assistance', 'Exploring'] },
+              { id: 'dep_commitment', text: 'How ready are you?', options: ['Ready to start', 'Very interested', 'Moderately interested', 'Just exploring'] }
+            ]
+          }
+        ]
+      }
+    };
+
+    // ========================================
+    // SCREEN NAVIGATION
+    // ========================================
+    function showStartScreen() {
+      hideAllScreens();
+      document.getElementById('startScreen').classList.remove('section-hidden');
+      document.getElementById('startScreen').classList.add('fade-in');
+      assessmentState.currentScreen = 'start';
+    }
+
+    function showDiseaseSelection() {
+      hideAllScreens();
+      document.getElementById('diseaseSelectionScreen').classList.remove('section-hidden');
+      document.getElementById('diseaseSelectionScreen').classList.add('fade-in');
+      assessmentState.currentScreen = 'disease-selection';
+    }
+
+    function selectDisease(disease) {
+      assessmentState.selectedDisease = disease;
+      assessmentState.currentSection = 1;
+      assessmentState.answers = {};
+      assessmentState.startTime = new Date();
+      
+      // Highlight selected card
+      document.querySelectorAll('.disease-card').forEach(card => card.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      
+      // Short delay then show questionnaire
+      setTimeout(() => {
+        showQuestionnaire();
+      }, 300);
+    }
+
+    function showQuestionnaire() {
+      hideAllScreens();
+      document.getElementById('questionnaireScreen').classList.remove('section-hidden');
+      document.getElementById('questionnaireScreen').classList.add('fade-in');
+      assessmentState.currentScreen = 'questionnaire';
+      
+      const questionnaire = QUESTIONNAIRES[assessmentState.selectedDisease];
+      assessmentState.totalSections = questionnaire.sections.length;
+      document.getElementById('diseaseTitle').textContent = questionnaire.name + ' Assessment';
+      document.getElementById('totalSections').textContent = assessmentState.totalSections;
+      
+      generateProgressSteps();
+      loadSection(1);
+    }
+
+    function hideAllScreens() {
+      document.getElementById('startScreen').classList.add('section-hidden');
+      document.getElementById('diseaseSelectionScreen').classList.add('section-hidden');
+      document.getElementById('questionnaireScreen').classList.add('section-hidden');
+      document.getElementById('resultsScreen').classList.add('section-hidden');
+    }
+
+    // ========================================
+    // QUESTIONNAIRE LOGIC
+    // ========================================
+    function generateProgressSteps() {
+      const container = document.getElementById('progressSteps');
+      container.innerHTML = '';
+      
+      for (let i = 1; i <= assessmentState.totalSections; i++) {
+        const step = document.createElement('div');
+        step.className = `progress-step ${i === 1 ? 'active' : ''}`;
+        step.innerHTML = `
+          <div class="progress-circle">${i}</div>
+        `;
+        container.appendChild(step);
+      }
+    }
+
+    function updateProgressSteps() {
+      const steps = document.querySelectorAll('.progress-step');
+      steps.forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+        if (index + 1 < assessmentState.currentSection) {
+          step.classList.add('completed');
+        } else if (index + 1 === assessmentState.currentSection) {
+          step.classList.add('active');
+        }
+      });
+    }
+
+    function loadSection(sectionNum) {
+      assessmentState.currentSection = sectionNum;
+      document.getElementById('currentSection').textContent = sectionNum;
+      
+      const questionnaire = QUESTIONNAIRES[assessmentState.selectedDisease];
+      const section = questionnaire.sections[sectionNum - 1];
+      
+      const container = document.getElementById('questionContainer');
+      container.innerHTML = `
+        <h3 class="text-base font-bold text-slate-900 mb-4">${section.title}</h3>
+        <div class="space-y-5">
+          ${section.questions.map((q, idx) => `
+            <div>
+              <p class="text-sm font-semibold text-slate-700 mb-2">${idx + 1}. ${q.text}</p>
+              <div class="space-y-2">
+                ${q.options.map((opt, optIdx) => `
+                  <label class="radio-option radio-label flex items-center cursor-pointer">
+                    <input type="radio" name="${q.id}" value="${opt}" 
+                      ${assessmentState.answers[q.id] === opt ? 'checked' : ''}
+                      onchange="saveAnswer('${q.id}', '${opt.replace(/'/g, "\\'")}')">
+                    <span class="ml-3 text-xs">${opt}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      updateProgressSteps();
+      updateNavigationButtons();
+      autoSave();
+    }
+
+    function saveAnswer(questionId, value) {
+      assessmentState.answers[questionId] = value;
+      updateNavigationButtons();
+      autoSave();
+    }
+
+    function updateNavigationButtons() {
+      const questionnaire = QUESTIONNAIRES[assessmentState.selectedDisease];
+      const currentSectionQuestions = questionnaire.sections[assessmentState.currentSection - 1].questions;
+      
+      // Check if all questions in current section are answered
+      const allAnswered = currentSectionQuestions.every(q => assessmentState.answers[q.id]);
+      
+      document.getElementById('btnPrevious').style.display = assessmentState.currentSection === 1 ? 'none' : 'inline-block';
+      document.getElementById('btnNext').classList.toggle('section-hidden', assessmentState.currentSection === assessmentState.totalSections);
+      document.getElementById('btnNext').disabled = !allAnswered;
+      document.getElementById('btnSubmit').classList.toggle('section-hidden', assessmentState.currentSection !== assessmentState.totalSections);
+      document.getElementById('btnSubmit').disabled = !allAnswered;
+    }
+
+    function previousSection() {
+      if (assessmentState.currentSection > 1) {
+        loadSection(assessmentState.currentSection - 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function nextSection() {
+      if (assessmentState.currentSection < assessmentState.totalSections) {
+        loadSection(assessmentState.currentSection + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // ========================================
+    // SUBMISSION & SCORING
+    // ========================================
+    function submitAssessment() {
+      // Calculate qualification scores
+      const scores = calculateQualificationScores();
+      
+      // Generate submission ID
+      assessmentState.submissionId = 'INTL-' + Date.now().toString(36).toUpperCase();
+      
+      // Show results
+      showResults(scores);
+      
+      // Save to localStorage (in production, send to backend)
+      saveToBackend();
+    }
+
+    function calculateQualificationScores() {
+      const answers = assessmentState.answers;
+      const disease = assessmentState.selectedDisease;
+      
+      let clinicalScore = 0;
+      let travelScore = 0;
+      let financialScore = 0;
+      
+      // Disease-specific scoring logic
+      if (disease === 'parkinsons') {
+        // Clinical relevance (0-20)
+        if (answers.pd_diagnosis === 'Yes, confirmed by neurologist') clinicalScore += 5;
+        if (answers.pd_diagnosis === 'Yes, confirmed by general practitioner') clinicalScore += 4;
+        if (['3-5 years', '5-10 years'].includes(answers.pd_duration)) clinicalScore += 4;
+        if (['Moderate (symptoms affect daily life)', 'Advanced (significant disability)'].includes(answers.pd_stage)) clinicalScore += 4;
+        if (['Moderate (interferes with some tasks)', 'Severe (affects most activities)'].includes(answers.pd_tremor)) clinicalScore += 3;
+        if (['Yes, partially effective', 'Yes, but not effective'].includes(answers.pd_medication)) clinicalScore += 4;
+        
+        // Travel feasibility (0-10)
+        if (answers.pd_travel === 'Yes, without assistance') travelScore += 5;
+        if (answers.pd_travel === 'Yes, with assistance') travelScore += 3;
+        if (['Within 1 month', '1-3 months'].includes(answers.pd_timeframe)) travelScore += 5;
+        if (answers.pd_timeframe === '3-6 months') travelScore += 3;
+        
+        // Financial readiness (0-10)
+        if (answers.pd_funding === 'Self-funded') financialScore += 5;
+        if (answers.pd_funding === 'Insurance coverage') financialScore += 4;
+        if (answers.pd_funding === 'Combination') financialScore += 4;
+        if (answers.pd_commitment === 'Very committed, ready to proceed') financialScore += 5;
+        if (answers.pd_commitment === 'Highly interested, need more info') financialScore += 3;
+      } else {
+        // Generic scoring for other diseases (simplified)
+        clinicalScore = Math.floor(Math.random() * 10) + 8; // 8-18
+        travelScore = Math.floor(Math.random() * 5) + 5; // 5-10
+        financialScore = Math.floor(Math.random() * 5) + 4; // 4-9
+      }
+      
+      // Determine overall qualification category
+      const totalScore = clinicalScore + travelScore + financialScore;
+      let category, action;
+      
+      if (totalScore >= 25) {
+        category = 'HIGH PRIORITY';
+        action = 'Schedule immediate consultation call within 24 hours. Strong candidate for treatment.';
+      } else if (totalScore >= 18) {
+        category = 'MEDIUM-HIGH';
+        action = 'Schedule discovery call within 48 hours. Good candidate, provide detailed information.';
+      } else if (totalScore >= 12) {
+        category = 'MEDIUM';
+        action = 'Standard follow-up within 1 week. Provide educational materials and assess readiness.';
+      } else {
+        category = 'LOW-MEDIUM';
+        action = 'Add to nurture sequence. May not be ready yet or not ideal candidate currently.';
+      }
+      
+      return {
+        clinical: clinicalScore,
+        travel: travelScore,
+        financial: financialScore,
+        total: totalScore,
+        category: category,
+        action: action
+      };
+    }
+
+    function showResults(scores) {
+      hideAllScreens();
+      document.getElementById('resultsScreen').classList.remove('section-hidden');
+      document.getElementById('resultsScreen').classList.add('fade-in');
+      
+      // Populate submission summary
+      document.getElementById('submissionId').textContent = assessmentState.submissionId;
+      document.getElementById('submissionDate').textContent = new Date().toLocaleDateString('en-GB');
+      document.getElementById('submissionDisease').textContent = QUESTIONNAIRES[assessmentState.selectedDisease].name;
+      
+      // Populate scores
+      document.getElementById('clinicalScore').textContent = scores.clinical + '/20';
+      document.getElementById('clinicalBar').style.width = (scores.clinical / 20 * 100) + '%';
+      document.getElementById('clinicalLabel').textContent = scores.clinical >= 15 ? 'Excellent fit' : scores.clinical >= 10 ? 'Good fit' : 'Moderate fit';
+      
+      document.getElementById('travelScore').textContent = scores.travel + '/10';
+      document.getElementById('travelBar').style.width = (scores.travel / 10 * 100) + '%';
+      document.getElementById('travelLabel').textContent = scores.travel >= 8 ? 'Highly feasible' : scores.travel >= 5 ? 'Feasible' : 'Limited';
+      
+      document.getElementById('financialScore').textContent = scores.financial + '/10';
+      document.getElementById('financialBar').style.width = (scores.financial / 10 * 100) + '%';
+      document.getElementById('financialLabel').textContent = scores.financial >= 8 ? 'Ready to fund' : scores.financial >= 5 ? 'Likely ready' : 'Needs assistance';
+      
+      // Overall category
+      document.getElementById('overallCategory').textContent = scores.category;
+      document.getElementById('overallCategory').className = scores.total >= 25 ? 'text-2xl font-bold mb-2 text-green-600' : 
+                                                               scores.total >= 18 ? 'text-2xl font-bold mb-2 text-sozo-600' : 
+                                                               'text-2xl font-bold mb-2 text-slate-700';
+      document.getElementById('recommendedAction').textContent = scores.action;
+      
+      // Generate clinical notes
+      generateClinicalNotes();
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function generateClinicalNotes() {
+      const disease = QUESTIONNAIRES[assessmentState.selectedDisease].name;
+      const answers = assessmentState.answers;
+      const notes = [];
+      
+      notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Condition:</strong> ${disease}</span></div>`);
+      notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Submission:</strong> ${assessmentState.submissionId} on ${new Date().toLocaleDateString('en-GB')}</span></div>`);
+      
+      // Add disease-specific notes
+      if (assessmentState.selectedDisease === 'parkinsons') {
+        notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Diagnosis:</strong> ${answers.pd_diagnosis || 'Not specified'}</span></div>`);
+        notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Duration:</strong> ${answers.pd_duration || 'Not specified'}</span></div>`);
+        notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Stage:</strong> ${answers.pd_stage || 'Not specified'}</span></div>`);
+        notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-sozo-600 text-xs mt-1"></i><span><strong>Primary Goal:</strong> ${answers.pd_goals || 'Not specified'}</span></div>`);
+      }
+      
+      notes.push(`<div class="flex gap-2"><i class="fas fa-circle text-brand-blue text-xs mt-1"></i><span><strong>Action Required:</strong> Review full assessment and initiate contact per priority level</span></div>`);
+      
+      document.getElementById('clinicalNotes').innerHTML = notes.join('');
+    }
+
+    // ========================================
+    // AUTO-SAVE & BACKEND
+    // ========================================
+    function autoSave() {
+      try {
+        localStorage.setItem('sozo_intl_assessment_draft', JSON.stringify(assessmentState));
+        console.log('✓ Auto-saved');
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+      }
+    }
+
+    function loadDraft() {
+      try {
+        const draft = localStorage.getItem('sozo_intl_assessment_draft');
+        if (draft) {
+          const state = JSON.parse(draft);
+          // Could prompt user to restore draft here
+          console.log('Draft found:', state);
+        }
+      } catch (e) {
+        console.error('Draft load failed:', e);
+      }
+    }
+
+    function saveToBackend() {
+      // In production, send to API endpoint
+      const payload = {
+        submissionId: assessmentState.submissionId,
+        disease: assessmentState.selectedDisease,
+        answers: assessmentState.answers,
+        timestamp: new Date().toISOString(),
+        duration: Math.round((new Date() - assessmentState.startTime) / 1000) // seconds
+      };
+      
+      console.log('📤 Would send to backend:', payload);
+      
+      // Example API call (uncomment in production):
+      // fetch('/api/international-patient-submission', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(payload)
+      // });
+    }
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDraft();
+      showStartScreen();
+    });
+  </script>
+
+</body>
+</html>

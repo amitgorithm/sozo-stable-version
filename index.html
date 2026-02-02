@@ -1717,6 +1717,7 @@ const MENU = {
     {key:'manageappts', label:'Manage Appointments', icon:'fa-calendar-check'},
     {key:'patientsearch', label:'Patient Search', icon:'fa-magnifying-glass'},
     {key:'doctorsearch', label:'Doctor Search', icon:'fa-stethoscope'},
+    {key:'international-patients', label:'International Patients', icon:'fa-globe'},
     {key:'profile', label:'My Profile', icon:'fa-user-circle'}
   ],
   admin: [
@@ -1726,6 +1727,7 @@ const MENU = {
     {key:'partnerships', label:'Partnerships', icon:'fa-handshake'},
     {key:'patients', label:'Patients DB', icon:'fa-users'},
     {key:'doctors', label:'Doctors DB', icon:'fa-user-doctor'},
+    {key:'international-patients', label:'International Patients', icon:'fa-globe'},
     {key:'medicalassessment', label:'Schedules/ appointments', icon:'fa-stethoscope', children: [
       {key:'schedule', label:'Today\'s Schedule'},
       {key:'appointments', label:'Appointments'},
@@ -2595,6 +2597,12 @@ function loadSection(key) {
     // Patient Journey - Open in new window for all roles
     if(key === 'patient-journey') {
       window.open('patient-journey.html', '_blank');
+      return;
+    }
+
+    // International Patients Questionnaire - Open in new window
+    if(key === 'international-patients') {
+      window.open('international-patients.html', '_blank');
       return;
     }
 
@@ -22117,6 +22125,265 @@ function renderDoctorNotes() {
 
 // -- TREATMENT PLAN MODULE LOGIC --
 // -- TREATMENT PLAN MODULE LOGIC --
+let treatmentPlanState = {
+  devices: [], // Array of up to 3 devices
+  activeDeviceTab: 0,
+  maxDevices: 3,
+  networkTabs: {} // Track network tabs per device: {deviceIndex: [{networkId, networkName, isActive}]}
+};
+
+// Persistence Logic
+const STORAGE_KEY = 'sozo_treatment_plan';
+const CUSTOM_MONTAGES_KEY = 'sozo_custom_montages';
+
+// Custom Montages Storage
+let customMontagesLibrary = [];
+
+function loadCustomMontages() {
+  try {
+    const saved = localStorage.getItem(CUSTOM_MONTAGES_KEY);
+    if (saved) {
+      customMontagesLibrary = JSON.parse(saved);
+      console.log('Custom Montages loaded from storage:', customMontagesLibrary.length, 'montages');
+    }
+  } catch (e) {
+    console.error('Error loading custom montages:', e);
+  }
+  return customMontagesLibrary;
+}
+
+function saveCustomMontageToLibrary(montageName, anodes, cathode, deviceType, baseNetwork) {
+  console.log('[saveCustomMontageToLibrary] Saving:', { montageName, anodes, cathode, deviceType, baseNetwork });
+  
+  const customMontage = {
+    id: `custom_${Date.now()}`,
+    name: montageName,
+    anodes: anodes,
+    cathode: cathode,
+    deviceType: deviceType,
+    baseNetwork: baseNetwork,
+    createdAt: new Date().toISOString(),
+    description: `Custom montage: ${anodes.join(', ')} → ${cathode}`
+  };
+  
+  customMontagesLibrary.push(customMontage);
+  console.log('[saveCustomMontageToLibrary] Library now has', customMontagesLibrary.length, 'montages');
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    console.log('[saveCustomMontageToLibrary] Saved to localStorage successfully');
+  } catch (e) {
+    console.error('[saveCustomMontageToLibrary] Failed to save to localStorage:', e);
+  }
+  
+  return customMontage;
+}
+
+function getCustomMontagesForDevice(deviceType) {
+  return customMontagesLibrary.filter(m => m.deviceType === deviceType);
+}
+
+function loadTreatmentPlanState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      treatmentPlanState = JSON.parse(saved);
+      console.log('Treatment Plan loaded from storage');
+    }
+  } catch (e) {
+    console.error('Failed to load treatment plan state', e);
+  }
+}
+
+function saveTreatmentPlanState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(treatmentPlanState));
+    console.log('Treatment Plan saved to storage');
+  } catch (e) {
+    console.error('Failed to save treatment plan state', e);
+  }
+}
+
+// Load state on initialization
+loadTreatmentPlanState();
+loadCustomMontages();
+
+// Restore visual state from stored data
+function restoreTreatmentPlanHighlights() {
+  treatmentPlanState.devices.forEach((device, i) => {
+    // 1. Update Dropdown
+    const select = document.getElementById(`networkSelect_${i}`);
+    if (select && device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+      select.value = device.selectedNetwork;
+      document.getElementById(`networkDetails_${i}`).classList.remove('hidden');
+    }
+
+    // 2. Update Details Text
+    if (device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+       const networks = getDummyNetworks(device.value);
+       const network = networks[device.selectedNetwork];
+       if (network) {
+         const nameEl = document.getElementById(`networkName_${i}`);
+         if (nameEl) {
+             let name = network.name;
+             if (device.customMontageName) {
+                 name += ` ${device.customMontageName}`;
+             }
+             nameEl.textContent = name;
+         }
+         
+         const descEl = document.getElementById(`networkDesc_${i}`);
+         if (descEl) descEl.textContent = network.description;
+         
+         const indEl = document.getElementById(`networkIndication_${i}`);
+         if (indEl) indEl.textContent = network.indication;
+       }
+    }
+
+    // 3. Update Electrodes Text
+    const anodesEl = document.getElementById(`networkAnodes_${i}`);
+    if (anodesEl && device.montage.anodes) {
+        anodesEl.textContent = device.montage.anodes.join(', ');
+    }
+    
+    const cathodeEl = document.getElementById(`networkCathode_${i}`);
+    if (cathodeEl) {
+        cathodeEl.textContent = device.montage.cathode || '';
+    }
+    
+    // 4. Update Info Panel
+    const infoEl = document.getElementById(`networkInfo_${i}`);
+    if (infoEl && device.selectedNetwork !== undefined && device.selectedNetwork !== '') {
+       const networks = getDummyNetworks(device.value);
+       const network = networks[device.selectedNetwork];
+       if (network) {
+           infoEl.innerHTML = `
+            <p class="text-xs font-bold text-purple-900 mb-1">
+              <i class="fa-solid fa-bolt mr-1"></i>Active Network: ${network.name}${device.customMontageName ? ` ${device.customMontageName}` : ''}
+            </p>
+            <p class="text-xs text-purple-700">
+              Anodes: <span class="font-mono font-bold">${device.montage.anodes ? device.montage.anodes.join(', ') : ''}</span> | 
+              Cathode: <span class="font-mono font-bold">${device.montage.cathode || ''}</span>
+            </p>
+          `;
+       }
+    }
+
+    // 5. Highlight Electrodes (Only for brain devices)
+    if (usesBrainMontage(device.value) && device.montage && device.montage.anodes) {
+      highlightNetworkElectrodes(i, device.montage.anodes, device.montage.cathode);
+    }
+  });
+}
+
+function populateCustomMontagesForAllDevices() {
+  treatmentPlanState.devices.forEach((device, i) => {
+    if (usesBrainMontage(device.value)) {
+      populateCustomMontagesForDevice(i);
+    }
+  });
+}
+
+function populateCustomMontagesForDevice(deviceIndex) {
+  const optgroup = document.getElementById(`customMontagesOptgroup_${deviceIndex}`);
+  
+  if (!optgroup) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Get custom montages for this device type
+  const deviceMontages = customMontagesLibrary.filter(m => m.deviceType === device.value);
+  
+  if (deviceMontages.length === 0) {
+    optgroup.innerHTML = '<option value="" disabled>No custom montages saved</option>';
+    return;
+  }
+  
+  // Build options from array
+  let html = '';
+  deviceMontages.forEach(montage => {
+    html += `<option value="${montage.id}">⭐ ${montage.name}</option>`;
+  });
+  
+  optgroup.innerHTML = html;
+}
+
+// Original implementation preserved below for reference
+function populateCustomMontagesForDevice_OLD(deviceIndex) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device || !usesBrainMontage(device.value)) return;
+  
+  const customMontages = getCustomMontagesForDevice(device.value);
+  const listEl = document.getElementById(`customMontagesList_${deviceIndex}`);
+  const countEl = document.getElementById(`customMontageCount_${deviceIndex}`);
+  
+  if (countEl) {
+    countEl.textContent = customMontages.length;
+  }
+  
+  if (listEl) {
+    if (customMontages.length === 0) {
+      listEl.innerHTML = '<p class="text-xs text-slate-500 italic text-center py-2">No custom montages saved yet</p>';
+    } else {
+      listEl.innerHTML = customMontages.map(montage => `
+        <button 
+          onclick="loadCustomMontage(${deviceIndex}, '${montage.id}')"
+          class="w-full text-left px-3 py-2 rounded hover:bg-purple-50 transition-colors text-xs border border-transparent hover:border-purple-300 group"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-semibold text-purple-900">${montage.name}</span>
+              <div class="text-[10px] text-purple-600">${montage.description}</div>
+            </div>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="fa-solid fa-arrow-right text-purple-500 text-xs"></i>
+            </div>
+          </div>
+        </button>
+      `).join('');
+    }
+  }
+}
+
+function loadCustomMontage(deviceIndex, montageId) {
+  const customMontage = customMontagesLibrary.find(m => m.id === montageId);
+  if (!customMontage) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Apply the custom montage
+  device.montage.anodes = [...customMontage.anodes];
+  device.montage.cathode = customMontage.cathode;
+  device.customMontageName = `(${customMontage.name})`;
+  device.selectedNetwork = ''; // Clear network selection as this is custom
+  
+  // Update UI
+  highlightNetworkElectrodes(deviceIndex, customMontage.anodes, customMontage.cathode);
+  
+  // Update network details panel
+  document.getElementById(`networkDetails_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`networkName_${deviceIndex}`).textContent = `Custom: ${customMontage.name}`;
+  document.getElementById(`networkDesc_${deviceIndex}`).textContent = customMontage.description;
+  document.getElementById(`networkAnodes_${deviceIndex}`).textContent = customMontage.anodes.join(', ');
+  document.getElementById(`networkCathode_${deviceIndex}`).textContent = customMontage.cathode;
+  document.getElementById(`networkIndication_${deviceIndex}`).textContent = `Custom montage created from ${customMontage.baseNetwork}`;
+  
+  // Update left panel info
+  document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+    <p class="text-xs font-bold text-purple-900 mb-1">
+      <i class="fa-solid fa-star mr-1"></i>Custom Montage: ${customMontage.name}
+    </p>
+    <p class="text-xs text-purple-700">
+      Anodes: <span class="font-mono font-bold">${customMontage.anodes.join(', ')}</span> | 
+      Cathode: <span class="font-mono font-bold">${customMontage.cathode}</span>
+    </p>
+  `;
+  
+  saveTreatmentPlanState();
+}
+
 function renderTreatmentPlan() {
   const area = document.getElementById('contentArea');
   // For patient role, auto-select their own patient context
@@ -22137,9 +22404,9 @@ function renderTreatmentPlan() {
   if (!p) {
     area.innerHTML = `
       <div class="p-8">
-        <div class="bg-slate-50 border border-slate-300 rounded-lg p-6">
-          <p class="text-slate-700 font-bold">No patient selected</p>
-          <p class="text-sm text-slate-700 mt-2">Please select a patient to view their treatment plan.</p>
+        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+          <p class="text-yellow-800 font-bold">No patient selected</p>
+          <p class="text-sm text-yellow-700 mt-2">Please select a patient to view their treatment plan.</p>
         </div>
       </div>
     `;
@@ -22194,1108 +22461,93 @@ function renderTreatmentPlan() {
     <!-- Treatment Plan Content -->
     <div class="card p-8">
       
+      <!-- Step 1: Device Selection (Max 3) -->
+      <div class="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-300">
+        <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          Choose Devices (Maximum 3)
+        </h3>
+        
+        <div class="flex flex-wrap gap-3 mb-4">
+          ${treatmentPlanState.devices.map((device, idx) => `
+            <div class="bg-white px-4 py-2 rounded-lg border-2 border-blue-400 flex items-center gap-2 shadow">
+              <i class="fa-solid fa-microchip text-blue-600"></i>
+              <span class="font-semibold text-slate-800">${device.name}</span>
+              <button onclick="removeDevice(${idx})" class="ml-2 text-red-500 hover:text-red-700" ${currentRole === 'patient' ? 'disabled' : ''}>
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          `).join('')}
+          ${treatmentPlanState.devices.length === 0 ? '<p class="text-slate-500 italic">No devices selected yet</p>' : ''}
+        </div>
+        
+        ${treatmentPlanState.devices.length < treatmentPlanState.maxDevices ? `
+        <div class="flex gap-3 items-center">
+          <select id="newDeviceSelect" class="input-royal flex-1" ${currentRole === 'patient' ? 'disabled' : ''}>
+            <option value="">-- Select a Device to Add --</option>
+            <optgroup label="tDCS/tACS Devices">
+              <option value="plato">Plato Neurostimulation - 4 specialized electrode blocks</option>
+              <option value="newronika">Newronika - 10-20 system placement</option>
+              <option value="device1">TMS (Transcranial Magnetic Stimulation)</option>
+              <option value="device2">tDCS (Transcranial Direct Current)</option>
+            </optgroup>
+            <optgroup label="Alpha Stim Devices">
+              <option value="alpha_stim_aid">Alpha Stim AID - Earlobe clips</option>
+              <option value="alpha_stim_met">Alpha Stim MET - Earlobe clips + probe</option>
+            </optgroup>
+            <optgroup label="VNS & Other">
+              <option value="tvns">tVNS - Cymba area (left ear)</option>
+              <option value="device3">VNS (Vagus Nerve Stimulation)</option>
+              <option value="tps">TPS (Transcranial Pulse Stimulation)</option>
+            </optgroup>
+            <optgroup label="Standard Placement">
+              <option value="flow">Flow Device - Standard placement</option>
+              <option value="robotic_arm">Robotic Arm - Standard placement</option>
+            </optgroup>
+          </select>
+          <button onclick="addDevice()" class="btn-primary" ${currentRole === 'patient' ? 'disabled' : ''}>
+            <i class="fa-solid fa-plus mr-2"></i>Add Device
+          </button>
+        </div>
+        ` : '<p class="text-orange-600 font-semibold"><i class="fa-solid fa-info-circle mr-2"></i>Maximum of 3 devices reached</p>'}
+      </div>
+
+      ${treatmentPlanState.devices.length > 0 ? `
+      <!-- Step 2: Device Journey Tabs -->
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-route"></i>
+          </div>
+          Configure Each Device Journey
+        </h3>
+        
+        <!-- Device Tabs -->
+        <div class="flex border-b-2 border-slate-200 mb-6 overflow-x-auto">
+          ${treatmentPlanState.devices.map((device, idx) => `
+            <button 
+              onclick="switchDeviceTab(${idx})" 
+              class="px-6 py-3 font-semibold transition-all border-b-4 ${treatmentPlanState.activeDeviceTab === idx ? 'border-purple-600 text-purple-600 bg-purple-50' : 'border-transparent text-slate-600 hover:bg-slate-50'}"
+            >
+              <i class="fa-solid fa-microchip mr-2"></i>
+              Device ${idx + 1}: ${device.name}
+            </button>
+          `).join('')}
+        </div>
+        
+        <!-- Active Device Tab Content -->
+        <div id="deviceTabContent">
+          ${renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab)}
+        </div>
+      </div>
+      ` : ''}
+
       
 
       <!-- Disease Selection & Automated Brain Region Mapping -->
-      <div class="mb-10 bg-white p-8 rounded-2xl border-2 border-orange-500 shadow-xl shadow-orange-100 relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-orange-200/50">
-        <!-- Decorative Glows -->
-        <div class="absolute -top-24 -right-24 w-64 h-64 bg-orange-100/40 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-100/40 rounded-full blur-3xl pointer-events-none"></div>
-
-        <h3 class="text-2xl font-extrabold text-slate-900 mb-8 flex items-center gap-4 border-b border-orange-100 pb-6 relative z-10">
-          <div class="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl shadow-lg shadow-orange-200 transition-transform hover:scale-105">
-            <i class="fa-solid fa-brain text-2xl"></i>
-          </div>
-          <div>
-            <span class="block text-orange-600 text-xs uppercase tracking-[0.2em] font-black mb-1">Advanced Workflow</span>
-            <span class="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Clinical Indication & Montage Configuration</span>
-          </div>
-        </h3>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
-          <!-- Disease/Clinical Phenotype Selection -->
-          <div class="space-y-4">
-            <label class="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 px-1">
-              <i class="fa-solid fa-stethoscope text-blue-600 text-base"></i>
-              1. Select Clinical Indication / Phenotype *
-            </label>
-            <div class="flex gap-2 items-start bg-slate-50 p-1.5 rounded-2xl border-2 border-slate-100 focus-within:border-orange-400 focus-within:bg-white transition-all shadow-inner">
-              <select id="clinicalIndicationSelect" class="bg-transparent border-none text-base font-bold text-slate-800 flex-1 h-12 px-4 focus:ring-0 cursor-pointer" ${currentRole === 'patient' ? 'disabled' : ''} onchange="updateMontageMapping()">
-                <option value="">-- Select Indication --</option>
-                <optgroup label="Standard Clinical Indications">
-                  <option value="ruminative_depression">Ruminative, Melancholic Depression; Low Drive</option>
-                  <option value="cognitive_depression">Cognitive Depression, Attentional Inefficiency</option>
-                  <option value="anxious_depression">Anxious Depression, Hypervigilance</option>
-                </optgroup>
-                <optgroup label="Custom Montages" id="customMontagesOptgroup" style="display:none;">
-                </optgroup>
-              </select>
-              <button id="deleteCustomMontageBtn" onclick="deleteSelectedCustomMontage()" class="hidden h-12 w-12 flex items-center justify-center bg-slate-600 hover:bg-slate-600 text-white rounded-xl transition-all shadow-md active:scale-95" title="Delete this custom montage">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-            <div class="flex items-center justify-between px-2">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Affects brain region targeting</span>
-              <span class="text-[10px] font-bold text-orange-500 uppercase flex items-center gap-1">
-                <i class="fa-solid fa-bolt"></i> Auto-Mapping Active
-              </span>
-            </div>
-          </div>
-
-          <!-- Neuromodulation Device Selection -->
-          <div class="space-y-4">
-            <label class="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 px-1">
-              <i class="fa-solid fa-microchip text-orange-600 text-base"></i>
-              2. Select Neuromodulation Device *
-            </label>
-            <div class="bg-slate-50 p-1.5 rounded-2xl border-2 border-slate-100 focus-within:border-orange-400 focus-within:bg-white transition-all shadow-inner">
-              <select id="deviceSelect" class="bg-transparent border-none text-base font-bold text-slate-800 w-full h-12 px-4 focus:ring-0 cursor-pointer" ${currentRole === 'patient' ? 'disabled' : ''} onchange="updateDeviceVisualization()">
-                <option value="">-- Select Device --</option>
-                <optgroup label="tDCS/tACS Devices">
-                  <option value="plato">Plato - 4 electrode locations (montage-specific)</option>
-                  <option value="newronika">Newronika - 10-20 system placement (1-2 channels)</option>
-                  <option value="device1">TMS (Transcranial Magnetic Stimulation) - Frontal Quadrant</option>
-                  <option value="device2">tDCS (Transcranial Direct Current Stimulation) - Full Brain</option>
-                </optgroup>
-                <optgroup label="Alpha Stim Devices">
-                  <option value="alpha_stim_aid">Alpha Stim AID - Earlobe clips</option>
-                  <option value="alpha_stim_met">Alpha Stim MET - Earlobe clips + probe/pad</option>
-                </optgroup>
-                <optgroup label="VNS & Other Stimulation">
-                  <option value="tvns">tVNS - Cymba area (left ear)</option>
-                  <option value="device3">VNS (Vagus Nerve Stimulation) - Ear/Neck Region</option>
-                  <option value="tps">TPS (Transcranial Pulse Stimulation)</option>
-                </optgroup>
-                <optgroup label="Standard Placement Devices">
-                  <option value="flow">Flow Device - Standard placement</option>
-                  <option value="robotic_arm">Robotic Arm - Standard placement</option>
-                </optgroup>
-              </select>
-            </div>
-            <div class="flex items-center justify-between px-2">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Updates visualization below</span>
-              <span class="text-[10px] font-bold text-blue-500 uppercase flex items-center gap-1">
-                <i class="fa-solid fa-eye"></i> Live Preview
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 pt-6 border-t border-slate-100 flex items-center justify-center gap-6 relative z-10">
-          <div class="flex items-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 py-2 px-4 rounded-full">
-            <span class="w-2 h-2 bg-sozo-600 rounded-full animate-pulse"></span>
-            10-20 System Ready
-          </div>
-          <p class="text-[11px] text-slate-400 font-medium italic max-w-sm text-center">
-            Reference the <span class="text-orange-600 font-bold">Clinical Assistant's Manual</span> for localized montage overrides and patient-specific adjustments.
-          </p>
-        </div>
-
-        <!-- Tab Navigation for Montage and Device Visualization -->
-        <div class="mt-6 bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">
-          <!-- Tab Headers -->
-          <div class="flex border-b border-slate-200 bg-slate-50">
-            <button id="montageTab" onclick="switchTab('montage')" class="flex-1 px-6 py-4 text-sm font-bold text-slate-700 border-b-2 border-transparent hover:bg-slate-100 transition-all tab-button active-tab">
-              <div class="flex items-center justify-center gap-2">
-                <i class="fa-solid fa-brain text-sozo-600"></i>
-                <span>Montage</span>
-              </div>
-            </button>
-            <button id="deviceTab" onclick="switchTab('device')" class="flex-1 px-6 py-4 text-sm font-bold text-slate-700 border-b-2 border-transparent hover:bg-slate-100 transition-all tab-button">
-              <div class="flex items-center justify-center gap-2">
-                <i class="fa-solid fa-crosshairs text-orange-600"></i>
-                <span>Device</span>
-              </div>
-            </button>
-          </div>
-
-          <!-- Tab Content -->
-          <div class="p-4">
-            <!-- Montage Tab Content -->
-            <div id="montageTabContent" class="tab-content">
-              <!-- Interactive Brain Layout Visualization -->
-              <div id="montageDetailsSection" class="hidden">
-                <div class="bg-slate-50 p-3 rounded-lg border border-slate-300">
-                  <h4 class="text-sm font-bold text-slate-800 mb-2 text-center flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-brain text-sozo-600 text-sm"></i>
-                    10-20 Montage Visualization
-                  </h4>
-                  
-                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                    <!-- Top-Down Brain View -->
-                    <div class="lg:col-span-2">
-                      <svg id="brainLayoutTopView" viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline circle -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
-                        <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                        
-                        <!-- Nasion marker (top) -->
-                        <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
-                        
-                        <!-- Inion marker (bottom) -->
-                        <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">INION</text>
-                        
-                        <!-- Left/Right markers -->
-                        <text x="15" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">L</text>
-                        <text x="285" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">R</text>
-                        
-                        <!-- Ear Reference Electrodes -->
-                        <g id="a1-electrode" class="electrode">
-                          <circle cx="25" cy="150" r="10" fill="#fbbf24" stroke="#f59e0b" stroke-width="2.5"/>
-                          <text x="25" y="155" text-anchor="middle" font-size="9" font-weight="bold" fill="#92400e">A1</text>
-                        </g>
-                        <g id="a2-electrode" class="electrode">
-                          <circle cx="275" cy="150" r="10" fill="#fbbf24" stroke="#f59e0b" stroke-width="2.5"/>
-                          <text x="275" y="155" text-anchor="middle" font-size="9" font-weight="bold" fill="#92400e">A2</text>
-                        </g>
-                        
-                        <!-- Row 1: Frontal Pole -->
-                        <g id="fp1-electrode" class="electrode">
-                          <circle cx="120" cy="65" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="120" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">Fp1</text>
-                        </g>
-                        <g id="fpz-electrode" class="electrode">
-                          <circle cx="150" cy="60" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="150" y="65" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">Fpz</text>
-                        </g>
-                        <g id="fp2-electrode" class="electrode">
-                          <circle cx="180" cy="65" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="180" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">Fp2</text>
-                        </g>
-                        
-                        <!-- Row 2: Frontal -->
-                        <g id="f7-electrode" class="electrode">
-                          <circle cx="65" cy="95" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="65" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F7</text>
-                        </g>
-                        <g id="f3-electrode" class="electrode">
-                          <circle cx="115" cy="95" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="115" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F3</text>
-                        </g>
-                        <g id="fz-electrode" class="electrode">
-                          <circle cx="150" cy="90" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="150" y="95" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">Fz</text>
-                        </g>
-                        <g id="f4-electrode" class="electrode">
-                          <circle cx="185" cy="95" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="185" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F4</text>
-                        </g>
-                        <g id="f8-electrode" class="electrode">
-                          <circle cx="235" cy="95" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="235" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">F8</text>
-                        </g>
-                        
-                        <!-- Row 3: Temporal/Central -->
-                        <g id="t3-electrode" class="electrode">
-                          <circle cx="50" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="50" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T3</text>
-                        </g>
-                        <g id="c3-electrode" class="electrode">
-                          <circle cx="105" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="105" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">C3</text>
-                        </g>
-                        <g id="cz-electrode" class="electrode">
-                          <circle cx="150" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="150" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">Cz</text>
-                        </g>
-                        <g id="c4-electrode" class="electrode">
-                          <circle cx="195" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="195" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">C4</text>
-                        </g>
-                        <g id="t4-electrode" class="electrode">
-                          <circle cx="250" cy="150" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="250" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T4</text>
-                        </g>
-                        
-                        <!-- Row 4: Parietal/Temporal -->
-                        <g id="t5-electrode" class="electrode">
-                          <circle cx="65" cy="205" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="65" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T5</text>
-                        </g>
-                        <g id="p3-electrode" class="electrode">
-                          <circle cx="115" cy="205" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="115" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">P3</text>
-                        </g>
-                        <g id="pz-electrode" class="electrode">
-                          <circle cx="150" cy="210" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="150" y="215" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">Pz</text>
-                        </g>
-                        <g id="p4-electrode" class="electrode">
-                          <circle cx="185" cy="205" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="185" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">P4</text>
-                        </g>
-                        <g id="t6-electrode" class="electrode">
-                          <circle cx="235" cy="205" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="235" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">T6</text>
-                        </g>
-                        
-                        <!-- Row 5: Occipital -->
-                        <g id="o1-electrode" class="electrode">
-                          <circle cx="120" cy="235" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="120" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">O1</text>
-                        </g>
-                        <g id="oz-electrode" class="electrode">
-                          <circle cx="150" cy="240" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="150" y="245" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">Oz</text>
-                        </g>
-                        <g id="o2-electrode" class="electrode">
-                          <circle cx="180" cy="235" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="180" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">O2</text>
-                        </g>
-                        
-                        <!-- Additional Reference Lines (subtle) -->
-                        <line x1="150" y1="35" x2="150" y2="265" stroke="#e2e8f0" stroke-width="1" opacity="0.5" stroke-dasharray="2,2"/>
-                        <line x1="30" y1="150" x2="270" y2="150" stroke="#e2e8f0" stroke-width="1" opacity="0.5" stroke-dasharray="2,2"/>
-                      </svg>
-                    </div>
-                    
-                    <!-- Electrode Controls -->
-                    <div class="space-y-3">
-                      <div class="text-xs">
-                        <p class="font-bold text-slate-700 mb-1">Interactive Mode:</p>
-                        <div class="flex flex-col gap-1">
-                          <button id="selectAnodeMode" onclick="setElectrodeMode('anode')" class="px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-800 border border-blue-300">
-                            + ANODE
-                          </button>
-                          <button id="selectCathodeMode" onclick="setElectrodeMode('cathode')" class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-700 border border-slate-300">
-                            - CATHODE
-                          </button>
-                          <button id="selectRemoveMode" onclick="setElectrodeMode('remove')" class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-700 border border-slate-300">
-                            REMOVE
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div id="saveCustomMontageSection" class="hidden">
-                        <button onclick="showSaveChangesPopup()" class="w-full bg-orange-500 hover:bg-sozo-600 text-white px-2 py-1.5 rounded text-xs font-bold">
-                          <i class="fa-solid fa-save"></i> Save Custom
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Hidden fields for logic preservation -->
-                  <div style="display:none;">
-                    <input type="hidden" id="montageCategory" />
-                    <input type="hidden" id="networkTarget" />
-                    <input type="hidden" id="anodePlacement" />
-                    <input type="hidden" id="cathodePlacement" />
-                    <input type="hidden" id="secondaryNetwork" />
-                    <input type="hidden" id="anodeOptions" />
-                    <input type="hidden" id="cathodeType" />
-                    <input type="hidden" id="useStage" />
-                    <span id="activeAnodes"></span>
-                    <span id="activeCathodes"></span>
-                    <span id="activeNetwork"></span>
-                    <div id="extracephalicNote"></div>
-                    <div id="activeMontageInfo"></div>
-                  </div>
-
-                  <!-- FNON Logic Explanation -->
-                  <div class="mt-4 bg-gradient-to-r from-orange-100 to-orange-50 p-3 rounded-lg border-l-4 border-orange-600">
-                    <h5 class="text-xs font-bold text-orange-900 mb-1 flex items-center gap-1">
-                      <i class="fa-solid fa-lightbulb text-orange-600 text-xs"></i>
-                      Clinical Logic
-                    </h5>
-                    <p id="fnonLogic" class="text-xs text-orange-800 leading-relaxed"></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          <!-- Plato Device: 4 Electrode Locations -->
-          <div id="platoViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Plato Device:</strong> 4 electrode locations using 10-20 system (montage-specific placement)
-              </p>
-              <svg viewBox="0 0 300 300" class="w-full max-w-md border-2 border-orange-300 rounded-lg bg-gradient-to-br from-orange-50 to-slate-50 p-4">
-                <!-- Brain outline -->
-                <circle cx="150" cy="150" r="120" fill="none" stroke="#f97316" stroke-width="3"/>
-                <circle cx="150" cy="150" r="110" fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="3,3"/>
-                
-                <!-- Nasion marker -->
-                <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
-                
-                <!-- 4 Electrode positions (example montage) -->
-                <g class="electrode-group">
-                  <circle cx="100" cy="90" r="18" fill="#3b82f6" fill-opacity="0.7" stroke="#1e40af" stroke-width="3"/>
-                  <text x="100" y="96" text-anchor="middle" font-size="12" font-weight="bold" fill="white">E1</text>
-                  <text x="100" y="75" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e40af">Anode</text>
-                </g>
-                
-                <g class="electrode-group">
-                  <circle cx="200" cy="90" r="18" fill="#3b82f6" fill-opacity="0.7" stroke="#1e40af" stroke-width="3"/>
-                  <text x="200" y="96" text-anchor="middle" font-size="12" font-weight="bold" fill="white">E2</text>
-                  <text x="200" y="75" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e40af">Anode</text>
-                </g>
-                
-                <g class="electrode-group">
-                  <circle cx="100" cy="210" r="18" fill="#dc2626" fill-opacity="0.7" stroke="#991b1b" stroke-width="3"/>
-                  <text x="100" y="216" text-anchor="middle" font-size="12" font-weight="bold" fill="white">E3</text>
-                  <text x="100" y="235" text-anchor="middle" font-size="9" font-weight="bold" fill="#991b1b">Cathode</text>
-                </g>
-                
-                <g class="electrode-group">
-                  <circle cx="200" cy="210" r="18" fill="#dc2626" fill-opacity="0.7" stroke="#991b1b" stroke-width="3"/>
-                  <text x="200" y="216" text-anchor="middle" font-size="12" font-weight="bold" fill="white">E4</text>
-                  <text x="200" y="235" text-anchor="middle" font-size="9" font-weight="bold" fill="#991b1b">Cathode</text>
-                </g>
-                
-                <text x="150" y="280" text-anchor="middle" font-size="11" font-style="italic" fill="#92400e">4 Electrode Configuration</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Newronika Device: 10-20 System with 1-2 Channels -->
-          <div id="newronikaViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Newronika Device:</strong> 10-20 system placement • 1-2 channel stimulation
-              </p>
-              <div class="grid grid-cols-2 gap-4 w-full max-w-2xl">
-                <!-- Single Channel Mode -->
-                <div class="bg-white p-4 rounded-lg border-2 border-blue-300">
-                  <h5 class="text-center font-bold text-blue-700 mb-3 text-sm">1 Channel Mode</h5>
-                  <svg viewBox="0 0 300 300" class="w-full border border-slate-200 rounded-lg bg-gradient-to-br from-blue-50 to-blue-50">
-                    <circle cx="150" cy="150" r="120" fill="none" stroke="#3b82f6" stroke-width="2"/>
-                    <circle cx="150" cy="150" r="110" fill="none" stroke="#60a5fa" stroke-width="1" stroke-dasharray="3,3"/>
-                    
-                    <!-- 1 Anode -->
-                    <circle cx="115" cy="105" r="20" fill="#3b82f6" fill-opacity="0.8" stroke="#1e40af" stroke-width="3"/>
-                    <text x="115" y="110" text-anchor="middle" font-size="11" font-weight="bold" fill="white">F3</text>
-                    <text x="115" y="85" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">Anode</text>
-                    
-                    <!-- 1 Cathode -->
-                    <circle cx="185" cy="195" r="20" fill="#dc2626" fill-opacity="0.8" stroke="#991b1b" stroke-width="3"/>
-                    <text x="185" y="200" text-anchor="middle" font-size="11" font-weight="bold" fill="white">P4</text>
-                    <text x="185" y="220" text-anchor="middle" font-size="10" font-weight="bold" fill="#991b1b">Cathode</text>
-                    
-                    <text x="150" y="280" text-anchor="middle" font-size="10" fill="#475569">1 Anode + 1 Cathode</text>
-                  </svg>
-                </div>
-                
-                <!-- Dual Channel Mode -->
-                <div class="bg-white p-4 rounded-lg border-2 border-slate-300">
-                  <h5 class="text-center font-bold text-slate-700 mb-3 text-sm">2 Channel Mode</h5>
-                  <svg viewBox="0 0 300 300" class="w-full border border-slate-200 rounded-lg bg-gradient-to-br from-slate-50 to-slate-50">
-                    <circle cx="150" cy="150" r="120" fill="none" stroke="#8b5cf6" stroke-width="2"/>
-                    <circle cx="150" cy="150" r="110" fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
-                    
-                    <!-- 2 Anodes -->
-                    <circle cx="110" cy="105" r="18" fill="#3b82f6" fill-opacity="0.8" stroke="#1e40af" stroke-width="3"/>
-                    <text x="110" y="110" text-anchor="middle" font-size="10" font-weight="bold" fill="white">F3</text>
-                    
-                    <circle cx="190" cy="105" r="18" fill="#3b82f6" fill-opacity="0.8" stroke="#1e40af" stroke-width="3"/>
-                    <text x="190" y="110" text-anchor="middle" font-size="10" font-weight="bold" fill="white">F4</text>
-                    
-                    <text x="150" y="85" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">Anodes</text>
-                    
-                    <!-- 1 Cathode -->
-                    <circle cx="150" cy="195" r="18" fill="#dc2626" fill-opacity="0.8" stroke="#991b1b" stroke-width="3"/>
-                    <text x="150" y="200" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Pz</text>
-                    <text x="150" y="220" text-anchor="middle" font-size="10" font-weight="bold" fill="#991b1b">Cathode</text>
-                    
-                    <text x="150" y="280" text-anchor="middle" font-size="10" fill="#475569">2 Anodes + 1 Cathode</text>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Alpha Stim AID: Earlobe Clips -->
-          <div id="alpha_stim_aidViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Alpha Stim AID:</strong> Cranial Electrotherapy Stimulation (CES) via earlobe clips
-              </p>
-              <svg viewBox="0 0 400 300" class="w-full max-w-lg border-2 border-orange-300 rounded-lg bg-gradient-to-br from-orange-50 to-blue-50 p-4">
-                <!-- Head outline (front view) -->
-                <ellipse cx="200" cy="150" rx="80" ry="110" fill="none" stroke="#94a3b8" stroke-width="2"/>
-                
-                <!-- Left Ear -->
-                <ellipse cx="120" cy="150" rx="15" ry="25" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
-                <path d="M 125 150 Q 130 150, 130 155 T 125 160" fill="none" stroke="#d97706" stroke-width="1.5"/>
-                
-                <!-- Left Earlobe Clip -->
-                <rect x="105" y="170" width="30" height="15" rx="3" fill="#10b981" stroke="#059669" stroke-width="2"/>
-                <circle cx="120" cy="177.5" r="3" fill="#34d399"/>
-                <line x1="120" y1="185" x2="120" y2="200" stroke="#059669" stroke-width="2"/>
-                <text x="120" y="215" text-anchor="middle" font-size="11" font-weight="bold" fill="#065f46">L Clip</text>
-                
-                <!-- Right Ear -->
-                <ellipse cx="280" cy="150" rx="15" ry="25" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
-                <path d="M 275 150 Q 270 150, 270 155 T 275 160" fill="none" stroke="#d97706" stroke-width="1.5"/>
-                
-                <!-- Right Earlobe Clip -->
-                <rect x="265" y="170" width="30" height="15" rx="3" fill="#10b981" stroke="#059669" stroke-width="2"/>
-                <circle cx="280" cy="177.5" r="3" fill="#34d399"/>
-                <line x1="280" y1="185" x2="280" y2="200" stroke="#059669" stroke-width="2"/>
-                <text x="280" y="215" text-anchor="middle" font-size="11" font-weight="bold" fill="#065f46">R Clip</text>
-                
-                <!-- Connection indication -->
-                <path d="M 120 200 Q 200 220, 280 200" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>
-                
-                <text x="200" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#065f46">Bilateral Earlobe Stimulation</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Alpha Stim MET: Earlobe Clips + Probe/Pad -->
-          <div id="alpha_stim_metViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Alpha Stim MET:</strong> Microcurrent Electrical Therapy • Earclips + probe/pad for pain areas
-              </p>
-              <svg viewBox="0 0 400 400" class="w-full max-w-lg border-2 border-blue-300 rounded-lg bg-gradient-to-br from-blue-50 to-blue-50 p-4">
-                <!-- Head and earlobes (simplified) -->
-                <ellipse cx="200" cy="100" rx="60" ry="80" fill="none" stroke="#94a3b8" stroke-width="2"/>
-                
-                <!-- Left Ear with Clip -->
-                <ellipse cx="140" cy="100" rx="12" ry="20" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
-                <rect x="130" y="115" width="20" height="12" rx="2" fill="#14b8a6" stroke="#0d9488" stroke-width="2"/>
-                <text x="140" y="140" text-anchor="middle" font-size="9" font-weight="bold" fill="#0f766e">L Clip</text>
-                
-                <!-- Right Ear with Clip -->
-                <ellipse cx="260" cy="100" rx="12" ry="20" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
-                <rect x="250" y="115" width="20" height="12" rx="2" fill="#14b8a6" stroke="#0d9488" stroke-width="2"/>
-                <text x="260" y="140" text-anchor="middle" font-size="9" font-weight="bold" fill="#0f766e">R Clip</text>
-                
-                <!-- Body outline (simplified shoulder/back) -->
-                <rect x="150" y="180" width="100" height="120" rx="10" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="5,5"/>
-                
-                <!-- Probe/Pad on pain area (example: lower back) -->
-                <ellipse cx="200" cy="240" rx="35" ry="25" fill="#f59e0b" fill-opacity="0.4" stroke="#d97706" stroke-width="2"/>
-                <rect x="180" y="230" width="40" height="20" rx="4" fill="#14b8a6" stroke="#0d9488" stroke-width="3"/>
-                <text x="200" y="242" text-anchor="middle" font-size="11" font-weight="bold" fill="white">PROBE</text>
-                
-                <!-- Connection lines -->
-                <path d="M 140 127 L 180 230" stroke="#14b8a6" stroke-width="2" stroke-dasharray="3,3"/>
-                <path d="M 260 127 L 220 230" stroke="#14b8a6" stroke-width="2" stroke-dasharray="3,3"/>
-                
-                <!-- Labels -->
-                <text x="200" y="275" text-anchor="middle" font-size="10" font-weight="bold" fill="#d97706">Pain Area Target</text>
-                <text x="200" y="370" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f766e">Earclips + Probe/Pad Configuration</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- tVNS: Cymba Area (Left Ear) -->
-          <div id="tvnsViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">tVNS Device:</strong> Transcutaneous Vagus Nerve Stimulation • Cymba concha (left ear)
-              </p>
-              <svg viewBox="0 0 350 350" class="w-full max-w-md border-2 border-slate-300 rounded-lg bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-                <!-- Head profile (side view) -->
-                <ellipse cx="200" cy="150" rx="70" ry="100" fill="none" stroke="#94a3b8" stroke-width="2"/>
-                
-                <!-- Detailed left ear anatomy -->
-                <ellipse cx="130" cy="150" rx="30" ry="45" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                
-                <!-- Ear canal and inner structures -->
-                <path d="M 145 150 Q 155 150, 155 160 Q 155 170, 145 170 Q 140 165, 145 160 Z" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
-                
-                <!-- Cymba concha area (highlighted) -->
-                <ellipse cx="135" cy="140" rx="18" ry="25" fill="#a78bfa" fill-opacity="0.5" stroke="#7c3aed" stroke-width="3" stroke-dasharray="3,3"/>
-                
-                <!-- tVNS electrode placement -->
-                <circle cx="135" cy="140" r="12" fill="#8b5cf6" fill-opacity="0.8" stroke="#6d28d9" stroke-width="3"/>
-                <text x="135" y="145" text-anchor="middle" font-size="10" font-weight="bold" fill="white">tVNS</text>
-                
-                <!-- Cymba label with arrow -->
-                <line x1="135" y1="110" x2="135" y2="125" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrowPurple)"/>
-                <text x="135" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#5b21b6">Cymba Concha</text>
-                
-                <!-- Vagus nerve pathway indication -->
-                <path d="M 145 150 Q 170 170, 180 200" stroke="#8b5cf6" stroke-width="3" stroke-dasharray="5,5"/>
-                <circle cx="180" cy="200" r="6" fill="#8b5cf6"/>
-                <text x="185" y="225" text-anchor="start" font-size="10" font-style="italic" fill="#7c3aed">Auricular Branch</text>
-                <text x="185" y="240" text-anchor="start" font-size="10" font-style="italic" fill="#7c3aed">Vagus Nerve</text>
-                
-                <!-- Arrow marker definition -->
-                <defs>
-                  <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L0,6 L9,3 z" fill="#7c3aed" />
-                  </marker>
-                </defs>
-                
-                <text x="175" y="320" text-anchor="middle" font-size="12" font-weight="bold" fill="#5b21b6">Left Ear Cymba Stimulation</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- TPS: Transcranial Pulse Stimulation -->
-          <div id="tpsViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">TPS Device:</strong> Transcranial Pulse Stimulation • Ultrasound-based neuromodulation
-              </p>
-              <svg viewBox="0 0 350 350" class="w-full max-w-md border-2 border-blue-300 rounded-lg bg-gradient-to-br from-blue-50 to-blue-50 p-4">
-                <!-- Brain outline (side profile) -->
-                <circle cx="175" cy="175" r="120" fill="none" stroke="#6366f1" stroke-width="3"/>
-                <circle cx="175" cy="175" r="110" fill="none" stroke="#818cf8" stroke-width="2" stroke-dasharray="5,5"/>
-                
-                <!-- TPS applicator/probe (external) -->
-                <rect x="30" y="140" width="60" height="70" rx="8" fill="#4f46e5" stroke="#3730a3" stroke-width="3"/>
-                <rect x="40" y="150" width="40" height="10" rx="2" fill="#6366f1"/>
-                <rect x="40" y="170" width="40" height="10" rx="2" fill="#6366f1"/>
-                <rect x="40" y="190" width="40" height="10" rx="2" fill="#6366f1"/>
-                <text x="60" y="180" text-anchor="middle" font-size="10" font-weight="bold" fill="white">TPS</text>
-                
-                <!-- Ultrasound pulse waves -->
-                <g opacity="0.7">
-                  <path d="M 90 175 Q 120 175, 150 175" fill="none" stroke="#818cf8" stroke-width="3"/>
-                  <path d="M 90 165 Q 120 165, 150 165" fill="none" stroke="#818cf8" stroke-width="2" opacity="0.6"/>
-                  <path d="M 90 185 Q 120 185, 150 185" fill="none" stroke="#818cf8" stroke-width="2" opacity="0.6"/>
-                  <path d="M 90 155 Q 120 155, 150 155" fill="none" stroke="#818cf8" stroke-width="1.5" opacity="0.4"/>
-                  <path d="M 90 195 Q 120 195, 150 195" fill="none" stroke="#818cf8" stroke-width="1.5" opacity="0.4"/>
-                </g>
-                
-                <!-- Deep brain target area -->
-                <circle cx="175" cy="175" r="35" fill="#f59e0b" fill-opacity="0.4" stroke="#d97706" stroke-width="3" stroke-dasharray="3,3"/>
-                <circle cx="175" cy="175" r="20" fill="#fb923c" fill-opacity="0.6" stroke="#ea580c" stroke-width="2"/>
-                <text x="175" y="180" text-anchor="middle" font-size="11" font-weight="bold" fill="#7c2d12">Target</text>
-                
-                <!-- Pulse indication arrows -->
-                <defs>
-                  <marker id="arrowIndigo" markerWidth="8" markerHeight="8" refX="4" refY="2" orient="auto">
-                    <path d="M0,0 L0,4 L8,2 z" fill="#818cf8" />
-                  </marker>
-                </defs>
-                <line x1="100" y1="175" x2="140" y2="175" stroke="#818cf8" stroke-width="3" marker-end="url(#arrowIndigo)"/>
-                
-                <!-- Labels -->
-                <text x="60" y="240" text-anchor="middle" font-size="10" font-weight="bold" fill="#3730a3">Applicator</text>
-                <text x="175" y="320" text-anchor="middle" font-size="12" font-weight="bold" fill="#4338ca">Ultrasound Pulse Neuromodulation</text>
-                <text x="175" y="335" text-anchor="middle" font-size="9" font-style="italic" fill="#64748b">Digitalization per Clinical Manual</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Flow Device: Standard Placement -->
-          <div id="flowViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Flow Device:</strong> Standard placement protocol • No custom montage required
-              </p>
-              <svg viewBox="0 0 300 320" class="w-full max-w-md border-2 border-sky-300 rounded-lg bg-gradient-to-br from-sky-50 to-blue-50 p-4">
-                <!-- Brain outline -->
-                <circle cx="150" cy="140" r="110" fill="none" stroke="#0ea5e9" stroke-width="3"/>
-                <circle cx="150" cy="140" r="100" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,5"/>
-                
-                <!-- Nasion -->
-                <circle cx="150" cy="35" r="5" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                <text x="150" y="25" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">NASION</text>
-                
-                <!-- Standard electrode placement (fixed positions) -->
-                <!-- Left DLPFC (F3 region) - Primary anode -->
-                <circle cx="100" cy="90" r="22" fill="#3b82f6" fill-opacity="0.8" stroke="#1e40af" stroke-width="4"/>
-                <text x="100" y="95" text-anchor="middle" font-size="12" font-weight="bold" fill="white">L-DLPFC</text>
-                <text x="100" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">Anode (Fixed)</text>
-                
-                <!-- Right supraorbital - Return electrode -->
-                <circle cx="200" cy="90" r="22" fill="#64748b" fill-opacity="0.6" stroke="#475569" stroke-width="4"/>
-                <text x="200" y="95" text-anchor="middle" font-size="12" font-weight="bold" fill="white">R-SO</text>
-                <text x="200" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">Return (Fixed)</text>
-                
-                <!-- Connection line -->
-                <path d="M 122 90 L 178 90" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="5,5"/>
-                
-                <!-- Standard placement indicator -->
-                <rect x="80" y="200" width="140" height="60" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
-                <text x="150" y="220" text-anchor="middle" font-size="12" font-weight="bold" fill="#0369a1">✓ Standard Protocol</text>
-                <text x="150" y="237" text-anchor="middle" font-size="10" fill="#0c4a6e">No custom configuration</text>
-                <text x="150" y="252" text-anchor="middle" font-size="10" fill="#0c4a6e">Pre-defined montage</text>
-                
-                <text x="150" y="295" text-anchor="middle" font-size="11" font-weight="bold" fill="#0369a1">Fixed Bilateral Placement</text>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Robotic Arm: Standard Placement -->
-          <div id="robotic_armViz" class="hidden">
-            <div class="flex flex-col items-center">
-              <p class="text-sm text-slate-600 mb-4 text-center">
-                <strong class="text-orange-600">Robotic Arm:</strong> Automated standard placement • No custom montage required
-              </p>
-              <svg viewBox="0 0 350 380" class="w-full max-w-md border-2 border-slate-400 rounded-lg bg-gradient-to-br from-slate-50 to-gray-100 p-4">
-                <!-- Brain outline -->
-                <circle cx="175" cy="160" r="100" fill="none" stroke="#64748b" stroke-width="2"/>
-                <circle cx="175" cy="160" r="90" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
-                
-                <!-- Robotic arm segments (simplified) -->
-                <g id="roboticArm">
-                  <!-- Base -->
-                  <rect x="280" y="300" width="50" height="30" rx="5" fill="#475569" stroke="#1e293b" stroke-width="2"/>
-                  
-                  <!-- Lower arm segment -->
-                  <rect x="295" y="220" width="20" height="80" rx="3" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                  <circle cx="305" cy="300" r="8" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
-                  
-                  <!-- Upper arm segment -->
-                  <line x1="305" y1="220" x2="240" y2="140" stroke="#64748b" stroke-width="18" stroke-linecap="round"/>
-                  <circle cx="305" cy="220" r="8" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
-                  <circle cx="240" cy="140" r="8" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
-                  
-                  <!-- End effector / Stimulation head -->
-                  <ellipse cx="210" cy="120" rx="25" ry="18" fill="#f59e0b" stroke="#d97706" stroke-width="3"/>
-                  <rect x="195" y="112" width="30" height="16" rx="3" fill="#fb923c" stroke="#ea580c" stroke-width="2"/>
-                  <text x="210" y="124" text-anchor="middle" font-size="9" font-weight="bold" fill="white">STIM</text>
-                </g>
-                
-                <!-- Target area on brain (automated positioning) -->
-                <circle cx="150" cy="110" r="25" fill="#3b82f6" fill-opacity="0.4" stroke="#1e40af" stroke-width="3" stroke-dasharray="5,5"/>
-                <circle cx="150" cy="110" r="15" fill="#60a5fa" fill-opacity="0.6" stroke="#2563eb" stroke-width="2"/>
-                <text x="150" y="115" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">Target</text>
-                
-                <!-- Positioning arrows -->
-                <defs>
-                  <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="4" refY="2" orient="auto">
-                    <path d="M0,0 L0,4 L8,2 z" fill="#94a3b8" />
-                  </marker>
-                </defs>
-                <path d="M 210 120 L 165 112" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowGray)"/>
-                
-                <!-- Standard placement info box -->
-                <rect x="70" y="260" width="210" height="70" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                <text x="175" y="280" text-anchor="middle" font-size="12" font-weight="bold" fill="#334155">✓ Automated Positioning</text>
-                <text x="175" y="297" text-anchor="middle" font-size="10" fill="#475569">Standard placement protocol</text>
-                <text x="175" y="312" text-anchor="middle" font-size="10" fill="#475569">Robotic precision targeting</text>
-                <text x="175" y="327" text-anchor="middle" font-size="9" font-style="italic" fill="#64748b">No manual montage required</text>
-                
-                <text x="175" y="360" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Automated Robotic Delivery</text>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Automated Montage Display -->
-        <div id="montageDetailsSection" class="hidden">
-          
-          <!-- Interactive Brain Layout Visualization - Moved to Top -->
-          <div class="mb-4 bg-white p-3 rounded-lg border border-slate-300 shadow-sm">
-            <h4 class="text-sm font-bold text-slate-800 mb-2 text-center flex items-center justify-center gap-1">
-              <i class="fa-solid fa-brain text-sozo-600 text-sm"></i>
-              10-20 Montage
-            </h4>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              <!-- Top-Down Brain View -->
-              <div class="lg:col-span-2">
-<!-- Brain outline circle -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
-                        <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                        
-                        <!-- Nasion marker (top) -->
-                        <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
-                        
-                        <!-- Inion marker (bottom) -->
-                        <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">INION</text>
-                        
-                        <!-- Left/Right markers -->
-                        <text x="15" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">L</text>
-                        <text x="285" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">R</text>
-                        
-                        <!-- EEG Electrodes will be populated here by JavaScript -->
-                        <!-- Row 1: Frontal Pole -->
-                        <g id="fp1-electrode" class="electrode">
-                          <circle cx="110" cy="70" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2.5"/>
-                          <text x="110" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">FP1</text>
-                        </g>
-                        <!-- Additional electrodes... -->
-                      </svg>
-                    </div>
-                    
-                    <!-- Electrode Controls -->
-                    <div class="space-y-3">
-                      <div class="text-xs">
-                        <p class="font-bold text-slate-700 mb-1">Interactive Mode:</p>
-                        <div class="flex flex-col gap-1">
-                          <button id="selectAnodeMode" onclick="setElectrodeMode('anode')" class="px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-800 border border-blue-300">
-                            + ANODE
-                          </button>
-                          <button id="selectCathodeMode" onclick="setElectrodeMode('cathode')" class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-700 border border-slate-300">
-                            - CATHODE
-                          </button>
-                          <button id="selectRemoveMode" onclick="setElectrodeMode('remove')" class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-700 border border-slate-300">
-                            REMOVE
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div id="saveCustomMontageSection" class="hidden">
-                        <button onclick="showSaveChangesPopup()" class="w-full bg-orange-500 hover:bg-sozo-600 text-white px-2 py-1.5 rounded text-xs font-bold">
-                          <i class="fa-solid fa-save"></i> Save Custom
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Hidden fields for logic preservation -->
-                  <div style="display:none;">
-                    <input type="hidden" id="montageCategory" />
-                    <input type="hidden" id="networkTarget" />
-                    <input type="hidden" id="anodePlacement" />
-                    <input type="hidden" id="cathodePlacement" />
-                    <input type="hidden" id="secondaryNetwork" />
-                    <input type="hidden" id="anodeOptions" />
-                    <input type="hidden" id="cathodeType" />
-                    <input type="hidden" id="useStage" />
-                    <span id="activeAnodes"></span>
-                    <span id="activeCathodes"></span>
-                    <span id="activeNetwork"></span>
-                    <div id="extracephalicNote"></div>
-                    <div id="activeMontageInfo"></div>
-                  </div>
-
-                  <!-- FNON Logic Explanation -->
-                  <div class="mt-4 bg-gradient-to-r from-orange-100 to-orange-50 p-3 rounded-lg border-l-4 border-orange-600">
-                    <h5 class="text-xs font-bold text-orange-900 mb-1 flex items-center gap-1">
-                      <i class="fa-solid fa-lightbulb text-orange-600 text-xs"></i>
-                      Clinical Logic
-                    </h5>
-                    <p id="fnonLogic" class="text-xs text-orange-800 leading-relaxed"></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Device Tab Content -->
-            <div id="deviceTabContent" class="tab-content hidden">
-              <div id="deviceVisualizationSection" class="hidden">
-                <div class="bg-slate-50 p-3 rounded-lg border border-orange-300">
-                  <h4 class="text-sm font-bold text-slate-800 mb-2 text-center flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-crosshairs text-orange-600 text-sm"></i>
-                    Device Placement Visualization
-                  </h4>
-
-                  <!-- Device 1: TMS - Frontal Quadrant -->
-                  <div id="device1Viz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">TMS:</strong> Left DLPFC targeting
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                        
-                        <!-- Nasion marker (top) -->
-                        <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
-                        
-                        <!-- Left/Right markers -->
-                        <text x="15" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">L</text>
-                        <text x="285" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">R</text>
-                        
-                        <!-- Highlighted Frontal Quadrant (Left DLPFC) -->
-                        <path d="M 150 150 L 80 80 A 120 120 0 0 1 150 30 Z" fill="#fb923c" fill-opacity="0.6" stroke="#ea580c" stroke-width="3"/>
-                        <circle cx="115" cy="90" r="25" fill="#f97316" fill-opacity="0.4" stroke="#ea580c" stroke-width="3" stroke-dasharray="5,5"/>
-                        
-                        <!-- Target label -->
-                        <text x="115" y="95" text-anchor="middle" font-size="14" font-weight="bold" fill="#7c2d12">DLPFC</text>
-                        <text x="115" y="110" text-anchor="middle" font-size="10" font-weight="bold" fill="#7c2d12">F3 Region</text>
-                      </svg>
-                    </div>
-                  </div>
-
-                  <!-- Device 2: tDCS - Full Brain -->
-                  <div id="device2Viz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">tDCS:</strong> Full cortical stimulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="#93c5fd" fill-opacity="0.5" stroke="#3b82f6" stroke-width="3"/>
-                        
-                        <!-- Nasion marker -->
-                        <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
-                        <text x="150" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">NASION</text>
-                        
-                        <!-- Electrode positions -->
-                        <circle cx="90" cy="90" r="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="2"/>
-                        <text x="90" y="80" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e3a8a">Anode</text>
-                        
-                        <circle cx="210" cy="210" r="8" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
-                        <text x="210" y="230" text-anchor="middle" font-size="9" font-weight="bold" fill="#991b1b">Cathode</text>
-                        
-                        <text x="150" y="155" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e40af">Full Coverage</text>
-                      </svg>
-                    </div>
-                  </div>
-
-                  <!-- Complete All Device Visualizations -->
-                  
-                  <!-- Device 3: VNS - Neck Region -->
-                  <div id="device3Viz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">VNS:</strong> Vagus nerve stimulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Neck outline -->
-                        <ellipse cx="150" cy="200" rx="80" ry="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <ellipse cx="150" cy="200" rx="70" ry="110" fill="#fef3c7" fill-opacity="0.6" stroke="#f59e0b" stroke-width="2"/>
-                        
-                        <!-- VNS device placement -->
-                        <rect x="120" y="160" width="60" height="40" rx="8" fill="#7c3aed" fill-opacity="0.8" stroke="#5b21b6" stroke-width="3"/>
-                        <text x="150" y="185" text-anchor="middle" font-size="12" font-weight="bold" fill="white">VNS</text>
-                        
-                        <!-- Nerve pathway indication -->
-                        <path d="M 100 180 Q 80 200 90 240" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="3,3"/>
-                        <text x="70" y="220" text-anchor="middle" font-size="10" font-weight="bold" fill="#059669">Vagus N.</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 4: Plato - Targeted Stimulation -->
-                  <div id="platoViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Plato:</strong> Precision neuromodulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                        
-                        <!-- Plato device targeting multiple regions -->
-                        <circle cx="120" cy="100" r="20" fill="#8b5cf6" fill-opacity="0.7" stroke="#7c3aed" stroke-width="3"/>
-                        <circle cx="180" cy="120" r="18" fill="#8b5cf6" fill-opacity="0.7" stroke="#7c3aed" stroke-width="3"/>
-                        <circle cx="150" cy="180" r="16" fill="#8b5cf6" fill-opacity="0.7" stroke="#7c3aed" stroke-width="3"/>
-                        
-                        <!-- Connection lines -->
-                        <path d="M 120 100 L 180 120 L 150 180" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5,5"/>
-                        
-                        <text x="150" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#7c3aed">Multi-Target</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 5: Newronika - Closed-loop System -->
-                  <div id="newronikaViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Newronika:</strong> Closed-loop stimulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="#ddd6fe" fill-opacity="0.6" stroke="#8b5cf6" stroke-width="2"/>
-                        
-                        <!-- Feedback loop indicators -->
-                        <circle cx="150" cy="100" r="25" fill="#10b981" fill-opacity="0.4" stroke="#059669" stroke-width="3"/>
-                        <text x="150" y="105" text-anchor="middle" font-size="10" font-weight="bold" fill="#065f46">RECORD</text>
-                        
-                        <circle cx="150" cy="200" r="25" fill="#f59e0b" fill-opacity="0.4" stroke="#d97706" stroke-width="3"/>
-                        <text x="150" y="205" text-anchor="middle" font-size="10" font-weight="bold" fill="#92400e">STIM</text>
-                        
-                        <!-- Feedback arrow -->
-                        <path d="M 125 125 Q 100 150 125 175" fill="none" stroke="#7c3aed" stroke-width="4" marker-end="url(#arrowhead)"/>
-                        <path d="M 175 175 Q 200 150 175 125" fill="none" stroke="#7c3aed" stroke-width="4" marker-end="url(#arrowhead)"/>
-                        
-                        <text x="150" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#7c3aed">CLOSED LOOP</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 6: Alpha Stim AID -->
-                  <div id="alpha_stim_aidViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Alpha Stim AID:</strong> Cranial electrotherapy
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="#fef3c7" fill-opacity="0.6" stroke="#f59e0b" stroke-width="2"/>
-                        
-                        <!-- Ear clip electrodes -->
-                        <circle cx="50" cy="150" r="15" fill="#dc2626" fill-opacity="0.8" stroke="#991b1b" stroke-width="3"/>
-                        <text x="50" y="155" text-anchor="middle" font-size="8" font-weight="bold" fill="white">L</text>
-                        
-                        <circle cx="250" cy="150" r="15" fill="#dc2626" fill-opacity="0.8" stroke="#991b1b" stroke-width="3"/>
-                        <text x="250" y="155" text-anchor="middle" font-size="8" font-weight="bold" fill="white">R</text>
-                        
-                        <!-- Current flow indication -->
-                        <path d="M 65 150 Q 150 120 235 150" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="5,5"/>
-                        
-                        <text x="150" y="190" text-anchor="middle" font-size="11" font-weight="bold" fill="#92400e">CES Mode</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 7: Alpha Stim MET -->
-                  <div id="alpha_stim_metViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Alpha Stim MET:</strong> Microcurrent therapy
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Body outline -->
-                        <ellipse cx="150" cy="150" rx="100" ry="130" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <ellipse cx="150" cy="150" rx="90" ry="120" fill="#dcfce7" fill-opacity="0.6" stroke="#16a34a" stroke-width="2"/>
-                        
-                        <!-- Probe placements -->
-                        <circle cx="120" cy="100" r="8" fill="#059669" stroke="#065f46" stroke-width="2"/>
-                        <circle cx="180" cy="200" r="8" fill="#059669" stroke="#065f46" stroke-width="2"/>
-                        
-                        <!-- Microcurrent path -->
-                        <path d="M 120 100 Q 150 150 180 200" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="3,3"/>
-                        
-                        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#16a34a">Microcurrent</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 8: tVNS -->
-                  <div id="tvnsViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">tVNS:</strong> Transcutaneous vagus nerve
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Ear outline -->
-                        <path d="M 120 100 Q 150 80 180 100 Q 200 150 180 200 Q 150 220 120 200 Q 100 150 120 100" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <path d="M 130 110 Q 150 90 170 110 Q 185 150 170 190 Q 150 210 130 190 Q 115 150 130 110" fill="#fee2e2" fill-opacity="0.6" stroke="#ef4444" stroke-width="2"/>
-                        
-                        <!-- tVNS electrode on ear -->
-                        <circle cx="150" cy="150" r="12" fill="#7c3aed" fill-opacity="0.8" stroke="#5b21b6" stroke-width="3"/>
-                        <text x="150" y="155" text-anchor="middle" font-size="8" font-weight="bold" fill="white">tVNS</text>
-                        
-                        <!-- Nerve pathway -->
-                        <path d="M 150 150 Q 120 180 90 220" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="3,3"/>
-                        
-                        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#7c3aed">Auricular</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 9: TPS -->
-                  <div id="tpsViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">TPS:</strong> Transcranial pulse stimulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="#dbeafe" fill-opacity="0.6" stroke="#2563eb" stroke-width="2"/>
-                        
-                        <!-- Ultrasound waves -->
-                        <circle cx="150" cy="80" r="20" fill="none" stroke="#2563eb" stroke-width="3" opacity="0.8"/>
-                        <circle cx="150" cy="80" r="35" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6"/>
-                        <circle cx="150" cy="80" r="50" fill="none" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
-                        
-                        <!-- Target area -->
-                        <circle cx="150" cy="150" r="25" fill="#2563eb" fill-opacity="0.3" stroke="#1d4ed8" stroke-width="3" stroke-dasharray="5,5"/>
-                        
-                        <text x="150" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#1d4ed8">PULSE</text>
-                        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#2563eb">Ultrasound</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 10: Flow -->
-                  <div id="flowViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Flow:</strong> Targeted neurostimulation
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="150" r="110" fill="#f3e8ff" fill-opacity="0.6" stroke="#9333ea" stroke-width="2"/>
-                        
-                        <!-- Flow patterns -->
-                        <path d="M 80 120 Q 150 100 220 120" fill="none" stroke="#9333ea" stroke-width="4" stroke-dasharray="8,4"/>
-                        <path d="M 80 150 Q 150 130 220 150" fill="none" stroke="#9333ea" stroke-width="4" stroke-dasharray="8,4"/>
-                        <path d="M 80 180 Q 150 160 220 180" fill="none" stroke="#9333ea" stroke-width="4" stroke-dasharray="8,4"/>
-                        
-                        <!-- Central target -->
-                        <circle cx="150" cy="150" r="20" fill="#9333ea" fill-opacity="0.4" stroke="#7c3aed" stroke-width="3"/>
-                        
-                        <text x="150" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="#581c87">FLOW</text>
-                        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#9333ea">Dynamic</text>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Device 11: Robotic Arm -->
-                  <div id="robotic_armViz" class="hidden">
-                    <div class="flex flex-col items-center">
-                      <p class="text-xs text-slate-600 mb-2 text-center">
-                        <strong class="text-orange-600">Robotic Arm:</strong> Precision positioning
-                      </p>
-                      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2">
-                        <!-- Brain outline -->
-                        <circle cx="150" cy="180" r="90" fill="none" stroke="#94a3b8" stroke-width="3"/>
-                        <circle cx="150" cy="180" r="80" fill="#f1f5f9" fill-opacity="0.6" stroke="#64748b" stroke-width="2"/>
-                        
-                        <!-- Robotic arm segments -->
-                        <rect x="140" y="50" width="20" height="60" rx="5" fill="#475569" stroke="#334155" stroke-width="2"/>
-                        <rect x="130" y="100" width="40" height="15" rx="5" fill="#475569" stroke="#334155" stroke-width="2"/>
-                        <rect x="145" y="110" width="10" height="40" rx="3" fill="#475569" stroke="#334155" stroke-width="2"/>
-                        
-                        <!-- Stimulation probe -->
-                        <circle cx="150" cy="150" r="8" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
-                        
-                        <!-- Precision targeting -->
-                        <circle cx="150" cy="180" r="15" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,3"/>
-                        <circle cx="150" cy="180" r="25" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,3"/>
-                        
-                        <text x="150" y="185" text-anchor="middle" font-size="9" font-weight="bold" fill="#991b1b">TARGET</text>
-                        <text x="150" y="280" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Automated</text>
-                      </svg>
-                    </div>
-                  </div>
-
-                  <div class="mt-3 text-center">
-                    <p class="text-xs text-slate-500 italic">
-                      Select a device from the dropdown above to view its placement visualization
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        <!-- ========= END OF CLINICAL INDICATION SECTION ========= -->
-                <input type="hidden" id="cathodePlacement" />
-                <input type="hidden" id="secondaryNetwork" />
-                <input type="hidden" id="anodeOptions" />
-                <input type="hidden" id="cathodeType" />
-                <input type="hidden" id="useStage" />
-                <span id="activeAnodes"></span>
-                <span id="activeCathodes"></span>
-                <span id="activeNetwork"></span>
-                <div id="extracephalicNote"></div>
-                <div id="activeMontageInfo"></div>
-              </div>
-            </div>
-          </div>
-
-          
-
-          <!-- FNON Logic Explanation -->
-          <div class="mt-6 bg-gradient-to-r from-orange-100 to-orange-50 p-5 rounded-lg border-l-4 border-orange-600">
-            <h5 class="text-sm font-bold text-orange-900 mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-lightbulb text-orange-600"></i>
-              FNON Logic (Why this montage exists)
-            </h5>
-            <p id="fnonLogic" class="text-sm text-orange-800 leading-relaxed"></p>
-          </div>
-        </div>
-      </div>
-
+      <!--for previous treatment plan -->
       <!-- Medication Suggestions Section -->
       <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
         <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">
@@ -23343,6 +22595,27 @@ function renderTreatmentPlan() {
   
   // Attach event listeners
   setTimeout(() => {
+    // Restore saved visualizations
+    restoreTreatmentPlanHighlights();
+    populateCustomMontagesForAllDevices();
+    
+    // Clean up any malformed network tabs
+    if (treatmentPlanState.networkTabs) {
+      Object.keys(treatmentPlanState.networkTabs).forEach(deviceIndex => {
+        if (treatmentPlanState.networkTabs[deviceIndex]) {
+          treatmentPlanState.networkTabs[deviceIndex] = treatmentPlanState.networkTabs[deviceIndex]
+            .filter(tab => tab && tab.networkId !== undefined && tab.networkName);
+        }
+      });
+    }
+    
+    // Initialize network tabs for all devices
+    treatmentPlanState.devices.forEach((device, index) => {
+      if (usesBrainMontage(device.value)) {
+        renderNetworkTabs(index);
+      }
+    });
+
     // Clinical Indication Dropdown - trigger initial update if needed
     const clinicalSelect = document.getElementById('clinicalIndicationSelect');
     if (clinicalSelect) {
@@ -23409,10 +22682,10 @@ function renderTreatmentPlan() {
         // Show success message
         saveBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Saved!';
         saveBtn.classList.remove('bg-sozo-600');
-        saveBtn.classList.add("bg-sozo-600");
+        saveBtn.classList.add('bg-green-500');
         setTimeout(() => {
           saveBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save Treatment Plan';
-          saveBtn.classList.remove("bg-sozo-600");
+          saveBtn.classList.remove('bg-green-500');
           saveBtn.classList.add('bg-sozo-600');
         }, 2000);
       });
@@ -23482,18 +22755,33 @@ function updateMontageMapping() {
   
   // Check if selection is a custom montage
   if (selection.startsWith('custom_')) {
-    config = getCustomMontage(selection);
-    if (config) {
-      // Add visual indicator that it's a custom montage
-      config.category = (config.baseCategory || config.category || 'Custom') + ' [Custom]';
+    const customMontage = getCustomMontage(selection);
+    if (customMontage) {
+      // Transform custom montage to match expected config structure
+      config = {
+        category: customMontage.baseNetwork || 'Custom Montage',
+        networkTarget: customMontage.baseNetwork || '',
+        secondaryNetwork: '',
+        anodePlacement: customMontage.anodes?.join(', ') || '',
+        anodeOptions: '',
+        cathodePlacement: customMontage.cathode || '',
+        cathodeType: '',
+        fnonLogic: customMontage.description || `Custom montage: ${customMontage.name}`,
+        anodes: customMontage.anodes || [],
+        cathodes: customMontage.cathode ? [customMontage.cathode] : [],
+        recommendedDevice: customMontage.deviceType || ''
+      };
     }
     // Show delete button for custom montages
-    if (deleteBtn) deleteBtn.classList.remove('hidden');
+    if (deleteBtn) {
+      deleteBtn.style.display = 'block';
+      deleteBtn.onclick = () => deleteCustomMontage(selection);
+    }
   } else {
     // Load standard configuration
     config = montageConfigs[selection];
     // Hide delete button for standard montages
-    if (deleteBtn) deleteBtn.classList.add('hidden');
+    if (deleteBtn) deleteBtn.style.display = 'none';
   }
   
   // Load custom montages list
@@ -23684,17 +22972,29 @@ function switchTab(tabName) {
   
   // Show selected tab content and activate tab
   if (tabName === 'montage') {
-    document.getElementById('montageTab').classList.add('active-tab');
-    document.getElementById('montageTab').classList.remove('text-slate-700');
-    document.getElementById('montageTab').classList.add('text-sozo-600');
-    document.getElementById('montageTab').style.borderBottomColor = '#9333ea';
-    document.getElementById('montageTabContent').classList.remove('hidden');
+    const montageTab = document.getElementById('montageTab');
+    const montageTabContent = document.getElementById('montageTabContent');
+    if (montageTab) {
+      montageTab.classList.add('active-tab');
+      montageTab.classList.remove('text-slate-700');
+      montageTab.classList.add('text-purple-600');
+      montageTab.style.borderBottomColor = '#9333ea';
+    }
+    if (montageTabContent) {
+      montageTabContent.classList.remove('hidden');
+    }
   } else if (tabName === 'device') {
-    document.getElementById('deviceTab').classList.add('active-tab');
-    document.getElementById('deviceTab').classList.remove('text-slate-700');
-    document.getElementById('deviceTab').classList.add('text-orange-600');
-    document.getElementById('deviceTab').style.borderBottomColor = '#ea580c';
-    document.getElementById('deviceTabContent').classList.remove('hidden');
+    const deviceTab = document.getElementById('deviceTab');
+    const deviceTabContent = document.getElementById('deviceTabContent');
+    if (deviceTab) {
+      deviceTab.classList.add('active-tab');
+      deviceTab.classList.remove('text-slate-700');
+      deviceTab.classList.add('text-orange-600');
+      deviceTab.style.borderBottomColor = '#ea580c';
+    }
+    if (deviceTabContent) {
+      deviceTabContent.classList.remove('hidden');
+    }
     
     // Show device visualization if device is selected
     const deviceSelect = document.getElementById('deviceSelect');
@@ -23707,52 +23007,1822 @@ function switchTab(tabName) {
 
 // Initialize default tab
 document.addEventListener('DOMContentLoaded', function() {
-  switchTab('montage'); // Default to montage tab
+  // Only switch tab if we're in the treatment plan context
+  if (document.getElementById('montageTab')) {
+    switchTab('montage'); // Default to montage tab
+  }
 });
+
+// Device Management Functions for Treatment Plan
+function addDevice() {
+  const select = document.getElementById('newDeviceSelect');
+  if (!select || !select.value) {
+    alert('Please select a device first');
+    return;
+  }
+  
+  if (treatmentPlanState.devices.length >= treatmentPlanState.maxDevices) {
+    alert('Maximum of 3 devices reached');
+    return;
+  }
+  
+  const deviceValue = select.value;
+  const deviceText = select.options[select.selectedIndex].text;
+  
+  // Check if device already added
+  if (treatmentPlanState.devices.some(d => d.value === deviceValue)) {
+    alert('This device has already been added');
+    return;
+  }
+  
+  // Add device with default configuration
+  treatmentPlanState.devices.push({
+    value: deviceValue,
+    name: deviceText,
+    symptoms: [],
+    network: '',
+    montage: {
+      type: 'blank',
+      anode: null,
+      cathode: null
+    }
+  });
+  
+  // Reset select and re-render
+  select.value = '';
+  saveTreatmentPlanState();
+  renderTreatmentPlan();
+}
+
+function removeDevice(index) {
+  if (confirm('Are you sure you want to remove this device?')) {
+    treatmentPlanState.devices.splice(index, 1);
+    
+    // Adjust active tab if needed
+    if (treatmentPlanState.activeDeviceTab >= treatmentPlanState.devices.length) {
+      treatmentPlanState.activeDeviceTab = Math.max(0, treatmentPlanState.devices.length - 1);
+    }
+    
+    saveTreatmentPlanState();
+    renderTreatmentPlan();
+  }
+}
+
+function switchDeviceTab(index) {
+  treatmentPlanState.activeDeviceTab = index;
+  saveTreatmentPlanState();
+  
+  // Re-render just the tab content
+  const content = document.getElementById('deviceTabContent');
+  if (content) {
+    content.innerHTML = renderDeviceJourney(treatmentPlanState.devices[index], index);
+    // Restore styling and functionality
+    restoreTreatmentPlanHighlights();
+    populateCustomMontagesForDevice(index);
+  }
+  
+  // Update tab styling
+  document.querySelectorAll('[onclick^="switchDeviceTab"]').forEach((tab, idx) => {
+    if (idx === index) {
+      tab.classList.add('border-purple-600', 'text-purple-600', 'bg-purple-50');
+      tab.classList.remove('border-transparent', 'text-slate-600');
+    } else {
+      tab.classList.remove('border-purple-600', 'text-purple-600', 'bg-purple-50');
+      tab.classList.add('border-transparent', 'text-slate-600');
+    }
+  });
+}
+
+// Switch between Network Selection and Custom Montage tabs
+function switchMontageTab(deviceIndex, tabType) {
+  const networkTab = document.getElementById(`networkTab_${deviceIndex}`);
+  const customTab = document.getElementById(`customTab_${deviceIndex}`);
+  const networkContent = document.getElementById(`networkTabContent_${deviceIndex}`);
+  const customContent = document.getElementById(`customTabContent_${deviceIndex}`);
+  
+  if (tabType === 'network') {
+    // Show network tab
+    if (networkTab) {
+      networkTab.classList.add('border-green-600', 'text-green-700', 'bg-green-100');
+      networkTab.classList.remove('border-transparent', 'text-slate-600');
+    }
+    if (customTab) {
+      customTab.classList.remove('border-purple-600', 'text-purple-700', 'bg-purple-100');
+      customTab.classList.add('border-transparent', 'text-slate-600');
+    }
+    if (networkContent) networkContent.classList.remove('hidden');
+    if (customContent) customContent.classList.add('hidden');
+  } else if (tabType === 'custom') {
+    // Show custom montage tab
+    if (networkTab) {
+      networkTab.classList.remove('border-green-600', 'text-green-700', 'bg-green-100');
+      networkTab.classList.add('border-transparent', 'text-slate-600');
+    }
+    if (customTab) {
+      customTab.classList.add('border-purple-600', 'text-purple-700', 'bg-purple-100');
+      customTab.classList.remove('border-transparent', 'text-slate-600');
+    }
+    if (networkContent) networkContent.classList.add('hidden');
+    if (customContent) customContent.classList.remove('hidden');
+    
+    // Populate custom montages when tab is opened
+    populateCustomMontagesForDevice(deviceIndex);
+  }
+}
+
+// Network Tab Management Functions
+function addNetworkTab(deviceIndex, networkId) {
+  try {
+    console.log('addNetworkTab called with:', {deviceIndex, networkId, type_deviceIndex: typeof deviceIndex, type_networkId: typeof networkId});
+    
+    const idx = Number(deviceIndex);
+
+    if (
+      Number.isNaN(idx) ||
+      !treatmentPlanState.devices ||
+      !treatmentPlanState.devices[idx]
+    ) {
+      console.error('Invalid device index', deviceIndex, 'Parsed:', idx, 'Devices:', treatmentPlanState.devices);
+      return;
+    }
+
+    const deviceValue = treatmentPlanState.devices[idx].value;
+    const networks = getDummyNetworks(deviceValue);
+    
+    console.log('Device and networks:', {deviceValue, networks: networks ? networks.length : 'null'});
+
+    if (!Array.isArray(networks)) {
+      console.error('Networks not found for device', deviceValue, 'Got:', networks);
+      return;
+    }
+
+    const nid = Number(networkId);
+    console.log('Network ID conversion:', {networkId, nid, isNaN: Number.isNaN(nid), networkExists: !!networks[nid]});
+    
+    if (Number.isNaN(nid) || !networks[nid]) {
+      console.error('Invalid networkId', networkId, 'Parsed:', nid, 'Available networks:', networks.length);
+      return;
+    }
+
+    // Double-check that the network object has required properties
+    if (!networks[nid].name) {
+      console.error('Network missing required properties:', networks[nid]);
+      return;
+    }
+
+    // Ensure networkTabs object exists
+    if (!treatmentPlanState.networkTabs) {
+      treatmentPlanState.networkTabs = {};
+    }
+    
+    if (!treatmentPlanState.networkTabs[idx]) {
+      treatmentPlanState.networkTabs[idx] = [];
+    }
+
+    const existing = treatmentPlanState.networkTabs[idx]
+      .find(tab => tab && tab.networkId === nid);
+
+    if (existing) {
+      switchNetworkTab(idx, nid);
+      applyNetworkToDevice(idx, nid);
+      return;
+    }
+
+    treatmentPlanState.networkTabs[idx].forEach(tab => {
+      if (tab) tab.isActive = false;
+    });
+
+    treatmentPlanState.networkTabs[idx].push({
+      networkId: nid,
+      networkName: networks[nid].name,
+      isActive: true
+    });
+
+    applyNetworkToDevice(idx, nid);
+    saveTreatmentPlanState();
+    renderNetworkTabs(idx);
+
+  } catch (err) {
+    console.error('addNetworkTab error:', err);
+  }
+}
+
+
+function removeNetworkTab(deviceIndex, networkId) {
+  if (!treatmentPlanState.networkTabs?.[deviceIndex]) return;
+
+  const tabs = treatmentPlanState.networkTabs[deviceIndex];
+  const tabIndex = tabs.findIndex(tab => tab && tab.networkId === networkId);
+  
+  if (tabIndex === -1) return; // Tab not found
+  
+  // Check if the tab being removed was active
+  const wasActive = tabs[tabIndex].isActive;
+  
+  // Remove the tab
+  tabs.splice(tabIndex, 1);
+
+  // If the removed tab was active and there are remaining tabs, activate the last one
+  if (wasActive && tabs.length > 0) {
+    tabs[tabs.length - 1].isActive = true;
+    // Apply the network for the newly activated tab
+    applyNetworkToDevice(deviceIndex, tabs[tabs.length - 1].networkId);
+  }
+
+  saveTreatmentPlanState();
+  renderNetworkTabs(deviceIndex);
+}
+
+
+function switchNetworkTab(deviceIndex, networkId) {
+  if (!treatmentPlanState.networkTabs[deviceIndex]) return;
+  
+  console.log('Switching to network tab:', {deviceIndex, networkId});
+  
+  // Deactivate all tabs
+  treatmentPlanState.networkTabs[deviceIndex].forEach(tab => {
+    if (tab) tab.isActive = false;
+  });
+  
+  // Activate selected tab
+  const selectedTab = treatmentPlanState.networkTabs[deviceIndex].find(tab => tab && tab.networkId === parseInt(networkId));
+  if (selectedTab) {
+    selectedTab.isActive = true;
+    console.log('Activated tab:', selectedTab.networkName);
+    
+    // Apply the network configuration and highlight the montage
+    applyNetworkToDevice(deviceIndex, networkId);
+  } else {
+    console.error('Network tab not found:', {deviceIndex, networkId, availableTabs: treatmentPlanState.networkTabs[deviceIndex]});
+  }
+  
+  saveTreatmentPlanState();
+  renderNetworkTabs(deviceIndex);
+}
+
+function renderNetworkTabs(deviceIndex) {
+  const tabsContainer = document.getElementById(`networkTabsContainer_${deviceIndex}`);
+  if (!tabsContainer) {
+    console.warn('Network tabs container not found for device:', deviceIndex);
+    return;
+  }
+  
+  const networkTabs = (treatmentPlanState.networkTabs[deviceIndex] || [])
+    .filter(tab => tab && tab.networkId !== undefined && tab.networkName);
+  
+  console.log('Rendering network tabs for device:', deviceIndex, 'Tab count:', networkTabs.length);
+  
+  if (networkTabs.length === 0) {
+    tabsContainer.innerHTML = '<p class="text-sm text-slate-500 italic">No networks selected. Choose networks from the dropdown above.</p>';
+    return;
+  }
+  
+  tabsContainer.innerHTML = `
+    <div class="flex flex-wrap gap-2 mb-4">
+      ${networkTabs.map(tab => `
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+          tab.isActive 
+            ? 'border-purple-600 bg-purple-50 text-purple-900' 
+            : 'border-slate-300 bg-white text-slate-600 hover:border-purple-300'
+        }">
+          <button 
+            onclick="switchNetworkTab(${deviceIndex}, ${tab.networkId})"
+            class="flex items-center gap-2 hover:bg-purple-100 rounded px-2 py-1 transition-colors"
+          >
+            <i class="fa-solid fa-brain text-sm"></i>
+            <span class="font-medium text-sm">${tab.networkName}</span>
+          </button>
+          <button 
+            onclick="removeNetworkTab(${deviceIndex}, ${tab.networkId})"
+            class="text-slate-400 hover:text-red-500 text-xs ml-1 p-1 rounded hover:bg-red-50 transition-colors"
+            title="Close network tab"
+          >
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+      `).join('')}
+    </div>
+    
+    <!-- Active Network Content -->
+    <div id="activeNetworkContent_${deviceIndex}">
+      ${renderActiveNetworkContent(deviceIndex)}
+    </div>
+  `;
+}
+
+function renderActiveNetworkContent(deviceIndex) {
+  const networkTabs = (treatmentPlanState.networkTabs[deviceIndex] || [])
+    .filter(tab => tab && tab.networkId !== undefined);
+  const activeTab = networkTabs.find(tab => tab && tab.isActive);
+  
+  if (!activeTab || !activeTab.networkId) {
+    return '<p class="text-sm text-slate-500 italic">No active network selected.</p>';
+  }
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    return '<p class="text-sm text-red-500">Device not found.</p>';
+  }
+  
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  if (!networks) {
+    return '<p class="text-sm text-red-500">Networks not available for this device.</p>';
+  }
+  
+  const network = networks[activeTab.networkId];
+  
+  if (!network) {
+    return '<p class="text-sm text-red-500">Network configuration not found.</p>';
+  }
+  
+  return `
+    <div class="bg-white border-2 border-purple-200 rounded-lg p-4">
+      <div class="mb-4">
+        <h4 class="font-bold text-purple-900 text-lg flex items-center gap-2">
+          <i class="fa-solid fa-bolt"></i>
+          ${network.name}
+        </h4>
+        <p class="text-sm text-slate-600 mt-1">${network.description}</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Anodes</label>
+          <div class="bg-red-50 border border-red-200 rounded px-3 py-2">
+            <span class="font-mono text-sm text-red-800">${network.anodes.join(', ')}</span>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Cathode</label>
+          <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2">
+            <span class="font-mono text-sm text-blue-800">${network.cathode}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="text-xs font-bold text-slate-700 block mb-1">Clinical Indication</label>
+        <p class="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded px-3 py-2">${network.indication}</p>
+      </div>
+      
+      <div class="flex justify-end gap-2">
+        <button 
+          onclick="applyNetworkToDevice(${deviceIndex}, '${activeTab.networkId}')"
+          class="btn-primary text-sm"
+        >
+          <i class="fa-solid fa-check mr-1"></i>Apply to Device
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function applyNetworkToDevice(deviceIndex, networkId) {
+  console.log('Applying network to device:', {deviceIndex, networkId});
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    console.error('Device not found at index:', deviceIndex);
+    return;
+  }
+  
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  if (!networks || networks.length === 0) {
+    console.error('Networks not available for device:', treatmentPlanState.devices[deviceIndex].value);
+    return;
+  }
+  
+  const nid = parseInt(networkId);
+  const network = networks[nid];
+  if (!network) {
+    console.error('Network not found with ID:', networkId, 'Available networks:', networks.length);
+    return;
+  }
+  
+  console.log('Applying network:', network);
+  
+  // Apply network configuration to device
+  treatmentPlanState.devices[deviceIndex].montage = {
+    type: 'network',
+    anodes: [...network.anodes],
+    cathode: network.cathode,
+    network: network.name
+  };
+  
+  treatmentPlanState.devices[deviceIndex].selectedNetwork = networkId;
+  
+  // Update UI - highlight brain montage if this device uses brain montage
+  if (usesBrainMontage(treatmentPlanState.devices[deviceIndex].value)) {
+    highlightNetworkElectrodes(deviceIndex, network.anodes, network.cathode);
+    
+    // Update network info panel
+    const networkInfo = document.getElementById(`networkInfo_${deviceIndex}`);
+    if (networkInfo) {
+      networkInfo.innerHTML = `
+        <p class="text-xs font-bold text-purple-900 mb-1">
+          <i class="fa-solid fa-network-wired mr-1"></i>${network.name}
+        </p>
+        <p class="text-xs text-purple-700">
+          Anodes: ${network.anodes?.join(', ') || 'None'} | Cathode: ${network.cathode || 'None'}
+        </p>
+      `;
+    }
+    
+    // Update network details panel
+    const networkDetails = document.getElementById(`networkDetails_${deviceIndex}`);
+    if (networkDetails) {
+      networkDetails.classList.remove('hidden');
+      
+      const networkName = document.getElementById(`networkName_${deviceIndex}`);
+      const networkDesc = document.getElementById(`networkDesc_${deviceIndex}`);
+      const networkAnodes = document.getElementById(`networkAnodes_${deviceIndex}`);
+      const networkCathode = document.getElementById(`networkCathode_${deviceIndex}`);
+      const networkIndication = document.getElementById(`networkIndication_${deviceIndex}`);
+      
+      if (networkName) networkName.textContent = network.name;
+      if (networkDesc) networkDesc.textContent = network.description || '';
+      if (networkAnodes) networkAnodes.textContent = network.anodes?.join(', ') || 'None';
+      if (networkCathode) networkCathode.textContent = network.cathode || 'None';
+      if (networkIndication) networkIndication.textContent = network.indication || '';
+    }
+  }
+  
+  // Show success message
+  showNotification(`Network "${network.name}" applied to device successfully!`, 'success');
+  
+  saveTreatmentPlanState();
+}
+
+// Add network from dropdown to tabs
+function addNetworkFromDropdown(deviceIndex) {
+  const select = document.getElementById(`networkSelect_${deviceIndex}`);
+  if (!select || !select.value) {
+    console.warn('No network select or no value selected for device:', deviceIndex);
+    alert('Please select a network to add.');
+    return;
+  }
+  
+  // Check if device exists
+  if (!treatmentPlanState.devices[deviceIndex]) {
+    console.error('Device not found at index:', deviceIndex);
+    alert('Device not found.');
+    return;
+  }
+  
+  const networkId = parseInt(select.value);
+  const networks = getDummyNetworks(treatmentPlanState.devices[deviceIndex].value);
+  
+  console.log('Adding network:', {deviceIndex, networkId, deviceValue: treatmentPlanState.devices[deviceIndex].value, networksAvailable: networks?.length || 0});
+  
+  if (!networks || networks.length === 0) {
+    console.error('Networks not available for device:', treatmentPlanState.devices[deviceIndex].value);
+    alert('Networks not available for this device.');
+    return;
+  }
+  
+  const network = networks[networkId];
+  
+  if (!network) {
+    console.error('Network not found with ID:', networkId, 'Available networks:', networks.length);
+    alert('Network not found.');
+    return;
+  }
+  
+  console.log('Selected network:', network);
+  
+  // Add network tab
+  addNetworkTab(deviceIndex, networkId);
+  
+  // Reset dropdown
+  select.value = '';
+}
+
+// Expose functions to global scope for onclick handlers
+window.addNetworkTab = addNetworkTab;
+window.removeNetworkTab = removeNetworkTab;
+window.switchNetworkTab = switchNetworkTab;
+window.renderNetworkTabs = renderNetworkTabs;
+window.applyNetworkToDevice = applyNetworkToDevice;
+window.addNetworkFromDropdown = addNetworkFromDropdown;
+
+// Dummy Network Data Generator - Device-Specific Montages
+function getDummyNetworks(deviceValue) {
+  // Device-specific network configurations based on device capabilities
+  
+  const deviceNetworks = {
+    // TMS - Transcranial Magnetic Stimulation: Frontal targeting
+    'device1': [
+      {
+        name: 'Left DLPFC Targeting',
+        description: 'Primary left dorsolateral prefrontal cortex stimulation for depression',
+        anodes: ['F3', 'F7'],
+        cathode: 'Fp1',
+        indication: 'Major Depressive Disorder, Treatment-Resistant Depression'
+      },
+      {
+        name: 'Right DLPFC Protocol',
+        description: 'Right dorsolateral prefrontal cortex for cognitive enhancement',
+        anodes: ['F4', 'F8'],
+        cathode: 'Fp2',
+        indication: 'Cognitive Enhancement, Executive Function'
+      },
+      {
+        name: 'Bilateral Frontal',
+        description: 'Bilateral frontal quadrant stimulation',
+        anodes: ['F3', 'F4'],
+        cathode: 'Fz',
+        indication: 'Anxiety with Depression, Mood Regulation'
+      }
+    ],
+    
+    // tDCS - Transcranial Direct Current: Full brain coverage
+    'device2': [
+      {
+        name: 'Frontal-Parietal Circuit',
+        description: 'Full cortical stimulation for mood and cognition',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Pz',
+        indication: 'Depression with Cognitive Symptoms'
+      },
+      {
+        name: 'Motor-Prefrontal Link',
+        description: 'Motor cortex to prefrontal connection',
+        anodes: ['C3', 'F3'],
+        cathode: 'P4',
+        indication: 'Movement Disorders, Chronic Pain'
+      },
+      {
+        name: 'Central Executive Enhancement',
+        description: 'Dorsolateral prefrontal enhancement protocol',
+        anodes: ['F3', 'F4'],
+        cathode: 'Cz',
+        indication: 'ADHD, Working Memory Deficits'
+      },
+      {
+        name: 'Global Connectivity',
+        description: 'Distributed network activation',
+        anodes: ['Fz', 'Cz'],
+        cathode: 'O1',
+        indication: 'General Neuroplasticity, Recovery'
+      }
+    ],
+    
+    // VNS - Vagus Nerve Stimulation: Neck/ear region
+    'device3': [
+      {
+        name: 'Left Vagus Nerve',
+        description: 'Standard left cervical vagus nerve stimulation',
+        anodes: ['T3', 'T5'],
+        cathode: 'C3',
+        indication: 'Treatment-Resistant Depression, Epilepsy'
+      },
+      {
+        name: 'Bilateral Vagal Tone',
+        description: 'Bilateral vagus nerve modulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Autonomic Regulation, Anxiety'
+      }
+    ],
+    
+    // Plato - Multi-target precision
+    'plato': [
+      {
+        name: 'Block 1 Standard',
+        description: 'Standard electrode placement - right frontal-parietal region',
+        anodes: ['F4', 'C4', 'P4'],
+        cathode: 'Fp2',
+        indication: 'Standard therapeutic protocol for depression and cognitive enhancement'
+      },
+      {
+        name: 'Block 2 Middle Device Place',
+        description: 'Middle device placement - right temporal targeting',
+        anodes: ['C4', 'T4'],
+        cathode: 'C3',
+        indication: 'Lateral cortical stimulation for mood regulation'
+      },
+      {
+        name: 'Block 3 Middle Device Placement, Improved',
+        description: 'Improved middle device placement - left posterior focus',
+        anodes: ['P3'],
+        cathode: 'O1',
+        indication: 'Targeted posterior cortical modulation'
+      },
+      {
+        name: 'Block 4 Back Device Placement, Invasive Back',
+        description: 'Back device placement - invasive posterior targeting',
+        anodes: ['P3', 'O1'],
+        cathode: 'T3',
+        indication: 'Deep posterior network stimulation for complex cases'
+      }
+    ],
+    
+    // Newronika - Closed-loop adaptive
+    'newronika': [
+      {
+        name: 'Adaptive DMN Regulation',
+        description: 'Closed-loop default mode network modulation',
+        anodes: ['F3', 'P3'],
+        cathode: 'Fz',
+        indication: 'Adaptive Depression Treatment'
+      },
+      {
+        name: 'Dynamic Attention Network',
+        description: 'Real-time attention network optimization',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Cz',
+        indication: 'ADHD with Real-time Feedback'
+      },
+      {
+        name: 'Feedback-Driven Motor',
+        description: 'Motor network with recording feedback',
+        anodes: ['C3', 'C4'],
+        cathode: 'Pz',
+        indication: 'Movement Disorders, Rehabilitation'
+      }
+    ],
+    
+    // Alpha Stim AID - Earlobe clips (cranial electrotherapy)
+    'alpha_stim_aid': [
+      {
+        name: 'Bilateral CES Mode',
+        description: 'Cranial electrotherapy stimulation via ear clips',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Anxiety, Insomnia, Depression'
+      },
+      {
+        name: 'Left-Dominant CES',
+        description: 'Left-ear focused cranial stimulation',
+        anodes: ['T3', 'F7'],
+        cathode: 'Fp2',
+        indication: 'Anxiety Disorders, Stress'
+      },
+      {
+        name: 'Balanced Hemispheric',
+        description: 'Balanced bilateral ear stimulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Fz',
+        indication: 'Mood Stabilization, Pain Management'
+      }
+    ],
+    
+    // Alpha Stim MET - Microcurrent with probe
+    'alpha_stim_met': [
+      {
+        name: 'Microcurrent Pain Relief',
+        description: 'Localized microcurrent therapy for pain',
+        anodes: ['C3', 'T3'],
+        cathode: 'P3',
+        indication: 'Chronic Pain, Muscle Tension'
+      },
+      {
+        name: 'Probe-Based Targeting',
+        description: 'Precise probe placement for tissue healing',
+        anodes: ['F3', 'C3'],
+        cathode: 'T5',
+        indication: 'Inflammation, Tissue Repair'
+      },
+      {
+        name: 'Full-Body Circuit',
+        description: 'Extended microcurrent pathway',
+        anodes: ['Fp1', 'T3'],
+        cathode: 'O1',
+        indication: 'Systemic Pain, Fibromyalgia'
+      }
+    ],
+    
+    // tVNS - Transcutaneous vagus (ear-based)
+    'tvns': [
+      {
+        name: 'Left Auricular Cymba',
+        description: 'Left ear cymba conchae stimulation',
+        anodes: ['T3', 'T5'],
+        cathode: 'F7',
+        indication: 'Depression, PTSD, Inflammation'
+      },
+      {
+        name: 'Bilateral Auricular',
+        description: 'Bilateral ear vagus stimulation',
+        anodes: ['T3', 'T4'],
+        cathode: 'Cz',
+        indication: 'Autonomic Balance, Anxiety'
+      }
+    ],
+    
+    // TPS - Transcranial Pulse (ultrasound-based)
+    'tps': [
+      {
+        name: 'Deep Brain Targeting',
+        description: 'Ultrasound pulse for deep brain structures',
+        anodes: ['Fz', 'Cz'],
+        cathode: 'Pz',
+        indication: 'Alzheimer\'s, Deep Brain Stimulation'
+      },
+      {
+        name: 'Frontal Lobe Focus',
+        description: 'Frontal ultrasound pulse therapy',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'O1',
+        indication: 'Cognitive Decline, Memory'
+      },
+      {
+        name: 'Temporal-Hippocampal',
+        description: 'Temporal lobe ultrasound targeting',
+        anodes: ['T3', 'T5'],
+        cathode: 'Cz',
+        indication: 'Memory Formation, Dementia'
+      }
+    ],
+    
+    // Flow - Standard placement device
+    'flow': [
+      {
+        name: 'Standard L-DLPFC Protocol',
+        description: 'Fixed left DLPFC placement - no customization',
+        anodes: ['F3', 'F7'],
+        cathode: 'Fp2',
+        indication: 'Depression - Standard Protocol'
+      },
+      {
+        name: 'Alternative Frontal',
+        description: 'Secondary frontal placement option',
+        anodes: ['F4', 'F8'],
+        cathode: 'Fp1',
+        indication: 'Depression - Alternative Protocol'
+      }
+    ],
+    
+    // Robotic Arm - Automated precision
+    'robotic_arm': [
+      {
+        name: 'Automated DLPFC Target',
+        description: 'Robotic precision left DLPFC targeting',
+        anodes: ['F3', 'F7'],
+        cathode: 'Cz',
+        indication: 'Precision Depression Treatment'
+      },
+      {
+        name: 'Motor Cortex Precision',
+        description: 'Automated motor cortex targeting',
+        anodes: ['C3', 'C4'],
+        cathode: 'Pz',
+        indication: 'Movement Disorders, Stroke Recovery'
+      },
+      {
+        name: 'Multi-Point Automation',
+        description: 'Sequential automated targeting',
+        anodes: ['F3', 'P3'],
+        cathode: 'Fz',
+        indication: 'Complex Multi-Target Protocol'
+      }
+    ]
+  };
+  
+  // Return device-specific networks or default networks
+  return deviceNetworks[deviceValue] || [
+    {
+      name: 'Default Mode Network',
+      description: 'General purpose stimulation protocol',
+      anodes: ['F3', 'F4'],
+      cathode: 'Pz',
+      indication: 'General Neuromodulation'
+    },
+    {
+      name: 'Central Executive Network',
+      description: 'Attention and cognitive control',
+      anodes: ['Fp1', 'Fp2'],
+      cathode: 'Cz',
+      indication: 'Cognitive Enhancement'
+    }
+  ];
+}
+
+// UI State for custom montage editing
+const customMontageState = {
+  isEditing: false,
+  activeDeviceIndex: null,
+  activeTool: 'anode' // 'anode' or 'cathode'
+};
+
+function startCustomMontage(deviceIndex) {
+  customMontageState.isEditing = true;
+  customMontageState.activeDeviceIndex = deviceIndex;
+  customMontageState.activeTool = 'anode';
+  
+  // Clear current montage for editing (blank template)
+  const device = treatmentPlanState.devices[deviceIndex];
+  device.montage.anodes = [];
+  device.montage.cathode = '';
+  highlightNetworkElectrodes(deviceIndex, [], '');
+  
+  // Reset Name input
+  const nameInput = document.getElementById(`customMontageName_${deviceIndex}`);
+  if (nameInput) nameInput.value = '';
+  
+  document.getElementById(`customMontageControls_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`startCustomBtn_${deviceIndex}`).classList.add('hidden');
+  
+  updateToolUI(deviceIndex);
+}
+
+function setElectrodeTool(deviceIndex, tool) {
+  customMontageState.activeTool = tool;
+  updateToolUI(deviceIndex);
+}
+
+function updateToolUI(deviceIndex) {
+  const anodeBtn = document.getElementById(`toolAnode_${deviceIndex}`);
+  const cathodeBtn = document.getElementById(`toolCathode_${deviceIndex}`);
+  const label = document.getElementById(`currentToolLabel_${deviceIndex}`);
+  
+  if (customMontageState.activeTool === 'anode') {
+    anodeBtn.classList.add('ring-2', 'ring-red-400', 'bg-red-50');
+    anodeBtn.classList.remove('bg-white', 'border-red-200');
+    anodeBtn.classList.add('border-red-400');
+    
+    cathodeBtn.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
+    cathodeBtn.classList.add('bg-white', 'border-blue-200');
+    
+    label.textContent = 'Anode (+)';
+    label.className = 'font-bold text-red-600';
+  } else {
+    cathodeBtn.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50');
+    cathodeBtn.classList.remove('bg-white', 'border-blue-200');
+    cathodeBtn.classList.add('border-blue-400');
+    
+    anodeBtn.classList.remove('ring-2', 'ring-red-400', 'bg-red-50');
+    anodeBtn.classList.add('bg-white', 'border-red-200');
+    
+    label.textContent = 'Cathode (-)';
+    label.className = 'font-bold text-blue-600';
+  }
+}
+
+function handleElectrodeClick(deviceIndex, electrodeId) {
+  if (!customMontageState.isEditing || customMontageState.activeDeviceIndex !== deviceIndex) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  
+  let anodes = new Set(device.montage.anodes);
+  // Ensure cathode is a string for single cathode logic
+  let cathode = device.montage.cathode; 
+  
+  if (customMontageState.activeTool === 'anode') {
+    // If clicking on existing cathode, remove it from cathode
+    if (cathode === electrodeId) {
+        cathode = '';
+    }
+    
+    // Toggle anode
+    if (anodes.has(electrodeId)) {
+      anodes.delete(electrodeId);
+    } else {
+        // Enforce Max 2 Anodes
+        if (anodes.size < 2) {
+            anodes.add(electrodeId);
+        } else {
+            alert('Maximum of 2 anodes allowed.');
+        }
+    }
+  } else if (customMontageState.activeTool === 'cathode') {
+    // If clicking on existing anode, remove it
+    if (anodes.has(electrodeId)) {
+      anodes.delete(electrodeId);
+    }
+    
+    // Toggle cathode (single cathode logic)
+    if (cathode === electrodeId) {
+      cathode = '';
+    } else {
+      cathode = electrodeId;
+    }
+  }
+  
+  // Update state
+  device.montage.anodes = Array.from(anodes);
+  device.montage.cathode = cathode;
+  
+  // Update visualization
+  highlightNetworkElectrodes(deviceIndex, device.montage.anodes, device.montage.cathode);
+}
+
+function applySameMontage(deviceIndex) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  const networks = getDummyNetworks(device.value);
+  const selectedIndex = device.selectedNetwork;
+  
+  if (selectedIndex !== '') {
+    const network = networks[selectedIndex];
+    device.montage.anodes = [...network.anodes];
+    device.montage.cathode = network.cathode;
+    highlightNetworkElectrodes(deviceIndex, device.montage.anodes, device.montage.cathode);
+  }
+}
+
+function saveCustomMontage(deviceIndex) {
+  customMontageState.isEditing = false;
+  customMontageState.activeDeviceIndex = null;
+  
+  document.getElementById(`customMontageControls_${deviceIndex}`).classList.add('hidden');
+  document.getElementById(`startCustomBtn_${deviceIndex}`).classList.remove('hidden');
+  
+  // Feedback to user
+  const networkName = document.getElementById(`networkName_${deviceIndex}`);
+  const customNameInput = document.getElementById(`customMontageName_${deviceIndex}`);
+  
+  let displayName = '(Custom)';
+  if (customNameInput && customNameInput.value.trim() !== '') {
+      displayName = `(${customNameInput.value.trim()})`;
+  }
+  
+  if (networkName) {
+      const currentName = networkName.textContent.split('(')[0].trim(); // Remove existing custom suffix if any
+      networkName.textContent = `${currentName} ${displayName}`;
+  }
+  
+  // Save custom name to state
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device && customNameInput && customNameInput.value.trim() !== '') {
+      device.customMontageName = displayName;
+      
+      // Save to custom montages library
+      const baseNetworkName = networkName ? networkName.textContent.split('(')[0].trim() : 'Unknown Network';
+      console.log('[saveCustomMontage] Saving to library with data:', {
+        name: customNameInput.value.trim(),
+        anodes: device.montage.anodes,
+        cathode: device.montage.cathode,
+        deviceType: device.value,
+        baseNetwork: baseNetworkName
+      });
+      
+      const savedMontage = saveCustomMontageToLibrary(
+        customNameInput.value.trim(),
+        device.montage.anodes,
+        device.montage.cathode,
+        device.value,
+        baseNetworkName
+      );
+      
+      console.log('[saveCustomMontage] Saved montage:', savedMontage);
+      
+      // Update all device dropdowns with the new montage
+      populateCustomMontagesForAllDevices();
+      
+      showNotification(`✓ Custom montage "${customNameInput.value.trim()}" saved successfully!`, 'success', 4000);
+  } else {
+    console.log('[saveCustomMontage] Skipping library save - no custom name provided');
+  }
+  
+  saveTreatmentPlanState();
+}
+
+// Generate electrode SVG elements for network visualization
+function generateNetworkElectrodes(deviceIndex) {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => `
+    <g id="electrode_${deviceIndex}_${e.id}" 
+       onclick="handleElectrodeClick(${deviceIndex}, '${e.id}')"
+       class="electrode-node transition-all duration-300 cursor-pointer hover:opacity-80">
+      <circle cx="${e.cx}" cy="${e.cy}" r="10" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e293b">${e.id}</text>
+    </g>
+  `).join('');
+}
+
+// Select and visualize a network
+function selectNetwork(deviceIndex, networkIndex) {
+  if (networkIndex === '') {
+    // Clear selection
+    clearNetworkHighlights(deviceIndex);
+    document.getElementById(`networkDetails_${deviceIndex}`).classList.add('hidden');
+    document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+      <p class="text-xs font-semibold text-purple-900 text-center">
+        Select a network from the right panel to view montage
+      </p>
+    `;
+    return;
+  }
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  const networks = getDummyNetworks(device.value);
+  const network = networks[networkIndex];
+  
+  if (!network) return;
+  
+  // Update right panel details
+  document.getElementById(`networkDetails_${deviceIndex}`).classList.remove('hidden');
+  document.getElementById(`networkName_${deviceIndex}`).textContent = network.name;
+  document.getElementById(`networkDesc_${deviceIndex}`).textContent = network.description;
+  document.getElementById(`networkAnodes_${deviceIndex}`).textContent = network.anodes.join(', ');
+  document.getElementById(`networkCathode_${deviceIndex}`).textContent = network.cathode;
+  document.getElementById(`networkIndication_${deviceIndex}`).textContent = network.indication;
+  
+  // Update left panel info
+  document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+    <p class="text-xs font-bold text-purple-900 mb-1">
+      <i class="fa-solid fa-bolt mr-1"></i>Active Network: ${network.name}
+    </p>
+    <p class="text-xs text-purple-700">
+      Anodes: <span class="font-mono font-bold">${network.anodes.join(', ')}</span> | 
+      Cathode: <span class="font-mono font-bold">${network.cathode}</span>
+    </p>
+  `;
+  
+  // Highlight electrodes on brain montage
+  highlightNetworkElectrodes(deviceIndex, network.anodes, network.cathode);
+  
+  // Store selected network in device state
+  device.selectedNetwork = networkIndex;
+  device.montage.anodes = network.anodes;
+  device.montage.cathode = network.cathode;
+  
+  // Clear custom name as we reset to standard
+  delete device.customMontageName;
+  saveTreatmentPlanState();
+}
+
+// Highlight electrodes based on network configuration
+function highlightNetworkElectrodes(deviceIndex, anodes, cathode) {
+  console.log('Highlighting electrodes for device:', deviceIndex, 'Anodes:', anodes, 'Cathode:', cathode);
+  
+  // First, reset all electrodes
+  clearNetworkHighlights(deviceIndex);
+  
+  // Highlight anodes in red
+  anodes.forEach(anodeId => {
+    const electrode = document.getElementById(`electrode_${deviceIndex}_${anodeId}`);
+    console.log('Looking for anode electrode:', `electrode_${deviceIndex}_${anodeId}`, 'Found:', !!electrode);
+    if (electrode) {
+      const circle = electrode.querySelector('circle');
+      const text = electrode.querySelector('text');
+      if (circle) {
+        circle.setAttribute('fill', '#ef4444');
+        circle.setAttribute('stroke', '#dc2626');
+        circle.setAttribute('stroke-width', '3');
+        circle.style.filter = 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))';
+      }
+      if (text) {
+        text.setAttribute('fill', '#ffffff');
+      }
+    }
+  });
+  
+  // Highlight cathode in blue
+  if (cathode) {
+    const cathodeElectrode = document.getElementById(`electrode_${deviceIndex}_${cathode}`);
+    console.log('Looking for cathode electrode:', `electrode_${deviceIndex}_${cathode}`, 'Found:', !!cathodeElectrode);
+    if (cathodeElectrode) {
+      const circle = cathodeElectrode.querySelector('circle');
+      const text = cathodeElectrode.querySelector('text');
+      if (circle) {
+        circle.setAttribute('fill', '#3b82f6');
+        circle.setAttribute('stroke', '#2563eb');
+        circle.setAttribute('stroke-width', '3');
+        circle.style.filter = 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))';
+      }
+      if (text) {
+        text.setAttribute('fill', '#ffffff');
+      }
+    }
+  }
+}
+
+// Clear all electrode highlights
+function clearNetworkHighlights(deviceIndex) {
+  const allElectrodes = document.querySelectorAll(`[id^="electrode_${deviceIndex}_"]`);
+  allElectrodes.forEach(electrode => {
+    const circle = electrode.querySelector('circle');
+    const text = electrode.querySelector('text');
+    if (circle) {
+      circle.setAttribute('fill', '#e2e8f0');
+      circle.setAttribute('stroke', '#64748b');
+      circle.setAttribute('stroke-width', '2');
+      circle.style.filter = 'none';
+    }
+    if (text) {
+      text.setAttribute('fill', '#1e293b');
+    }
+  });
+}
+
+// Helper function to determine if device uses brain montage
+function usesBrainMontage(deviceValue) {
+  const brainDevices = ['device1', 'device2', 'newronika', 'flow', 'robotic_arm', 'tps'];
+  return brainDevices.includes(deviceValue);
+}
+
+// Helper function to get device-specific visualization
+function getDeviceVisualization(deviceValue, deviceIndex) {
+  // VNS - Neck Region
+  if (deviceValue === 'device3') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="VNS Device Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-purple-700">VNS Device</p>
+          <p class="text-xs text-slate-600">Vagus Nerve Stimulation</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Alpha Stim AID - Cranial Electrotherapy
+  if (deviceValue === 'alpha_stim_aid') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="Alpha Stim AID Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-orange-700">Alpha Stim AID</p>
+          <p class="text-xs text-slate-600">Cranial Electrotherapy (CES Mode)</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Alpha Stim MET - Microcurrent Therapy
+  if (deviceValue === 'alpha_stim_met') {
+    return `
+      <div class="flex flex-col items-center justify-center p-4">
+        <img src="eardevice.png" alt="Alpha Stim MET Placement" class="max-w-full max-h-64 object-contain border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2"/>
+        <div class="mt-3 text-center">
+          <p class="text-sm font-semibold text-green-700">Alpha Stim MET</p>
+          <p class="text-xs text-slate-600">Microcurrent Therapy</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // tVNS - Transcutaneous Vagus Nerve (Ear-based)
+  if (deviceValue === 'tvns') {
+    return `
+      <svg viewBox="0 0 300 300" class="w-full max-w-xs border border-slate-200 rounded bg-gradient-to-br from-slate-50 to-blue-50 p-2 mx-auto">
+        <!-- Ear outline -->
+        <path d="M 120 100 Q 150 80 180 100 Q 200 150 180 200 Q 150 220 120 200 Q 100 150 120 100" fill="none" stroke="#94a3b8" stroke-width="3"/>
+        <path d="M 130 110 Q 150 90 170 110 Q 185 150 170 190 Q 150 210 130 190 Q 115 150 130 110" fill="#fee2e2" fill-opacity="0.6" stroke="#ef4444" stroke-width="2"/>
+        
+        <!-- tVNS electrode on ear -->
+        <circle cx="150" cy="150" r="12" fill="#7c3aed" fill-opacity="0.8" stroke="#5b21b6" stroke-width="3"/>
+        <text x="150" y="155" text-anchor="middle" font-size="8" font-weight="bold" fill="white">tVNS</text>
+        
+        <!-- Nerve pathway -->
+        <path d="M 150 150 Q 120 180 90 220" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="3,3"/>
+        
+        <text x="150" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#7c3aed">Auricular</text>
+      </svg>
+    `;
+  }
+  
+  // Plato - 4 Brain Region Blocks
+  if (deviceValue === 'plato') {
+    return `
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Block 1: Forehead -->
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border-2 border-purple-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block1.png" alt="Block 1 - Forehead Placement" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-purple-700 text-center">Block 1</p>
+            <p class="text-xs text-purple-600 text-center">Forehead</p>
+          </div>
+          
+          <!-- Block 2: Middle Device Placement -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border-2 border-blue-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block2.png" alt="Block 2 - Middle Device Placement" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-blue-700 text-center">Block 2</p>
+            <p class="text-xs text-blue-600 text-center">Middle Device</p>
+          </div>
+          
+          <!-- Block 3: Middle Device Placement (Inverted) -->
+          <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border-2 border-green-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block3.png" alt="Block 3 - Middle Device Placement (Inverted)" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-green-700 text-center">Block 3</p>
+            <p class="text-xs text-green-600 text-center">Middle Device (Inverted)</p>
+          </div>
+          
+          <!-- Block 4: Back Device Placement (Inverted) -->
+          <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border-2 border-red-300">
+            <div class="h-20 flex items-center justify-center mb-2">
+              <img src="block4.png" alt="Block 4 - Back Device Placement (Inverted)" class="max-h-full max-w-full object-contain"/>
+            </div>
+            <p class="text-xs font-semibold text-red-700 text-center">Block 4</p>
+            <p class="text-xs text-red-600 text-center">Back Device (Inverted)</p>
+          </div>
+        </div>
+        
+        <!-- Overall Plato Device Info -->
+        <div class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200">
+          <p class="text-sm font-semibold text-purple-900 text-center mb-1">
+            <i class="fa-solid fa-microchip mr-2"></i>Plato Neurostimulation System
+          </p>
+          <p class="text-xs text-purple-700 text-center">
+            4 specialized electrode blocks targeting specific brain regions
+          </p>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Default return empty if no specific visualization
+  return '';
+}
+
+function renderDeviceJourney(device, deviceIndex) {
+  if (!device) return '<p class="text-slate-500">No device selected</p>';
+  
+  // Get dummy networks for this device
+  const networks = getDummyNetworks(device.value);
+  const showBrainMontage = usesBrainMontage(device.value);
+  const deviceViz = getDeviceVisualization(device.value, deviceIndex);
+  
+  // Debug logging
+  console.log('Rendering device journey for:', {
+    deviceValue: device.value,
+    deviceIndex,
+    networksCount: networks?.length || 0,
+    showBrainMontage,
+    networks: networks?.map(n => n.name) || []
+  });
+  
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- LEFT PANEL: Visualization (Brain Montage or Device-Specific) -->
+      <div class="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl border-2 border-slate-300 shadow-lg">
+        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i class="fa-solid ${showBrainMontage ? 'fa-brain text-purple-600' : 'fa-microchip text-orange-600'}"></i>
+          ${showBrainMontage ? 'Brain Montage Visualization' : 'Device Placement Visualization'}
+        </h4>
+        
+        <div class="bg-white p-4 rounded-lg border border-slate-200">
+          <p class="text-xs text-slate-600 mb-3 text-center">
+            <i class="fa-solid fa-info-circle mr-1 text-blue-500"></i>
+            ${showBrainMontage ? '10-20 Electrode System - Network-based highlighting' : 'Device-specific placement zones'}
+          </p>
+          
+          ${showBrainMontage ? `
+          <!-- Interactive Brain Montage SVG -->
+          <svg id="brainMontage_${deviceIndex}" viewBox="0 0 300 300" class="w-full max-w-md mx-auto">
+            <!-- Brain outline -->
+            <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
+            <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+            
+            <!-- Reference markers -->
+            <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+            <text x="150" y="25" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">NASION</text>
+            
+            <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+            <text x="150" y="285" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">INION</text>
+            
+            <!-- All electrode positions -->
+            ${generateNetworkElectrodes(deviceIndex)}
+          </svg>
+          
+          <!-- Legend -->
+          <div class="mt-4 flex items-center justify-center gap-4 text-xs">
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <span class="text-slate-700">Anode (+)</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span class="text-slate-700">Cathode (-)</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-slate-300"></div>
+              <span class="text-slate-700">Inactive</span>
+            </div>
+          </div>
+          ` : `
+          <!-- Device-Specific Visualization -->
+          ${deviceViz}
+          
+          <!-- Device-specific legend -->
+          <div class="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
+            <p class="text-xs text-amber-900 text-center">
+              <i class="fa-solid fa-lightbulb mr-1"></i>
+              ${device.value === 'device3' ? 'This device uses neck-based stimulation' : 
+                device.value === 'plato' ? 'Multi-region brain stimulation with 4 specialized blocks' : 
+                'This device uses ear-based stimulation'}
+            </p>
+          </div>
+          `}
+          
+          <!-- Current Network Info -->
+          <div id="networkInfo_${deviceIndex}" class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <p class="text-xs font-semibold text-purple-900 text-center">
+              Select a network from the right panel to view ${showBrainMontage ? 'montage' : 'configuration'}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- RIGHT PANEL: Tabbed Interface for Network Selection & Custom Montages -->
+      <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl border-2 border-green-300 shadow-lg">
+        <!-- Tab Headers -->
+        <div class="flex border-b-2 border-green-300 mb-4">
+          <button 
+            id="networkTab_${deviceIndex}" 
+            onclick="switchMontageTab(${deviceIndex}, 'network')" 
+            class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-green-600 text-green-700 bg-green-100"
+          >
+            <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
+          </button>
+          ${showBrainMontage ? `
+          <button 
+            id="customTab_${deviceIndex}" 
+            onclick="switchMontageTab(${deviceIndex}, 'custom')" 
+            class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-transparent text-slate-600 hover:bg-slate-50"
+          >
+            <i class="fa-solid fa-star mr-2"></i>Custom Montage
+          </button>
+          ` : ''}
+        </div>
+        
+        <!-- Network Selection Tab Content -->
+        <div id="networkTabContent_${deviceIndex}" class="space-y-4">
+          <!-- Add Network to Tabs -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              <i class="fa-solid fa-sitemap mr-1"></i>
+              Add Network to Tabs
+            </label>
+            <div class="flex gap-2">
+              <select 
+                id="networkSelect_${deviceIndex}" 
+                class="input-royal flex-1"
+              >
+                <option value="">-- Choose a Brain Network to Add --</option>
+                ${networks && networks.length > 0 ? networks.map((network, idx) => `
+                  <option value="${idx}">Network ${idx + 1}: ${network.name}</option>
+                `).join('') : '<option value="" disabled>No networks available for this device</option>'}
+              </select>
+              <button 
+                onclick="addNetworkFromDropdown(${deviceIndex})"
+                class="btn-primary text-sm whitespace-nowrap"
+              >
+                <i class="fa-solid fa-plus mr-1"></i>Add Tab
+              </button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Select networks to compare them side by side in tabs</p>
+          </div>
+          
+          <!-- Network Tabs Container -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Open Network Tabs</label>
+            <div id="networkTabsContainer_${deviceIndex}">
+              <!-- Network tabs will be rendered here -->
+            </div>
+          </div>
+          
+          <!-- Selected Network Details (Legacy - still used for compatibility) -->
+          <div id="networkDetails_${deviceIndex}" class="hidden">
+            <div class="bg-white p-4 rounded-lg border border-green-300 space-y-3">
+              <div>
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Network Name</p>
+                <p id="networkName_${deviceIndex}" class="text-sm font-semibold text-slate-900"></p>
+              </div>
+              
+              <div>
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Description</p>
+                <p id="networkDesc_${deviceIndex}" class="text-sm text-slate-700"></p>
+              </div>
+              
+              <div class="pt-3 border-t border-green-200">
+                <p class="text-xs font-bold text-slate-500 uppercase mb-2">Electrode Configuration</p>
+                <div class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
+                    <div class="text-xs">
+                      <span class="font-semibold text-red-700">Anodes (+):</span>
+                      <span id="networkAnodes_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
+                    <div class="text-xs">
+                      <span class="font-semibold text-blue-700">Cathode (-):</span>
+                      <span id="networkCathode_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="pt-3 border-t border-green-200">
+                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Clinical Indication</p>
+                <p id="networkIndication_${deviceIndex}" class="text-xs text-slate-700 mb-4"></p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Network Summary -->
+          <div class="bg-white p-4 rounded-lg border border-green-200">
+            <p class="text-xs font-semibold text-green-900 mb-2">
+              <i class="fa-solid fa-list mr-1"></i>
+              Available Networks: ${networks.length}
+            </p>
+            <div class="space-y-1 max-h-48 overflow-y-auto">
+              ${networks.map((network, idx) => `
+                <button 
+                  onclick="selectNetwork(${deviceIndex}, ${idx})"
+                  class="w-full text-left px-3 py-2 rounded hover:bg-green-50 transition-colors text-xs border border-transparent hover:border-green-300"
+                >
+                  <span class="font-semibold text-slate-900">Network ${idx + 1}:</span>
+                  <span class="text-slate-600 ml-1">${network.name}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button onclick="showFullMontageGuide()" class="btn-secondary text-sm flex-1">
+              <i class="fa-solid fa-book mr-2"></i>Guide
+            </button>
+          </div>
+        </div>
+        
+        <!-- Custom Montage Tab Content (Only for brain devices) -->
+        ${showBrainMontage ? `
+        <div id="customTabContent_${deviceIndex}" class="hidden space-y-4">
+          <!-- Load Saved Custom Montages Section -->
+          <div class="bg-white p-4 rounded-lg border border-purple-200">
+            <h5 class="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-star"></i>
+              Load Saved Custom Montages
+            </h5>
+            <select 
+              id="customMontageSelect_${deviceIndex}" 
+              class="input-royal w-full text-sm mb-2" 
+              onchange="loadCustomMontageForDevice(${deviceIndex}, this.value)"
+            >
+              <option value="">-- Select Custom Montage --</option>
+              <optgroup label="Custom Montages" id="customMontagesOptgroup_${deviceIndex}">
+                <!-- Custom montages will be populated here -->
+              </optgroup>
+            </select>
+            <div class="flex gap-2">
+              <button 
+                id="deleteCustomMontageBtn_${deviceIndex}" 
+                onclick="deleteCustomMontageForDevice(${deviceIndex})" 
+                class="hidden flex-1 px-3 py-2 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                title="Delete selected custom montage"
+              >
+                <i class="fa-solid fa-trash mr-1"></i>Delete Selected
+              </button>
+            </div>
+            <p class="text-[9px] text-purple-600 mt-2 text-center">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              Select a saved custom montage to load it, or create a new one below
+            </p>
+          </div>
+          
+          <!-- Create Custom Montage Section -->
+          <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+            <h5 class="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-plus-circle"></i>
+              Create New Custom Montage
+            </h5>
+            
+            <div id="startCustomBtn_${deviceIndex}">
+               <button onclick="startCustomMontage(${deviceIndex})" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                 <i class="fa-solid fa-sliders"></i> 
+                 Start Custom Configuration
+               </button>
+               <p class="text-[10px] text-slate-500 text-center mt-2">Click to modify electrode placement for this patient</p>
+            </div>
+            
+            <!-- Custom Edit Controls (Hidden by default) -->
+            <div id="customMontageControls_${deviceIndex}" class="hidden mt-4 pt-4 border-t-2 border-dashed border-indigo-200">
+                <h6 class="text-xs font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-pen-to-square"></i> Configuration Mode Active
+                </h6>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button id="toolAnode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'anode')" class="p-2 bg-white border border-red-200 rounded text-xs font-bold text-red-700 hover:bg-red-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div> Place Anode
+                    </button>
+                    <button id="toolCathode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'cathode')" class="p-2 bg-white border border-blue-200 rounded text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div> Place Cathode
+                    </button>
+                </div>
+                
+                <p class="text-[10px] text-indigo-600 text-center mb-3 bg-white/60 p-1.5 rounded border border-indigo-100">
+                  <i class="fa-solid fa-mouse-pointer mr-1"></i>
+                  Click nodes on the left to place <span id="currentToolLabel_${deviceIndex}" class="font-bold">Anode</span>
+                  <br><span class="text-[9px] text-indigo-400">(Max 2 Anodes, 1 Cathode)</span>
+                </p>
+                
+                <div class="mb-3">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custom Montage Name</label>
+                    <input type="text" id="customMontageName_${deviceIndex}" placeholder="e.g., Patient Specific F3-F4" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                </div>
+                
+                <div class="space-y-2">
+                     <button onclick="applySameMontage(${deviceIndex})" class="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 p-2 rounded text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                       <i class="fa-solid fa-rotate-left"></i> Reset to Base Network
+                     </button>
+                     <button onclick="saveCustomMontage(${deviceIndex})" class="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded text-xs font-bold shadow transition-colors flex items-center justify-center gap-2">
+                       <i class="fa-solid fa-check"></i> Save Custom Configuration
+                     </button>
+                </div>
+            </div>
+          </div>
+          
+          <!-- Help Section -->
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <p class="text-xs text-blue-900 mb-2">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              <strong>Custom Montage Guide:</strong>
+            </p>
+            <ul class="text-[10px] text-blue-800 space-y-1 ml-4 list-disc">
+              <li>Start with a base network or create from scratch</li>
+              <li>Click electrodes on the brain visualization to place anodes and cathodes</li>
+              <li>Save your configuration with a descriptive name</li>
+              <li>Saved montages can be loaded anytime from the dropdown above</li>
+            </ul>
+          </div>
+        </div>
+        ` : ''}
+              <i class="fa-solid fa-book mr-2"></i>Guide
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Custom Montage Section (Hidden by default) -->
+    <div id="customMontageSection_${deviceIndex}" class="mt-6 bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-300 hidden">
+      <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <span class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
+        Custom Montage Configuration
+        <button onclick="toggleCustomMontage(${deviceIndex})" class="ml-auto text-red-500 hover:text-red-700" title="Close">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </h4>
+        
+        <div class="space-y-4">
+          <p class="text-sm text-slate-600"><i class="fa-solid fa-hand-pointer mr-2 text-purple-600"></i>Click on electrodes below to set Anode (+) and Cathode (-) positions</p>
+          
+          <!-- Electrode Mode Selection -->
+          <div class="flex gap-3 mb-4">
+            <button 
+              onclick="setElectrodeMode(${deviceIndex}, 'anode')" 
+              class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${device.montage.anode ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}"
+            >
+              <i class="fa-solid fa-plus mr-2"></i>Anode (+)
+              ${device.montage.anode ? `<span class="ml-2 text-xs">${device.montage.anode}</span>` : ''}
+            </button>
+            <button 
+              onclick="setElectrodeMode(${deviceIndex}, 'cathode')" 
+              class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${device.montage.cathode ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}"
+            >
+              <i class="fa-solid fa-minus mr-2"></i>Cathode (-)
+              ${device.montage.cathode ? `<span class="ml-2 text-xs">${device.montage.cathode}</span>` : ''}
+            </button>
+          </div>
+          
+          <!-- Interactive Montage Builder -->
+          <div class="bg-white p-4 rounded-lg border-2 border-purple-300">
+            <svg id="customMontage_${deviceIndex}" viewBox="0 0 300 300" class="w-full max-w-md mx-auto">
+              <!-- Brain outline -->
+              <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              
+              <!-- Interactive electrodes -->
+              ${generateInteractiveElectrodes(deviceIndex, device.montage)}
+            </svg>
+          </div>
+          
+          ${device.montage.anode && device.montage.cathode ? `
+          <div class="mt-4 p-4 bg-white rounded-lg border-2 border-purple-400">
+            <p class="text-sm font-bold text-purple-900 mb-2"><i class="fa-solid fa-check-circle mr-2"></i>Montage Configured:</p>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-red-50 p-3 rounded border border-red-300">
+                <span class="font-semibold text-red-700">Anode (+):</span>
+                <span class="ml-2 text-red-900 font-bold">${device.montage.anode}</span>
+              </div>
+              <div class="bg-blue-50 p-3 rounded border border-blue-300">
+                <span class="font-semibold text-blue-700">Cathode (-):</span>
+                <span class="ml-2 text-blue-900 font-bold">${device.montage.cathode}</span>
+              </div>
+            </div>
+            <button onclick="resetMontage(${deviceIndex})" class="mt-3 btn-secondary text-sm w-full">
+              <i class="fa-solid fa-redo mr-2"></i>Reset Montage
+            </button>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Helper function to generate blank electrodes
+function generateBlankElectrodes() {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => `
+    <g class="electrode">
+      <circle cx="${e.cx}" cy="${e.cy}" r="10" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e293b">${e.id}</text>
+    </g>
+  `).join('');
+}
+
+// Helper function to generate interactive electrodes
+function generateInteractiveElectrodes(deviceIndex, montage) {
+  const electrodes = [
+    { id: 'Fp1', cx: 120, cy: 65 },
+    { id: 'Fp2', cx: 180, cy: 65 },
+    { id: 'F7', cx: 65, cy: 95 },
+    { id: 'F3', cx: 115, cy: 95 },
+    { id: 'Fz', cx: 150, cy: 90 },
+    { id: 'F4', cx: 185, cy: 95 },
+    { id: 'F8', cx: 235, cy: 95 },
+    { id: 'T3', cx: 50, cy: 150 },
+    { id: 'C3', cx: 105, cy: 150 },
+    { id: 'Cz', cx: 150, cy: 150 },
+    { id: 'C4', cx: 195, cy: 150 },
+    { id: 'T4', cx: 250, cy: 150 },
+    { id: 'T5', cx: 65, cy: 205 },
+    { id: 'P3', cx: 115, cy: 205 },
+    { id: 'Pz', cx: 150, cy: 210 },
+    { id: 'P4', cx: 185, cy: 205 },
+    { id: 'T6', cx: 235, cy: 205 },
+    { id: 'O1', cx: 120, cy: 235 },
+    { id: 'O2', cx: 180, cy: 235 }
+  ];
+  
+  return electrodes.map(e => {
+    let fill = '#e2e8f0';
+    let stroke = '#64748b';
+    let strokeWidth = 2;
+    
+    if (montage.anode === e.id) {
+      fill = '#ef4444';
+      stroke = '#dc2626';
+      strokeWidth = 3;
+    } else if (montage.cathode === e.id) {
+      fill = '#3b82f6';
+      stroke = '#2563eb';
+      strokeWidth = 3;
+    }
+    
+    return `
+      <g class="electrode cursor-pointer" onclick="selectElectrode(${deviceIndex}, '${e.id}')" style="cursor: pointer;">
+        <circle cx="${e.cx}" cy="${e.cy}" r="12" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" class="transition-all hover:opacity-80"/>
+        <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff" pointer-events="none">${e.id}</text>
+      </g>
+    `;
+  }).join('');
+}
+
+// Electrode selection functions
+let currentElectrodeMode_device = {}; // Track mode per device
+
+function setElectrodeMode(deviceIndex, mode) {
+  currentElectrodeMode_device[deviceIndex] = mode;
+}
+
+function selectElectrode(deviceIndex, electrodeId) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  const mode = currentElectrodeMode_device[deviceIndex] || 'anode';
+  
+  if (mode === 'anode') {
+    device.montage.anode = electrodeId;
+  } else if (mode === 'cathode') {
+    device.montage.cathode = electrodeId;
+  }
+  
+  // Re-render the device journey
+  const content = document.getElementById('deviceTabContent');
+  if (content) {
+    content.innerHTML = renderDeviceJourney(device, deviceIndex);
+  }
+}
+
+function resetMontage(deviceIndex) {
+  if (confirm('Are you sure you want to reset this montage configuration?')) {
+    const device = treatmentPlanState.devices[deviceIndex];
+    if (device) {
+      device.montage = {
+        type: 'blank',
+        anode: null,
+        cathode: null
+      };
+      
+      // Re-render
+      const content = document.getElementById('deviceTabContent');
+      if (content) {
+        content.innerHTML = renderDeviceJourney(device, deviceIndex);
+      }
+    }
+  }
+}
+
+function updateDeviceSymptoms(deviceIndex, symptom) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device && symptom) {
+    device.symptoms = [symptom]; // For now, single selection
+    
+    // Re-render to show updated state
+    const content = document.getElementById('deviceTabContent');
+    if (content) {
+      content.innerHTML = renderDeviceJourney(device, deviceIndex);
+    }
+  }
+}
+
+function updateDeviceNetwork(deviceIndex, network) {
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (device) {
+    device.network = network;
+    
+    // Re-render to show updated state
+    const content = document.getElementById('deviceTabContent');
+    if (content) {
+      content.innerHTML = renderDeviceJourney(device, deviceIndex);
+    }
+  }
+}
+
+function showFullMontageGuide() {
+  alert('Complete 10-20 Montage Guide:\n\nThis would open a detailed guide showing all electrode positions, measurement techniques, and standard montage configurations.');
+}
+
+function toggleCustomMontage(deviceIndex) {
+  const section = document.getElementById(`customMontageSection_${deviceIndex}`);
+  if (section) {
+    section.classList.toggle('hidden');
+    
+    // Scroll to the section if it's being shown
+    if (!section.classList.contains('hidden')) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  }
+}
 
 
 // Global state for custom electrode placement
 let customMontageConfig = null;
-let hasUnsavedChanges = false;
-let currentElectrodeMode = 'cathode'; // 'anode' or 'cathode'
-let lastElectrodeClickTime = 0;
-let notificationTimeout = null;
-
-// Local storage key for custom montages
-const CUSTOM_MONTAGE_STORAGE_KEY = 'sozo_custom_montages';
-
-// Load custom montages from local storage
-function loadCustomMontages() {
-  try {
-    const stored = localStorage.getItem(CUSTOM_MONTAGE_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (e) {
-    console.error('Error loading custom montages:', e);
-    return {};
-  }
-}
-
-// Save custom montage to local storage
-function saveCustomMontageToStorage(indication, config) {
-  try {
-    const customMontages = loadCustomMontages();
-    customMontages[indication] = {
-      ...config,
-      timestamp: new Date().toISOString(),
-      modifiedBy: currentRole
-    };
-    localStorage.setItem(CUSTOM_MONTAGE_STORAGE_KEY, JSON.stringify(customMontages));
-    return true;
-  } catch (e) {
-    console.error('Error saving custom montage:', e);
-    return false;
-  }
-}
+// Treatment plan specific functions continue...
 
 // Get custom montage from storage if exists
-function getCustomMontage(indication) {
-  const customMontages = loadCustomMontages();
-  return customMontages[indication] || null;
+function getCustomMontage(montageId) {
+  return customMontagesLibrary.find(m => m.id === montageId) || null;
 }
 
 // Set electrode mode (anode, cathode, or remove)
@@ -23766,18 +24836,18 @@ function setElectrodeMode(mode) {
   const modeIndicator = document.getElementById('activeModeIndicator');
   
   // Reset all buttons to inactive state
-  anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-slate-700 border-slate-300 hover:border-slate-400';
+  anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-red-700 border-red-300 hover:border-red-400';
   cathodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-blue-700 border-blue-300 hover:border-blue-400';
   removeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-slate-700 border-slate-300 hover:border-slate-400';
   
   if (mode === 'anode') {
     // Active anode button style
-    anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-md bg-gradient-to-br from-slate-600 to-slate-600 text-white border-slate-700';
+    anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-md bg-gradient-to-br from-red-500 to-red-600 text-white border-red-700';
     
     // Update mode indicator
     if (modeIndicator) {
       modeIndicator.textContent = 'ANODE MODE';
-      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-slate-600 text-white';
+      modeIndicator.className = 'px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white';
     }
     
     // Add cursor indicator to brain diagram
@@ -23850,7 +24920,7 @@ function enableCathodeCustomization() {
     const modeIndicator = document.getElementById('activeModeIndicator');
     
     if (anodeBtn) {
-      anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-slate-700 border-slate-300 hover:border-slate-400';
+      anodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-red-700 border-red-300 hover:border-red-400';
     }
     if (cathodeBtn) {
       cathodeBtn.className = 'flex-1 px-3 py-2 text-xs font-bold rounded-lg border-2 transition-all shadow-sm hover:shadow-md bg-white text-blue-700 border-blue-300 hover:border-blue-400';
@@ -24225,13 +25295,13 @@ function showSaveChangesPopup() {
           </p>
           <div class="text-xs text-blue-900 space-y-1">
             <div><strong class="text-orange-700">Device:</strong> <span id="popupDeviceInfo"></span></div>
-            <div><strong class="text-slate-700">Anode(s):</strong> <span id="popupAnodeList"></span></div>
+            <div><strong class="text-red-700">Anode(s):</strong> <span id="popupAnodeList"></span></div>
             <div><strong class="text-blue-700">Cathode(s):</strong> <span id="popupCathodeList"></span></div>
           </div>
         </div>
         
-        <div class="bg-slate-50 border border-slate-300 rounded-lg p-3 mb-4">
-          <p class="text-xs text-slate-700">
+        <div class="bg-amber-50 border border-amber-300 rounded-lg p-3 mb-4">
+          <p class="text-xs text-amber-800">
             <i class="fa-solid fa-info-circle mr-1"></i>
             <strong>Note:</strong> The original montage will remain unchanged. This creates a new custom configuration.
           </p>
@@ -24340,6 +25410,102 @@ function saveNewMontage() {
     clinicalSelect.value = montageId;
   }
   
+  // Show delete button for the loaded custom montage
+  showDeleteButton(montageId);
+}
+
+// Show delete button for custom montages
+function showDeleteButton(montageId) {
+  let deleteBtn = document.getElementById('deleteCustomMontageBtn');
+  if (!deleteBtn) {
+    // Create delete button if it doesn't exist
+    deleteBtn = document.createElement('button');
+    deleteBtn.id = 'deleteCustomMontageBtn';
+    deleteBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors mt-2';
+    deleteBtn.innerHTML = '<i class="fas fa-trash mr-2"></i>Delete Custom Montage';
+    
+    // Find a good place to insert the button (after montage category field)
+    const categoryField = document.getElementById('montageCategory');
+    if (categoryField && categoryField.parentNode) {
+      categoryField.parentNode.insertAdjacentElement('afterend', deleteBtn);
+    }
+  }
+  
+  deleteBtn.style.display = 'block';
+  deleteBtn.onclick = () => deleteCustomMontage(montageId);
+}
+
+// Delete a custom montage for a specific device
+function deleteCustomMontageForDevice(deviceIndex) {
+  const select = document.getElementById(`customMontageSelect_${deviceIndex}`);
+  if (!select || !select.value) {
+    showNotification('Please select a custom montage to delete', 'error');
+    return;
+  }
+  
+  const montageId = select.value;
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
+  
+  if (!montage) {
+    showNotification('Montage not found', 'error');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to delete "${montage.name}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  // Remove from library
+  customMontagesLibrary = customMontagesLibrary.filter(m => m.id !== montageId);
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    showNotification(`Deleted custom montage "${montage.name}"`, 'success');
+    
+    // Reset the dropdown
+    select.value = '';
+    
+    // Hide delete button
+    const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+    
+    // Update all device dropdowns
+    populateCustomMontagesForAllDevices();
+    
+  } catch (e) {
+    console.error('Failed to delete montage:', e);
+    showNotification('Failed to delete montage', 'error');
+  }
+}
+
+// Legacy delete function
+function deleteCustomMontage(montageId) {
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
+  if (!montage) {
+    showNotification('Montage not found', 'error');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to delete "${montage.name}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  // Remove from library
+  customMontagesLibrary = customMontagesLibrary.filter(m => m.id !== montageId);
+  
+  try {
+    localStorage.setItem(CUSTOM_MONTAGES_KEY, JSON.stringify(customMontagesLibrary));
+    showNotification(`Deleted custom montage "${montage.name}"`, 'success');
+    
+    // Update all dropdowns
+    populateCustomMontagesForAllDevices();
+    populateCustomMontagesDropdown();
+    
+  } catch (e) {
+    console.error('Failed to delete montage:', e);
+    showNotification('Failed to delete montage', 'error');
+  }
+  
   // Update active montage info
   const activeAnodes = document.getElementById('activeAnodes');
   const activeCathodes = document.getElementById('activeCathodes');
@@ -24406,8 +25572,8 @@ function showNotification(message, type = 'info', duration = 3000) {
   notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in`;
   
   const colors = {
-    success: 'bg-orange-100 border-sozo-600 text-slate-900',
-    error: 'bg-slate-100 border-slate-500 text-slate-900',
+    success: 'bg-green-100 border-green-500 text-green-900',
+    error: 'bg-red-100 border-red-500 text-red-900',
     info: 'bg-blue-100 border-blue-500 text-blue-900'
   };
   
@@ -24446,14 +25612,11 @@ function showNotification(message, type = 'info', duration = 3000) {
 
 // Populate custom montages dropdown
 function populateCustomMontagesDropdown() {
-  const customMontages = loadCustomMontages();
   const optgroup = document.getElementById('customMontagesOptgroup');
   
   if (!optgroup) return;
   
-  const montageKeys = Object.keys(customMontages);
-  
-  if (montageKeys.length === 0) {
+  if (customMontagesLibrary.length === 0) {
     optgroup.style.display = 'none';
     optgroup.innerHTML = '';
     return;
@@ -24461,12 +25624,11 @@ function populateCustomMontagesDropdown() {
   
   optgroup.style.display = 'block';
   
-  // Build options
+  // Build options from array
   let html = '';
-  montageKeys.forEach(key => {
-    const montage = customMontages[key];
-    const basedOnLabel = getMontageLabel(montage.basedOn);
-    html += `<option value="${key}">⭐ ${montage.name} (based on ${basedOnLabel})</option>`;
+  customMontagesLibrary.forEach(montage => {
+    const deviceLabel = montage.deviceType || 'Unknown';
+    html += `<option value="${montage.id}">⭐ ${montage.name} (${deviceLabel})</option>`;
   });
   
   optgroup.innerHTML = html;
@@ -24498,15 +25660,15 @@ function loadCustomMontagesList() {
     const montage = customMontages[key];
     const date = new Date(montage.timestamp).toLocaleDateString();
     html += `
-      <div class="bg-white p-3 rounded-lg border border-slate-200 hover:border-slate-400 transition-all">
+      <div class="bg-white p-3 rounded-lg border border-purple-200 hover:border-purple-400 transition-all">
         <div class="flex items-start justify-between">
           <div class="flex-1">
-            <h5 class="font-bold text-sm text-slate-900">${montage.name}</h5>
+            <h5 class="font-bold text-sm text-purple-900">${montage.name}</h5>
             <p class="text-xs text-slate-600 mt-1">
               <i class="fa-solid fa-link mr-1"></i>Based on: ${getMontageLabel(montage.basedOn)}
             </p>
             <div class="mt-2 text-xs space-y-0.5">
-              <div><strong class="text-slate-700">Anodes:</strong> ${montage.anodes?.join(', ') || 'None'}</div>
+              <div><strong class="text-red-700">Anodes:</strong> ${montage.anodes?.join(', ') || 'None'}</div>
               <div><strong class="text-blue-700">Cathodes:</strong> ${montage.cathodes?.join(', ') || 'None'}</div>
             </div>
             <p class="text-xs text-slate-500 mt-2">
@@ -24514,10 +25676,10 @@ function loadCustomMontagesList() {
             </p>
           </div>
           <div class="flex gap-1 ml-2">
-            <button onclick="loadCustomMontage('${key}')" class="px-2 py-1 bg-slate-500 text-white rounded text-xs hover:bg-slate-600" title="Load this montage">
+            <button onclick="loadCustomMontage('${key}')" class="px-2 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600" title="Load this montage">
               <i class="fa-solid fa-upload"></i>
             </button>
-            <button onclick="deleteCustomMontage('${key}')" class="px-2 py-1 bg-slate-600 text-white rounded text-xs hover:bg-slate-600" title="Delete this montage">
+            <button onclick="deleteCustomMontage('${key}')" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600" title="Delete this montage">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -24530,32 +25692,7 @@ function loadCustomMontagesList() {
 }
 
 // Populate custom montages dropdown
-function populateCustomMontagesDropdown() {
-  const customMontages = loadCustomMontages();
-  const optgroup = document.getElementById('customMontagesOptgroup');
-  
-  if (!optgroup) return;
-  
-  const montageKeys = Object.keys(customMontages);
-  
-  if (montageKeys.length === 0) {
-    optgroup.style.display = 'none';
-    optgroup.innerHTML = '';
-    return;
-  }
-  
-  optgroup.style.display = 'block';
-  
-  // Build options
-  let html = '';
-  montageKeys.forEach(key => {
-    const montage = customMontages[key];
-    const basedOnLabel = getMontageLabel(montage.basedOn);
-    html += `<option value="${key}">⭐ ${montage.name} (based on ${basedOnLabel})</option>`;
-  });
-  
-  optgroup.innerHTML = html;
-}
+// Duplicate removed - consolidated above
 
 // Get readable label for montage type
 function getMontageLabel(key) {
@@ -24581,46 +25718,85 @@ function toggleCustomMontagesList() {
   }
 }
 
-// Load a custom montage
-function loadCustomMontage(montageId) {
-  const customMontages = loadCustomMontages();
-  const montage = customMontages[montageId];
+// Load a custom montage for a specific device
+function loadCustomMontageForDevice(deviceIndex, montageId) {
+  if (!montageId) {
+    // Clear selection - hide delete button
+    const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+    return;
+  }
+  
+  const montage = customMontagesLibrary.find(m => m.id === montageId);
   
   if (!montage) {
     showNotification('Custom montage not found', 'error');
     return;
   }
   
-  // Update visualization with custom montage
-  updateBrainVisualization(montage);
+  // Apply montage to the device
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
   
-  // Update fields
-  document.getElementById('montageCategory').value = montage.baseCategory + ' (Custom)';
-  document.getElementById('networkTarget').value = montage.baseNetworkTarget;
-  document.getElementById('anodePlacement').value = montage.anodes?.join(', ') || '';
-  document.getElementById('cathodePlacement').value = montage.cathodes?.join(', ') || '';
+  // Update device montage configuration
+  device.montage = {
+    anodes: montage.anodes || [],
+    cathode: montage.cathode || ''
+  };
+  device.customMontageName = montage.name;
+  
+  // Update the visualization
+  highlightNetworkElectrodes(deviceIndex, montage.anodes || [], montage.cathode || '');
+  
+  // Update the network info display
+  const networkInfo = document.getElementById(`networkInfo_${deviceIndex}`);
+  if (networkInfo) {
+    networkInfo.innerHTML = `
+      <div class="text-xs">
+        <p class="font-bold text-purple-900 mb-2">🌟 ${montage.name}</p>
+        <div class="space-y-1">
+          <div><strong class="text-red-700">Anodes:</strong> <span class="font-mono">${montage.anodes?.join(', ') || 'None'}</span></div>
+          <div><strong class="text-blue-700">Cathode:</strong> <span class="font-mono">${montage.cathode || 'None'}</span></div>
+          ${montage.baseNetwork ? `<div class="mt-2 text-[10px] text-slate-600">Based on: ${montage.baseNetwork}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Update network details section
+  const networkName = document.getElementById(`networkName_${deviceIndex}`);
+  if (networkName) networkName.textContent = `${montage.baseNetwork || 'Custom'} (${montage.name})`;
+  
+  const networkAnodes = document.getElementById(`networkAnodes_${deviceIndex}`);
+  if (networkAnodes) networkAnodes.textContent = montage.anodes?.join(', ') || 'None';
+  
+  const networkCathode = document.getElementById(`networkCathode_${deviceIndex}`);
+  if (networkCathode) networkCathode.textContent = montage.cathode || 'None';
+  
+  // Show network details
+  const networkDetails = document.getElementById(`networkDetails_${deviceIndex}`);
+  if (networkDetails) networkDetails.classList.remove('hidden');
+  
+  // Show delete button
+  const deleteBtn = document.getElementById(`deleteCustomMontageBtn_${deviceIndex}`);
+  if (deleteBtn) deleteBtn.classList.remove('hidden');
+  
+  // Save state
+  saveTreatmentPlanState();
   
   showNotification(`Loaded custom montage "${montage.name}"`, 'success');
 }
 
+// Legacy function for backward compatibility
+function loadCustomMontage(montageId) {
+  loadCustomMontageForDevice(treatmentPlanState.activeDeviceTab || 0, montageId);
+}
+
 // Delete a custom montage
-function deleteCustomMontage(montageId) {
-  if (!confirm('Are you sure you want to delete this custom montage?')) {
-    return;
-  }
-  
-  try {
-    const customMontages = loadCustomMontages();
-    const montageName = customMontages[montageId]?.name || 'montage';
-    delete customMontages[montageId];
-    localStorage.setItem(CUSTOM_MONTAGE_STORAGE_KEY, JSON.stringify(customMontages));
-    
-    showNotification(`Deleted custom montage "${montageName}"`, 'success');
-    loadCustomMontagesList();
-    populateCustomMontagesDropdown();
-  } catch (e) {
-    showNotification('Failed to delete montage', 'error');
-  }
+// Duplicate removed - consolidated array-based version above
+function deleteCustomMontage_OLD(montageId) {
+  // This function has been replaced by the array-based version above
+  return;
 }
 
 // Delete the currently selected custom montage from dropdown
@@ -24635,35 +25811,8 @@ function deleteSelectedCustomMontage() {
     return;
   }
   
-  const customMontages = loadCustomMontages();
-  const montageName = customMontages[selection]?.name || 'this custom montage';
-  
-  if (!confirm(`Are you sure you want to delete "${montageName}"? This action cannot be undone.`)) {
-    return;
-  }
-  
-  try {
-    delete customMontages[selection];
-    localStorage.setItem(CUSTOM_MONTAGE_STORAGE_KEY, JSON.stringify(customMontages));
-    
-    // Reset dropdown to default
-    clinicalSelect.value = '';
-    
-    // Hide delete button
-    const deleteBtn = document.getElementById('deleteCustomMontageBtn');
-    if (deleteBtn) deleteBtn.classList.add('hidden');
-    
-    // Update dropdown
-    populateCustomMontagesDropdown();
-    
-    // Hide montage section
-    const montageSection = document.getElementById('montageDetailsSection');
-    if (montageSection) montageSection.classList.add('hidden');
-    
-    showNotification(`Deleted custom montage "${montageName}"`, 'success');
-  } catch (e) {
-    showNotification('Failed to delete montage', 'error');
-  }
+  // Use the main deleteCustomMontage function
+  deleteCustomMontage(selection);
 }
 
 // Helper function to get montage configs
@@ -24777,6 +25926,8 @@ function addSVGGradients() {
   defs.appendChild(cathodeGradient);
   svg.insertBefore(defs, svg.firstChild);
 }
+
+
 
 // -- PATIENT PORTAL TREATMENT PLAN --
 function renderPatientTreatmentPlan() {
