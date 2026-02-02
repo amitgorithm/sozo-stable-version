@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Portal — Sozo Brain Center</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sozo: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+    html { overflow-x: hidden; }
+    
+    .input-royal { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; }
+    .input-royal:focus { border-color: #ea580c; outline: none; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1); }
+    
+    .btn-primary { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+    .btn-primary:hover { box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3); transform: translateY(-1px); }
+    
+    .btn-secondary { background: white; border: 2px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: #ea580c; color: #ea580c; }
+
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; margin: 0.2rem 0.65rem; color: white; cursor: pointer; transition: all 0.2s ease; border-radius: 0.5rem; border-left: 3px solid transparent; font-weight: 500; font-size: 0.875rem; }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.15); color: white; }
+    .nav-item.active { background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%); color: #60a5fa; border-left-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+
+    .card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: #fdba74; }
+    
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge-success { background-color: #dcfce7; color: #166534; }
+    .badge-info { background-color: #dbeafe; color: #1e40af; }
+    .badge-sozo { background-color: #fff7ed; color: #ea580c; }
+
+    /* Print Styles */
+    @media print {
+      /* Hide non-printable elements */
+      .print\\:hidden,
+      button,
+      .nav-item,
+      #sidebar,
+      .sidebar {
+        display: none !important;
+      }
+
+      /* Reset body and html for printing */
+      html, body {
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        overflow: visible !important;
+      }
+
+      /* Content area full width */
+      #contentArea {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+      }
+
+      #mainContent {
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+
+      /* Final report content optimization */
+      #finalReportContent {
+        padding: 10mm !important;
+        background: white !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* Allow content to flow across pages */
+      #finalReportContent > div {
+        page-break-inside: auto !important;
+      }
+
+      /* Remove shadows and borders for clean print */
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+        page-break-inside: auto;
+      }
+
+      /* Optimize colors for printing - but keep important backgrounds */
+      .bg-gradient-to-r:not(.bg-sozo-600),
+      .bg-gradient-to-br {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      /* Keep the report title background */
+      .bg-sozo-600 {
+        background-color: #ea580c !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Keep section backgrounds for better readability */
+      .bg-slate-50 {
+        background-color: #f8fafc !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .bg-blue-50 {
+        background-color: #eff6ff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .bg-purple-50 {
+        background-color: #faf5ff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Keep gradient backgrounds for header sections */
+      .bg-gradient-to-r.from-sozo-100,
+      .bg-gradient-to-r.from-blue-50,
+      .bg-gradient-to-r.from-slate-200 {
+        background-color: #fff7ed !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Keep doctor recommendation section styling */
+      .bg-blue-50.border-blue-300 {
+        background-color: #dbeafe !important;
+        border-color: #93c5fd !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Table header backgrounds */
+      thead {
+        background-color: #e2e8f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .bg-slate-200 {
+        background-color: #e2e8f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Keep important backgrounds visible */
+      .border-sozo-600 {
+        border-color: #ea580c !important;
+      }
+
+      .text-sozo-600,
+      .text-sozo-700 {
+        color: #ea580c !important;
+      }
+
+      /* White text on colored backgrounds */
+      .text-white {
+        color: white !important;
+      }
+
+      /* Colored text elements */
+      .text-blue-900,
+      .text-blue-800,
+      .text-blue-700 {
+        color: #1e3a8a !important;
+      }
+
+      .text-slate-900,
+      .text-slate-800,
+      .text-slate-700 {
+        color: #1e293b !important;
+      }
+
+      /* Border preservation */
+      .border-b-4 {
+        border-bottom-width: 4px !important;
+      }
+
+      .border-2 {
+        border-width: 2px !important;
+      }
+
+      /* Table optimization */
+      table {
+        page-break-inside: auto !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      tbody {
+        display: table-row-group;
+      }
+
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+
+      td, th {
+        page-break-inside: avoid;
+      }
+
+      /* Prevent awkward page breaks */
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* Keep content blocks together when possible */
+      .mb-6, .mb-4 {
+        page-break-inside: auto;
+      }
+
+      /* Spacing adjustments */
+      .mb-6 {
+        margin-bottom: 0.5rem !important;
+      }
+
+      .mb-8 {
+        margin-bottom: 0.75rem !important;
+      }
+
+      .p-6 {
+        padding: 0.5rem !important;
+      }
+
+      .p-8 {
+        padding: 0.75rem !important;
+      }
+
+      .p-4 {
+        padding: 0.4rem !important;
+      }
+
+      /* Font size adjustments for readability */
+      body {
+        font-size: 8pt !important;
+        line-height: 1.3 !important;
+        color: #000 !important;
+      }
+
+      h1 {
+        font-size: 16pt !important;
+      }
+
+      h2 {
+        font-size: 12pt !important;
+      }
+
+      h3 {
+        font-size: 11pt !important;
+      }
+
+      h4 {
+        font-size: 9pt !important;
+      }
+
+      .text-xs {
+        font-size: 6pt !important;
+      }
+
+      .text-sm {
+        font-size: 7pt !important;
+      }
+
+      .text-base {
+        font-size: 8pt !important;
+      }
+
+      .text-lg {
+        font-size: 9pt !important;
+      }
+
+      .text-xl {
+        font-size: 10pt !important;
+      }
+
+      .text-2xl {
+        font-size: 11pt !important;
+      }
+
+      .text-3xl {
+        font-size: 13pt !important;
+      }
+
+      .text-4xl {
+        font-size: 15pt !important;
+      }
+
+      /* Border visibility */
+      .border-l-4 {
+        border-left: 3px solid #ea580c !important;
+      }
+
+      /* Page breaks */
+      .page-break-before {
+        page-break-before: always;
+      }
+
+      .page-break-after {
+        page-break-after: always;
+      }
+
+      .avoid-page-break {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800">
+
+<!-- Login Page -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-orange-100 to-white relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(1200px 600px at -10% -10%, rgba(251, 146, 60, 0.15) 0%, rgba(251, 146, 60, 0.08) 40%, rgba(255,255,255,0) 70%), radial-gradient(800px 400px at 110% 110%, rgba(250, 204, 21, 0.12) 0%, rgba(255,255,255,0) 60%);"></div>
+  <div class="bg-white/95 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md relative z-10 border border-white/20">
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-4">
+        <img src="logo1.png" alt="SOZOBRAIN Logo" class="h-16 w-auto">
+      </div>
+      <p class="text-slate-600 font-medium mt-1">Center for Advanced Neuromodulation</p>
+    </div>
+
+    <div id="loginViewLogin" class="space-y-5">
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+          <div class="relative mt-1">
+            <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="email" id="loginUsername" placeholder="Enter your email" class="input-royal pl-10 py-3 bg-slate-50 border-slate-200" value="patient@sozobrain.com" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+          <div class="relative mt-1">
+            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="password" id="loginPassword" placeholder="Enter your password" class="input-royal pl-10 py-3 bg-slate-50 border-slate-200" value="patient123" />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-sozo-600 to-sozo-700 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-sozo-500/30 transition transform hover:-translate-y-0.5">Login</button>
+        <div class="mt-2"><span id="loginError" class="text-sm text-red-600"></span></div>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+        <p class="text-xs text-slate-500">For demo purposes, credentials are pre-filled</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Visit Selection Page -->
+
+
+<!-- Main Patient Portal -->
+<div id="mainPortal" class="hidden w-full h-screen">
+  <div class="flex w-full h-full bg-slate-50">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 shrink-0 flex flex-col text-white" style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1);">
+      <!-- Logo -->
+      <div class="p-4 flex items-center justify-center border-b border-slate-700">
+        <img src="logo.png" alt="Logo" class="w-32 h-auto" />
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <div class="text-xs font-bold text-slate-400 uppercase mb-4 px-2 tracking-wide">
+          Patient Portal
+        </div>
+        <div id="sidebarNav" class="space-y-1"></div>
+      </div>
+
+      <!-- User Info & Logout -->
+      <div class="p-4 border-t border-slate-700">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-full border-2 border-slate-600 shadow-md bg-gradient-to-br from-sozo-500 to-blue-600 flex items-center justify-center">
+            <i class="fa-solid fa-user text-white text-xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div id="sidebarName" class="font-bold text-white text-sm truncate">
+              Alex Johnson
+            </div>
+            <div class="text-xs text-slate-400">Patient</div>
+          </div>
+        </div>
+        <button onclick="handleLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition text-sm">
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <div id="contentArea" class="w-full min-h-full px-8 py-6">
+        <!-- Content will be loaded here -->
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<script>
+// Demo patient user
+const patientUser = {
+  id: 'PAT-001',
+  name: 'Alex Johnson',
+  role: 'patient',
+  email: 'patient@sozobrain.com',
+  password: 'patient123',
+  country: 'Germany'
+};
+
+let currentUser = null;
+let currentRole = 'patient';
+let selectedVisit = null;
+let selectedSession = null;
+
+// Login form handler
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  
+  // Validate patient credentials
+  if (email === patientUser.email && password === patientUser.password) {
+    currentUser = patientUser;
+    
+    // Save to localStorage
+    localStorage.setItem('sozo_patient_user', JSON.stringify({
+      user: currentUser,
+      timestamp: new Date().toISOString()
+    }));
+    
+    // Set first visit by default
+    selectedVisit = 'first-visit';
+    localStorage.setItem('sozo_selected_visit', selectedVisit);
+    
+    // Show main portal directly
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('mainPortal').classList.remove('hidden');
+    
+    // Initialize portal
+    renderSidebar();
+    loadSection('treatmentplan');
+    
+    errorEl.textContent = '';
+  } else {
+    errorEl.textContent = 'Invalid credentials. Please use the demo patient login.';
+  }
+});
+
+// Initialize patient portal
+function initializePortal() {
+  renderSidebar();
+  loadSection('treatmentplan'); // Default to treatment plan for first visit
+}
+
+// Render sidebar navigation
+function renderSidebar() {
+  const nav = document.getElementById('sidebarNav');
+  
+  // First visit menu items only
+  const menuItems = [
+    { key: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-file-medical' },
+    { key: 'prescription', label: 'Prescription', icon: 'fa-prescription' },
+    { key: 'finalreport', label: 'Final Report', icon: 'fa-file-medical-alt' }
+  ];
+  
+  nav.innerHTML = menuItems.map(item => `
+    <div class="nav-item" onclick="loadSection('${item.key}')" id="nav-${item.key}">
+      <i class="fa-solid ${item.icon}"></i>
+      <span>${item.label}</span>
+    </div>
+  `).join('');
+}
+
+// Load section content
+function loadSection(section) {
+  const contentArea = document.getElementById('contentArea');
+  
+  // Update active nav
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  const activeNav = document.getElementById(`nav-${section}`);
+  if (activeNav) activeNav.classList.add('active');
+  
+  // Render content based on section
+  switch(section) {
+    case 'treatmentplan':
+      renderTreatmentPlan();
+      break;
+    case 'prescription':
+      renderPrescription();
+      break;
+    case 'finalreport':
+      renderFinalReport();
+      break;
+    case 'sessionlog':
+      renderSessionLog();
+      break;
+    case 'profile':
+      renderProfile();
+      break;
+    default:
+      contentArea.innerHTML = '<div class="p-8"><h2 class="text-2xl font-bold">Section: ' + section + '</h2></div>';
+  }
+}
+
+// Assessment Navigation Helper
+function getAssessmentNavigation(currentAssessment) {
+  const assessments = [
+    { id: 'prescription', label: 'Prescription', icon: 'fa-comment-medical', color: 'bg-yellow-600' },
+    { id: 'treatmentplan', label: 'Treatment Plan', icon: 'fa-notes-medical', color: 'bg-orange-600' },
+    { id: 'finalreport', label: 'Final Report', icon: 'fa-file-medical', color: 'bg-amber-600' }
+  ];
+  
+  return `
+    <div class="mb-6 bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-route text-slate-500"></i>
+          <span class="text-sm font-bold text-slate-600">Assessment Navigation:</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          ${assessments.map(assess => `
+            <button 
+              onclick="loadSection('${assess.id}')" 
+              class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+                assess.id === currentAssessment 
+                  ? assess.color + ' text-white shadow-md' 
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }"
+              ${assess.id === currentAssessment ? 'disabled' : ''}
+            >
+              <i class="fa-solid ${assess.icon} mr-2"></i>${assess.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Function to view session details
+function viewSessionDetails(sessionNumber) {
+  selectedSession = sessionNumber;
+  loadSection('sessionlog');
+  // Scroll to top after a short delay to ensure content is rendered
+  setTimeout(() => {
+    document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+  }, 100);
+}
+
+// Render Treatment Plan
+function renderTreatmentPlan() {
+  const contentArea = document.getElementById('contentArea');
+  
+  contentArea.innerHTML = `
+    <div class="p-8">
+    
+      <!-- Assessment Navigation -->
+      ${getAssessmentNavigation('treatmentplan')}
+
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-slate-800">Treatment Plan</h2>
+        <p class="text-slate-500">Neuromodulation Treatment Planning & Documentation</p>
+      </div>
+
+      <!-- Treatment Plan Content -->
+      <div class="card p-8">
+        
+        <!-- Patient Info -->
+        <div class="mb-6">
+          <label class="text-sm font-bold text-slate-800 block mb-2">Patient's Name</label>
+          <div class="grid grid-cols-2 gap-4">
+            <input type="text" class="input-royal" placeholder="Patient Name" value="Alex Johnson" readonly />
+          </div>
+        </div>
+
+        <!-- Device Suggestions Section -->
+        <div class="mb-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 border-b-2 border-sozo-600 pb-2">Device Suggestions</h3>
+          
+          <!-- Patient View: Recommended Devices -->
+          <div class="mb-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fa-solid fa-info-circle text-blue-600"></i>
+              <p class="text-sm font-semibold text-blue-900">Your doctor has recommended the following devices based on your treatment plan:</p>
+            </div>
+            <div class="space-y-3">
+              <div class="bg-white p-4 rounded-lg border-2 border-green-400 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <i class="fa-solid fa-circle-nodes text-3xl text-green-600"></i>
+                    <div>
+                      <div class="font-bold text-lg text-slate-900">tDCS</div>
+                      <div class="text-sm text-slate-600">Transcranial Direct Current Stimulation</div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xl font-bold text-slate-800">15 sessions</div>
+                    <div class="text-sm text-sozo-600 font-semibold">€1200</div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white p-4 rounded-lg border-2 border-blue-400 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <i class="fa-solid fa-wave-square text-3xl text-blue-600"></i>
+                    <div>
+                      <div class="font-bold text-lg text-slate-900">CES Device</div>
+                      <div class="text-sm text-slate-600">Cranial Electrotherapy Stimulation</div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xl font-bold text-slate-800">12 sessions</div>
+                    <div class="text-sm text-sozo-600 font-semibold">€900</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Session Notes Section -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+              <i class="fa-solid fa-notes-medical text-white text-lg"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-blue-600">Clinical Notes</h3>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+            <!-- Session 1 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(1)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 1 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">January 15, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">45 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Patient presented with mild cognitive impairment symptoms. Initial assessment shows decreased attention span and memory recall difficulties. Patient is alert and cooperative. No adverse reactions noted during initial evaluation. Baseline cognitive scores established for treatment monitoring.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session 2 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(2)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 2 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">January 22, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">50 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Follow-up session shows patient adapting well to treatment protocol. Slight improvement in attention metrics noted. Patient reports feeling more focused during daily activities. No side effects reported. Treatment parameters adjusted based on initial response. Continue with current montage configuration.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session 3 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(3)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 3 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">January 29, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">45 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Continued improvement observed. Patient reports better sleep quality and improved focus during work tasks. Cognitive testing shows measurable gains in working memory scores. No adverse events. Patient expressing high satisfaction with treatment progress.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session 4 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(4)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 4 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">February 5, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">50 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Patient continues to show positive response. Family members report noticeable improvements in daily functioning. Enhanced attention span evident during session. Memory recall tasks showing consistent improvement. Treatment parameters maintained at current levels.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session 5 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(5)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 5 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">February 12, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">45 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Mid-treatment assessment completed. Significant improvement in cognitive markers compared to baseline. Patient tolerating treatment well with no side effects. Enhanced executive function noted. Recommend continuing current protocol through completion of treatment cycle.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Session 6 Notes -->
+            <div class="mb-6 cursor-pointer hover:shadow-lg transition-all" onclick="viewSessionDetails(6)">
+              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg">
+                <i class="fa-solid fa-file-medical text-blue-600 text-lg"></i>
+                <h4 class="text-lg font-bold text-slate-800">Session 6 Notes</h4>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-500 hover:border-blue-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Date</p>
+                    <p class="font-semibold text-slate-900">February 19, 2025</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Duration</p>
+                    <p class="font-semibold text-slate-900">50 minutes</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-600 mb-1">Clinician</p>
+                    <p class="font-semibold text-slate-900">Dr. Sarah Johnson</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 mb-2">Clinical Observations</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">Steady progress maintained. Patient reports improved mental clarity and reduced brain fog. Cognitive assessments show continued gains in attention and processing speed. Family engagement remains positive. No treatment modifications required.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Treatment Progress Summary -->
+            <div class="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-5 border-2 border-green-300">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-chart-line text-green-600 text-xl mt-1"></i>
+                <div>
+                  <h5 class="font-bold text-slate-800 mb-2">Treatment Progress Summary</h5>
+                  <p class="text-sm text-slate-700 mb-3">Patient has completed 6 treatment sessions with positive results. Cognitive improvements documented throughout the treatment cycle including enhanced attention, memory, and processing speed. Patient demonstrated excellent tolerance to tDCS therapy with zero adverse events. Quality of life improvements confirmed by patient and family reports.</p>
+                  <div class="mt-3 p-3 bg-white rounded-lg border border-green-200">
+                    <p class="text-sm font-semibold text-green-800"><i class="fa-solid fa-check-circle mr-2"></i>Treatment Progress: Ongoing with significant therapeutic benefit</p>
+                    <p class="text-sm text-slate-700 mt-2"><i class="fa-solid fa-calendar-check mr-2"></i>Next Steps: Continue with treatment protocol and monitor cognitive improvement markers in upcoming sessions.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+// Render other sections (simplified)
+function renderPrescription() {
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = `
+    <div class="p-8">
+      ${getAssessmentNavigation('prescription')}
+
+      <!-- Header -->
+      <div class="mb-6">
+        <h2 class="text-2xl font-black text-slate-900">Prescription</h2>
+        <p class="text-slate-600 mt-1">Medications and treatment instructions from your doctor</p>
+      </div>
+
+      <!-- Doctor Notes Card -->
+      <div class="card p-6 border border-slate-200 bg-gradient-to-r from-yellow-50 to-white">
+        <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-comment-medical mr-2"></i>Doctor's Notes & Comments</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase">Recommendations</label>
+            <div class="bg-white rounded-lg border border-slate-200 p-4">
+              <p class="text-slate-700">Recommend initiating cognitive rehabilitation therapy 3 times per week. Family should be educated on dementia care strategies and home safety modifications. Patient would benefit from structured daily routines and cognitive stimulation activities. Consider referral to occupational therapy for ADL assessment. Schedule follow-up appointment in 3 months to reassess cognitive function and adjust treatment plan accordingly.</p>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase mb-3 block">
+              <i class="fa-solid fa-pills mr-2"></i>Prescribed Medications
+            </label>
+            
+            <!-- Patient View - Medication Grid -->
+            <div class="bg-white rounded-lg border-2 border-slate-200 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                      <th class="px-4 py-3 text-left font-bold">Medicine Name</th>
+                      <th class="px-4 py-3 text-center font-bold">Dosage</th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-sunrise mr-1"></i>Morning
+                      </th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-sun mr-1"></i>Afternoon
+                      </th>
+                      <th class="px-4 py-3 text-center font-bold">
+                        <i class="fa-solid fa-moon mr-1"></i>Dinner
+                      </th>
+                      <th class="px-4 py-3 text-left font-bold">Instructions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Donepezil</div>
+                        <div class="text-xs text-slate-500">Cholinesterase Inhibitor</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">5mg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">with water</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Vitamin B12</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">1000mcg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Before Meal</span>
+                          <span class="text-slate-600 text-sm">on empty stomach</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Vitamin D</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">2000 IU</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">for better absorption</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-blue-50 transition">
+                      <td class="px-4 py-4">
+                        <div class="font-bold text-slate-900">Omega-3 Fatty Acids</div>
+                        <div class="text-xs text-slate-500">Supplement</div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">1000mg</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-lg">1</span>
+                      </td>
+                      <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">After Meal</span>
+                          <span class="text-slate-600 text-sm">twice daily</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Legend -->
+              <div class="bg-slate-50 px-4 py-3 border-t border-slate-200">
+                <div class="flex items-center gap-6 text-xs text-slate-600">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-6 h-6 bg-green-500 text-white rounded-full font-bold text-xs">1</span>
+                    <span>Take this many pills</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-6 h-6 bg-slate-200 text-slate-400 rounded-full font-bold">-</span>
+                    <span>Skip this time</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded font-bold">After Meal</span>
+                    <span>Take after eating</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">Before Meal</span>
+                    <span>Take before eating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Additional Notes for Patient -->
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="font-bold text-blue-900 mb-2">
+                <i class="fa-solid fa-info-circle mr-2"></i>Important Medication Information
+              </h4>
+              <ul class="text-sm text-blue-800 space-y-1">
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Patient tolerating all medications well with no reported side effects</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Donepezil dose may be increased to 10mg after 4-6 weeks if tolerated</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>Monitor for potential drug interactions with new prescriptions</li>
+                <li><i class="fa-solid fa-check mr-2 text-blue-600"></i>No known drug allergies on record</li>
+                <li><i class="fa-solid fa-exclamation-triangle mr-2 text-orange-600"></i>Please inform your doctor of any side effects immediately</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSessionLog() {
+  const contentArea = document.getElementById('contentArea');
+  
+  // Header
+  const headerHTML = `
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Session Log</h2>
+            <p class="text-sm text-slate-600">Detailed instructions and guidance for each treatment session</p>
+          </div>
+          <button onclick="selectedSession = null; loadSection('treatmentplan');" class="btn-primary">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Back to Treatment Plan
+          </button>
+        </div>
+      </div>
+  `;
+  
+  contentArea.innerHTML = headerHTML + getSessionContent() + `</div>`;
+}
+
+function getSessionContent() {
+  const session1 = `
+      <!-- Session 1 -->
+      <div class="card p-8 mb-6" id="session-1">
+        <h3 class="text-xl font-bold text-blue-600 mb-6 pb-3 border-b-2 border-blue-200">Session 1: Introduction to Your Treatment and Device</h3>
+        
+        <!-- What This Session Focused On -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What This Session Focused On:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+            <li>Introducing your tDCS and CES treatment devices and explaining how the procedure works</li>
+          </ul>
+        </div>
+
+        <!-- What You Did Today -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Did Today:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+            <li>Learned how the tDCS/CES devices work and experienced your first treatment session</li>
+            <li>Watched electrode placement on scalp positions (F3, F4) and device setup with 2mA current</li>
+            <li>Tried cognitive tasks during your 30-minute stimulation session</li>
+          </ul>
+          <div class="flex gap-3 mt-4">
+            <img src="How-it-works-tDCS.jpg" alt="Treatment Session" class="w-32 h-32 object-cover rounded-lg shadow-sm">
+            <img src="Untitled-design-1-1536x1536.png" alt="Device Setup" class="w-32 h-32 object-cover rounded-lg shadow-sm">
+          </div>
+        </div>
+
+        <!-- Exercises You Can Practice at Home -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">Exercises You Can Practice at Home:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+            <li>Memory Exercises (word recall games, pattern recognition)</li>
+            <li>Relaxation Activities (mindfulness meditation)</li>
+            <li>Focus Tasks (attention training, mental arithmetic)</li>
+            <li>Breathing Exercises (stress reduction techniques)</li>
+          </ul>
+        </div>
+
+        <!-- What You Learned -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Learned:</h4>
+          <p class="text-sm text-slate-700">You became familiar with the tDCS/CES devices and treatment protocol for cognitive enhancement.</p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-blue-50 rounded p-2">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What's Next:</h4>
+          <p class="text-sm text-slate-700">You are ready for the next steps in your treatment journey - observing the full procedure.</p>
+        </div>
+      </div>
+  `;
+  
+  const session2 = `
+      <!-- Session 2 -->
+      <div class="card p-8 mb-6" id="session-2">
+        <h3 class="text-xl font-bold text-blue-600 mb-6 pb-3 border-b-2 border-blue-200">Session 2: Familiarization With the Procedure</h3>
+        
+        <!-- What This Session Focused On -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What This Session Focused On:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Observing the complete tDCS/CES treatment procedure from start to finish</li>
+          </ul>
+        </div>
+
+        <!-- What You Did Today -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Did Today:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Watched the complete setup process including skin preparation and electrode positioning</li>
+            <li>Confirmed understanding of montage configuration and safety protocols</li>
+            <li>Repeated cognitive exercises with improved baseline scores</li>
+            <li>Shared your experience of sensations (tingling, warmth) in a supportive environment</li>
+          </ul>
+        </div>
+
+        <!-- Exercises You Can Practice at Home -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">Exercises You Can Practice at Home:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Working Memory Tasks (digit span exercises)</li>
+            <li>Attention Training (sustained focus activities)</li>
+            <li>Cognitive Stimulation (puzzles and brain teasers)</li>
+            <li>Relaxation Techniques (progressive muscle relaxation)</li>
+          </ul>
+        </div>
+
+        <!-- What You Learned -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Learned:</h4>
+          <p class="text-sm text-slate-700">You understand each step of the treatment process and are building confidence in the tDCS therapy protocol.</p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-blue-50 rounded p-2">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What's Next:</h4>
+          <p class="text-sm text-slate-700">You will begin hands-on practice with clinician guidance in the next session.</p>
+        </div>
+      </div>
+  `;
+  
+  const session3 = `
+      <!-- Session 3 -->
+      <div class="card p-8 mb-6" id="session-3">
+        <h3 class="text-xl font-bold text-blue-600 mb-6 pb-3 border-b-2 border-blue-200">Session 3: Guided Hands-On Practice</h3>
+        
+        <!-- What This Session Focused On -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What This Session Focused On:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Beginning hands-on practice with the tDCS/CES devices under clinician guidance</li>
+          </ul>
+        </div>
+
+        <!-- What You Did Today -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Did Today:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Practiced electrode placement on correct scalp positions (F3, F4)</li>
+            <li>Received real-time coaching on saline application and device connection</li>
+            <li>Programmed the device to 2mA current level and started a 30-minute session</li>
+            <li>Applied the device multiple times with supervision</li>
+          </ul>
+        </div>
+
+        <!-- Exercises You Can Practice at Home -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">Exercises You Can Practice at Home:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Cognitive Stimulation Tasks (word games, number sequences)</li>
+            <li>Memory Enhancement (visual and verbal memory exercises)</li>
+            <li>Concentration Practice (timed focus activities)</li>
+            <li>Mental Flexibility Exercises (task switching drills)</li>
+          </ul>
+        </div>
+
+        <!-- What You Learned -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Learned:</h4>
+          <p class="text-sm text-slate-700">You can successfully apply the devices with guidance and are developing the skills for independent use.</p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-blue-50 rounded p-2">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What's Next:</h4>
+          <p class="text-sm text-slate-700">You will practice performing the procedure independently with clinician support available.</p>
+        </div>
+      </div>
+  `;
+  
+  const session45 = `
+      <!-- Sessions 4 & 5 -->
+      <div class="card p-8 mb-6" id="session-4">
+        <h3 class="text-xl font-bold text-blue-600 mb-6 pb-3 border-b-2 border-blue-200">Sessions 4 & 5: Independent Practice With Support</h3>
+        
+        <!-- What This Session Focused On -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What This Session Focused On:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Performing the complete tDCS/CES procedure independently while clinician observes</li>
+          </ul>
+        </div>
+
+        <!-- What You Did Today -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Did Today:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Completed full setup independently: prepared electrodes, positioned headband, applied saline</li>
+            <li>Set device to 2mA and ran complete 30-minute session with cognitive exercises</li>
+            <li>Demonstrated mastery of treatment protocol with minimal assistance</li>
+            <li>Practiced problem-solving for electrode repositioning and saline adjustment</li>
+          </ul>
+        </div>
+
+        <!-- Exercises You Can Practice at Home -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">Exercises You Can Practice at Home:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Advanced Memory Tasks (complex recall exercises)</li>
+            <li>Processing Speed Activities (rapid response drills)</li>
+            <li>Executive Function Training (planning and organizing tasks)</li>
+            <li>Sustained Attention Exercises (extended focus sessions)</li>
+          </ul>
+        </div>
+
+        <!-- What You Learned -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Learned:</h4>
+          <p class="text-sm text-slate-700">You can manage your cognitive enhancement therapy independently and are tracking improvements in attention and memory.</p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-blue-50 rounded p-2">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What's Next:</h4>
+          <p class="text-sm text-slate-700">Final confirmation of competence and preparation for home treatment in Session 6.</p>
+        </div>
+      </div>
+  `;
+  
+  const session6 = `
+      <!-- Session 6 -->
+      <div class="card p-8 mb-6" id="session-6">
+        <h3 class="text-xl font-bold text-blue-600 mb-6 pb-3 border-b-2 border-blue-200">Session 6: Independent Use & Home Preparation</h3>
+        
+        <!-- What This Session Focused On -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What This Session Focused On:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Final competence assessment and preparation for independent home treatment</li>
+          </ul>
+        </div>
+
+        <!-- What You Did Today -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Did Today:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Demonstrated full independent ability for 15-session tDCS (€1200) and 12-session CES (€900) treatment</li>
+            <li>Reviewed safety checklist, troubleshooting guide, and electrode replacement schedule</li>
+            <li>Received comprehensive digital materials package (protocol documents, manuals, videos)</li>
+            <li>Scheduled 3-month follow-up appointment for progress assessment</li>
+          </ul>
+        </div>
+
+        <!-- Materials Provided -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">Materials Provided:</h4>
+          <ul class="list-disc list-inside text-sm text-slate-700 space-y-1 space-y-1">
+            <li>Complete tDCS/CES treatment protocol document</li>
+            <li>Device operation manual with electrode montage diagrams</li>
+            <li>Video tutorials for setup and troubleshooting</li>
+            <li>Cognitive exercise guide and progress tracking sheets</li>
+          </ul>
+        </div>
+
+        <!-- What You Learned -->
+        <div class="mb-6 bg-blue-50 rounded-lg p-4">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What You Learned:</h4>
+          <p class="text-sm text-slate-700">You are fully prepared to manage your tDCS/CES therapy at home with confidence and independence.</p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-blue-50 rounded p-2">
+          <h4 class="text-md font-bold text-blue-700 mb-3">What's Next:</h4>
+          <p class="text-sm text-slate-700">Begin your home treatment sessions and return in 3 months for cognitive assessment and treatment plan adjustment.</p>
+        </div>
+      </div>
+  `;
+  
+  const importantNote = `
+      <!-- Important Note -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <i class="fa-solid fa-info-circle text-blue-600 text-xl mt-1"></i>
+          <div>
+            <h4 class="font-bold text-blue-900 mb-2">Important Note</h4>
+            <p class="text-sm text-blue-800">These 6 training sessions are designed to ensure you feel completely comfortable and confident with your tDCS/CES cognitive enhancement treatment. The goal is to prepare you for independent home use of the devices over your 15-session treatment cycle. Please don't hesitate to ask questions about electrode placement, device settings, or the cognitive exercises during any session. Your clinician is here to support your learning journey at your own pace as you work toward improving attention span and memory recall.</p>
+          </div>
+        </div>
+      </div>
+  `;
+  
+  // Return content based on selectedSession
+  if (selectedSession === 1) {
+    return session1 + importantNote;
+  } else if (selectedSession === 2) {
+    return session2 + importantNote;
+  } else if (selectedSession === 3) {
+    return session3 + importantNote;
+  } else if (selectedSession === 4 || selectedSession === 5) {
+    return session45 + importantNote;
+  } else if (selectedSession === 6) {
+    return session6 + importantNote;
+  } else {
+    // Show all sessions
+    return session1 + session2 + session3 + session45 + session6 + importantNote;
+  }
+}
+
+function renderProfile() {
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = `
+    <div class="max-w-3xl">
+      <h2 class="text-3xl font-bold text-slate-900 mb-6">My Profile</h2>
+      <div class="card p-6">
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-bold text-slate-600">Name</label>
+            <p class="text-lg font-semibold text-slate-900">${currentUser.name}</p>
+          </div>
+          <div>
+            <label class="text-sm font-bold text-slate-600">Email</label>
+            <p class="text-lg text-slate-900">${currentUser.email}</p>
+          </div>
+          <div>
+            <label class="text-sm font-bold text-slate-600">Patient ID</label>
+            <p class="text-lg text-slate-900">${currentUser.id}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Download Final Report as PDF
+function downloadReportAsPDF() {
+  const element = document.getElementById('finalReportContent');
+  const patientName = 'Alex_Johnson';
+  const currentDate = new Date().toISOString().split('T')[0];
+  const filename = `Assessment_Report_${patientName}_${currentDate}.pdf`;
+  
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      letterRendering: true,
+      logging: false
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait',
+      compress: true
+    },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+  
+  // Show loading indicator
+  const button = event.target.closest('button');
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Generating PDF...';
+  button.disabled = true;
+  
+  html2pdf().set(opt).from(element).save().then(() => {
+    // Reset button
+    button.innerHTML = originalContent;
+    button.disabled = false;
+  }).catch((error) => {
+    console.error('PDF generation error:', error);
+    button.innerHTML = originalContent;
+    button.disabled = false;
+    alert('Error generating PDF. Please try using Print instead.');
+  });
+}
+
+function renderFinalReport() {
+  const contentArea = document.getElementById('contentArea');
+  
+  // Generate random data for patient view
+  const randomData = {
+    qolMobility: Math.floor(Math.random() * 5) + 1,
+    qolSelfCare: Math.floor(Math.random() * 5) + 1,
+    qolUsualActivities: Math.floor(Math.random() * 5) + 1,
+    qolPainDiscomfort: Math.floor(Math.random() * 5) + 1,
+    qolDepressionAnxiety: Math.floor(Math.random() * 5) + 1,
+    qolVAS: Math.floor(Math.random() * 10) + 1,
+    compassOrthostatic: Math.floor(Math.random() * 41),
+    compassVasomotor: Math.floor(Math.random() * 41),
+    compassSecretomotor: Math.floor(Math.random() * 41),
+    compassGastrointestinal: Math.floor(Math.random() * 41),
+    compassBladder: Math.floor(Math.random() * 41),
+    compassPupillomotor: Math.floor(Math.random() * 41),
+    amtsScore: Math.floor(Math.random() * 11),
+    mocaScore: Math.floor(Math.random() * 31),
+    dsrsScore: Math.floor(Math.random() * 55),
+    gdsStage: `Stage ${Math.floor(Math.random() * 5) + 1}`,
+    iadlScore: Math.floor(Math.random() * 9),
+    dassDepression: Math.floor(Math.random() * 29),
+    dassAnxiety: Math.floor(Math.random() * 21),
+    dassStress: Math.floor(Math.random() * 35)
+  };
+
+  contentArea.innerHTML = `
+    <div class="p-8">
+      ${getAssessmentNavigation('finalreport')}
+      
+      <div id="finalReportContent" class="p-8 bg-white w-full">
+        
+        <!-- Header with Logo and Contact -->
+        <div class="text-center border-b-4 border-sozo-600 pb-4 mb-6">
+          <h1 class="text-4xl font-black text-sozo-600 mb-2">SOZ&#937; BRAIN CENTER</h1>
+          <p class="text-sm text-slate-600">
+            <i class="fa-solid fa-phone mr-1"></i> +357 25 864013 | 
+            <i class="fa-solid fa-envelope mr-1"></i> info@sozobraincenter.com | 
+            <i class="fa-solid fa-globe mr-1"></i> www.sozobraincenter.com
+          </p>
+          <p class="text-xs text-slate-500 mt-3">Privacy Notice available at www.sozobraincenter.com</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 justify-end mb-6 print:hidden">
+          <button onclick="downloadReportAsPDF()" class="bg-sozo-600 text-white px-4 py-2 rounded font-bold hover:bg-sozo-700">
+            <i class="fa-solid fa-file-pdf mr-2"></i>Download PDF
+          </button>
+        </div>
+
+        <!-- Report Title -->
+        <div class="bg-sozo-600 text-white p-4 rounded mb-6 text-center">
+          <h2 class="text-2xl font-bold">ASSESSMENT FINDINGS REPORT</h2>
+          <p class="text-sm mt-1 opacity-90">DEMENTIA</p>
+        </div>
+
+        <!-- Patient Information Section -->
+        <div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-200 mb-6">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Patient Information</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-3 rounded-lg">
+              <p class="text-xs font-bold text-slate-600 uppercase">Name/Surname</p>
+              <p class="text-sm sm:text-base font-bold text-slate-900">Alex Johnson</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <p class="text-xs font-bold text-slate-600 uppercase">Date</p>
+              <p class="text-sm sm:text-base font-bold text-slate-900">${new Date().toLocaleDateString()}</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <p class="text-xs font-bold text-slate-600 uppercase">Date of Birth</p>
+              <p class="text-sm sm:text-base font-bold text-slate-900">01/15/1958</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <p class="text-xs font-bold text-slate-600 uppercase">Patient ID</p>
+              <p class="text-sm sm:text-base font-bold text-slate-900">P001</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-3 rounded-lg">
+              <label class="text-xs font-bold text-slate-600 uppercase block mb-2">Complaints</label>
+              <div class="text-sm text-slate-700 p-2 bg-slate-50 rounded border border-slate-200">
+                Memory difficulties, confusion with daily tasks, occasional disorientation
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <label class="text-xs font-bold text-slate-600 uppercase block mb-2">Medical History</label>
+              <div class="text-sm text-slate-700 p-2 bg-slate-50 rounded border border-slate-200">
+                Mild Cognitive Impairment
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <label class="text-xs font-bold text-slate-600 uppercase block mb-2">External Diagnosis</label>
+              <div class="text-sm text-slate-700 p-2 bg-slate-50 rounded border border-slate-200">
+                DEMENTIA
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded-lg">
+              <label class="text-xs font-bold text-slate-600 uppercase block mb-2">Referred by</label>
+              <div class="text-sm text-slate-700 p-2 bg-slate-50 rounded border border-slate-200">
+                Dr. Michael Stevens, General Practitioner
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multifactorial Assessment Report Header -->
+        <div class="bg-gradient-to-r from-sozo-100 to-orange-50 p-3 sm:p-4 rounded-lg mb-4 border-l-4 border-sozo-600">
+          <h3 class="text-lg sm:text-xl font-bold text-sozo-700 flex items-center"><i class="fa-solid fa-clipboard-list mr-2"></i>Multifactorial Assessment Report</h3>
+        </div>
+
+        <!-- Quality of Life Section -->
+        <div class="mb-6">
+          <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2 flex items-center"><i class="fa-solid fa-heart mr-2 text-red-500"></i>Quality of Life</h4>
+          <p class="text-xs sm:text-sm font-bold text-slate-700 mb-2">General Health (EQ-5D-5L)</p>
+          <div class="overflow-x-auto mb-3">
+            <table class="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
+              <thead class="bg-gradient-to-r from-slate-200 to-slate-100">
+                <tr>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Mobility</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Self-Care</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Activities</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Pain</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Mood</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">VAS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-blue-50">
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2">${new Date().toLocaleDateString()}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolMobility}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolSelfCare}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolUsualActivities}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolPainDiscomfort}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolDepressionAnxiety}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.qolVAS}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-slate-600 italic">Scale: 1=No problem, 2=Slight, 3=Moderate, 4=Severe, 5=Unable/Extreme</p>
+        </div>
+
+        <!-- Autonomic Nervous System Assessment -->
+        <div class="mb-6">
+          <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2 flex items-center"><i class="fa-solid fa-wave-square mr-2 text-purple-500"></i>Autonomic Nervous System (COMPASS-31)</h4>
+          <div class="overflow-x-auto mb-3">
+            <table class="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
+              <thead class="bg-gradient-to-r from-slate-200 to-slate-100">
+                <tr>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Orthostatic</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Vasomotor</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Secretomotor</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">GI</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Bladder</th>
+                  <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Pupil</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-purple-50">
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2">${new Date().toLocaleDateString()}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassOrthostatic}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassVasomotor}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassSecretomotor}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassGastrointestinal}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassBladder}</td>
+                  <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center font-bold">${randomData.compassPupillomotor}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cognitive Assessments -->
+        <div class="mb-6">
+          <!-- AMTS -->
+          <div class="mb-4">
+            <p class="text-sm font-bold text-slate-800 mb-2">AMTS – Abbreviated Mental Test Score</p>
+            <table class="w-full border-collapse border border-slate-300 mb-2">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">AMTS Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.amtsScore}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-xs text-slate-600 italic">A score of 6 or less suggests delirium or dementia, although further tests are necessary to confirm the diagnosis.</p>
+          </div>
+
+          <!-- MoCA -->
+          <div class="mb-4">
+            <p class="text-sm font-bold text-slate-800 mb-2">MoCA – Montreal Cognitive Assessment</p>
+            <table class="w-full border-collapse border border-slate-300">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">MoCA Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.mocaScore}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- DSRS -->
+          <div class="mb-4">
+            <p class="text-sm font-bold text-slate-800 mb-2">DSRS – Dementia Severity Rating Scale</p>
+            <table class="w-full border-collapse border border-slate-300 mb-2">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">DSRS Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.dsrsScore}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-xs text-slate-600 italic">0-18: Mild, 19-36: Moderate, 37-54: Severe</p>
+          </div>
+
+          <!-- GDS -->
+          <div class="mb-4">
+            <p class="text-sm font-bold text-slate-800 mb-2">GDS – Global Deterioration Scale</p>
+            <table class="w-full border-collapse border border-slate-300">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">GDS Stage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.gdsStage}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- IADL -->
+          <div class="mb-4">
+            <p class="text-sm font-bold text-slate-800 mb-2">IADL – Lawton Instrumental Activities of Daily Living Scale</p>
+            <table class="w-full border-collapse border border-slate-300 mb-2">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">IADL Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.iadlScore}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-xs text-slate-600 italic">Score ranges from 0 (low function, dependent) to 8 (high function, independent).</p>
+          </div>
+        </div>
+
+        <!-- Mental Health Section -->
+        <div class="mb-6">
+          <h4 class="text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2">Mental Health</h4>
+          <p class="text-sm font-bold text-slate-700 mb-2">Assessment of Psychological Distress</p>
+          <p class="text-sm font-bold text-slate-800 mb-3">DASS-21</p>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse border border-slate-300">
+              <thead class="bg-slate-200">
+                <tr>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Depression<br/>(0-28)</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Anxiety<br/>(0-20)</th>
+                  <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Stress<br/>(0-34)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.dassDepression}</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.dassAnxiety}</td>
+                  <td class="border border-slate-300 px-3 py-2 text-sm text-center font-bold text-lg">${randomData.dassStress}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Conclusion and Recommendations -->
+        <div class="space-y-4 mb-6">
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Multifactorial Assessment Conclusion</h4>
+            <p class="text-sm text-slate-700">The comprehensive analysis reveals significant hypoactivity in the left dorsolateral prefrontal cortex, consistent with the patient's reported low mood and lack of motivation. Concurrent elevated Beta wave activity suggests underlying anxiety and hyperarousal, contributing to sleep disturbances.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Recommendation</h4>
+            <p class="text-sm text-slate-700">We recommend a non-invasive neuromodulation protocol to regulate cortical excitability, paired with cognitive behavioral strategies to reinforce neural changes. Lifestyle modifications focusing on sleep hygiene and reduced stimulant intake are advised to support the biological intervention.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Recommendation - Device</h4>
+            <p class="text-sm text-slate-700">We recommend using the Sozo Brain Mapper device for biweekly assessment sessions to monitor cortical activity changes. Daily use of transcranial stimulation device is advised for optimal therapeutic outcomes.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Recommendation - Medical History</h4>
+            <p class="text-sm text-slate-700">Given the patient's previous medication trials and adverse reactions, we recommend avoiding SSRIs. Continue current supplementation regimen and monitor liver function annually due to medication history.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Neuromodulation</h4>
+            <p class="text-sm text-slate-700">The selected modality is Repetitive Transcranial Magnetic Stimulation (rTMS) targeting the left DLPFC to enhance neuronal firing rates. An inhibitory protocol may be applied to the right hemisphere subsequently to dampen anxiety-related overactivity.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Primary neuromodulation goals</h4>
+            <p class="text-sm text-slate-700">The primary objective is to achieve a clinically significant reduction in depressive symptoms (aiming for >50% reduction in standardized depression scores). We focus on restoring emotional regulation and increasing the patient's drive and motivation for daily activities.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Additional goals</h4>
+            <p class="text-sm text-slate-700">Secondary goals include stabilizing sleep architecture to ensure restorative rest and reducing subjective feelings of brain fog. We also aim to improve executive functions, specifically attention span and working memory, which have been impacted by the mood disorder.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Schedule of neuromodulation sessions</h4>
+            <p class="text-sm text-slate-700 mb-2">The initial acute phase consists of 5 sessions per week for a duration of 4 to 6 weeks, totaling 20-30 sessions. Each session will last approximately 20 minutes and should ideally be scheduled at the same time each day to establish a routine.</p>
+            <p class="text-xs text-slate-600 italic">Note: Manufacturers propose limiting the use of tDCS products to a maximum of 30 mins per day and recommend against their use with children below the age of 18.</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h4 class="text-sm font-bold text-slate-800 mb-2">Follow up assessment</h4>
+            <p class="text-sm text-slate-700">A clinical review will be conducted after session 10 to evaluate tolerance and early symptomatic improvement. A full repeat of the Multifactorial Assessment, including Brain Mapping, is required after session 20 to quantify physiological progress. Based on these results, the treatment plan will be adjusted or transitioned to a maintenance schedule.</p>
+          </div>
+        </div>
+
+        <!-- Doctor Recommendation -->
+        <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-300 mb-6">
+          <h4 class="text-lg font-bold text-blue-900 mb-3">Doctor Recommendation</h4>
+          <p class="text-sm text-blue-800 mb-4">
+            As a member of the multidisciplinary medical team of SOZ&#937; Brain Center, I have reviewed the findings 
+            in this report and recommend this patient proceeds with neuromodulation treatment.
+          </p>
+          <div class="grid grid-cols-2 gap-8 mt-6">
+            <div>
+              <label class="text-xs font-bold text-blue-700 block mb-1">Signature & Name</label>
+              <div class="bg-white p-3 rounded border border-blue-400">
+                <p class="text-sm font-bold text-slate-900">Dr. James Wilson </p>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-blue-700 block mb-1">Date</label>
+              <div class="bg-white p-3 rounded border border-blue-400">
+                <p class="text-sm font-bold text-slate-900">${new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-4 border-t-2 border-slate-300 text-center text-xs text-slate-500">
+          <p>SOZ&#937; Brain Center collects and processes data according to our Privacy Notice</p>
+          <p class="mt-1">prepared in accordance with the provisions of the EU General Data Protection Regulation (GDPR)</p>
+          <p class="mt-1 font-bold">Page 1 of 4</p>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+// Logout from visit selection
+// Logout from main portal
+function handleLogout() {
+  localStorage.removeItem('sozo_patient_user');
+  localStorage.removeItem('sozo_selected_visit');
+  
+  document.getElementById('mainPortal').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  
+  currentUser = null;
+  selectedVisit = null;
+}
+
+// Auto-restore session on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const savedUser = localStorage.getItem('sozo_patient_user');
+  
+  if (savedUser) {
+    try {
+      const userData = JSON.parse(savedUser);
+      const savedTime = new Date(userData.timestamp);
+      const now = new Date();
+      const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+      
+      // Session valid for 24 hours
+      if (hoursDiff < 24) {
+        currentUser = userData.user;
+        
+        // Always set to first visit
+        selectedVisit = 'first-visit';
+        localStorage.setItem('sozo_selected_visit', selectedVisit);
+        
+        // Go directly to portal
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('mainPortal').classList.remove('hidden');
+        initializePortal();
+      } else {
+        // Session expired
+        localStorage.removeItem('sozo_patient_user');
+        localStorage.removeItem('sozo_selected_visit');
+      }
+    } catch (e) {
+      console.error('Error restoring session:', e);
+    }
+  }
+});
+</script>
+
+</body>
+</html>
