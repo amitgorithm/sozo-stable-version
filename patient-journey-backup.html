@@ -185,10 +185,6 @@
             overflow: visible;
             padding-bottom: 24px;
             z-index: 1;
-            position: relative;
-            min-height: fit-content;
-            word-wrap: break-word;
-            box-sizing: border-box;
         }
 
         .block-card.expanded:hover {
@@ -237,7 +233,7 @@
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            margin-bottom: 12px;
+            margin: 0 auto 12px auto;
             flex-shrink: 0;
         }
 
@@ -267,13 +263,25 @@
             font-size: 14px;
             font-weight: 700;
             color: #0f172a;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            text-align: center;
+            width: 100%;
+            padding: 0 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
         }
 
         .block-desc {
             font-size: 12px;
             color: #64748b;
-            line-height: 1.4;
+            line-height: 1.3;
+            text-align: center;
+            width: 100%;
+            padding: 0 8px;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         /* STATUS OVERLAY */
@@ -300,6 +308,7 @@
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            text-align: center;
         }
 
         .block-card.completed .block-status {
@@ -731,73 +740,73 @@
             margin-top: 16px;
             opacity: 0;
             width: 100%;
-            position: relative;
-            padding: 0;
+            text-align: center;
+            word-wrap: break-word;
+            padding: 0 6px;
             box-sizing: border-box;
         }
 
         .block-card.expanded .block-expanded-details {
-            max-height: 1000px;
+            max-height: 800px;
             overflow: visible;
             opacity: 1;
-            padding: 8px 12px 16px 12px;
-            margin-bottom: 8px;
-            width: calc(100% - 24px);
-            margin-left: auto;
-            margin-right: auto;
+            padding: 6px;
+            text-align: center;
+            word-wrap: break-word;
+            box-sizing: border-box;
         }
 
         .block-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
             background: #f8fafc;
-            padding: 14px;
+            padding: 10px;
             border-radius: 8px;
             position: relative;
             z-index: 1;
-            margin: 0;
-            width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
+            text-align: center;
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .block-info-item {
             display: flex;
             flex-direction: column;
-            min-width: 0;
+            text-align: center;
+            padding: 6px 4px;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            hyphens: auto;
-            text-align: left;
-            align-items: flex-start;
-            justify-content: flex-start;
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .block-info-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
             color: #64748b;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-            line-height: 1.2;
+            letter-spacing: 0.2px;
+            margin-bottom: 3px;
+            text-align: center;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            line-height: 1.2;
         }
 
         .block-info-value {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             color: #0f172a;
-            line-height: 1.3;
+            text-align: center;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            hyphens: auto;
-            white-space: normal;
-            text-overflow: ellipsis;
+            line-height: 1.2;
             max-width: 100%;
+            hyphens: auto;
         }
 
         .action-button {
@@ -835,33 +844,34 @@
         .activity-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 4px;
+            margin-top: 10px;
             position: relative;
             z-index: 100;
+            justify-content: center;
+            text-align: center;
+            padding: 0 6px;
             width: 100%;
             box-sizing: border-box;
-            padding: 0;
-            justify-content: flex-start;
-            align-items: flex-start;
         }
 
         .activity-tag {
-            padding: 6px 10px;
+            padding: 3px 6px;
             background: rgba(0, 161, 228, 0.15);
             color: #0369a1;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
             z-index: 101;
+            word-wrap: break-word;
+            text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 120px;
-            text-align: center;
+            max-width: 80px;
             box-sizing: border-box;
         }
 
@@ -894,62 +904,67 @@
         }
 
         .detail-section {
-            margin-top: 12px;
+            margin-top: 10px;
             position: relative;
             z-index: 50;
             overflow: visible;
-            padding: 0;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            background: rgba(248, 250, 252, 0.7);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             width: 100%;
             box-sizing: border-box;
-            word-wrap: break-word;
         }
 
         .detail-section-title {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
             color: #64748b;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+            margin-bottom: 4px;
+            text-align: center;
             word-wrap: break-word;
-            overflow-wrap: break-word;
+            line-height: 1.1;
         }
 
         .block-action-buttons {
             display: flex;
-            gap: 8px;
-            margin-top: 16px;
+            gap: 4px;
+            margin-top: 10px;
             width: 100%;
             flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 6px;
             box-sizing: border-box;
-            padding: 0;
-            justify-content: flex-start;
-            align-items: center;
         }
 
         .block-action-btn {
             flex: 1;
-            min-width: 100px;
-            max-width: 140px;
-            padding: 8px 12px;
+            min-width: 80px;
+            max-width: 100px;
+            padding: 5px 6px;
             border-radius: 6px;
             border: 2px solid;
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 2px;
             position: relative;
             z-index: 10;
             pointer-events: auto;
+            text-align: center;
+            word-wrap: break-word;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             box-sizing: border-box;
-            text-align: center;
         }
 
         .block-action-btn.view {
@@ -1102,10 +1117,10 @@
 
         .start-button {
             width: 100%;
-            padding: 10px 16px;
+            padding: 10px 12px;
             border-radius: 8px;
             border: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -1113,6 +1128,8 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            text-align: center;
+            margin-top: auto;
         }
 
         .start-button.primary {
@@ -2292,7 +2309,7 @@
                     <!-- FNON Assessment Questions -->
                     <div style="background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px;">
                         <h4 style="font-weight: 700; color: #0f172a; margin: 0 0 16px 0; font-size: 16px;">Assessment Questions</h4>
-                        <div style="space-y: 16px;">
+                        <div style="margin-bottom: 16px;">
                             <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
                                 <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">1</div>
                                 <div style="flex: 1;">
@@ -2411,7 +2428,7 @@
                                 <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Dorsal Attention Mapping Interface (DAMI)</h3>
                             </div>
                             <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Hypervigilance, sustained attention deficits, distractibility</p>
-                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
                                     <span style="font-weight: 500; color: #475569;">Attention Orientation Stability</span>
                                     <div style="display: flex; gap: 8px; align-items: center;">
@@ -2438,7 +2455,7 @@
                                 <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Central Executive Network (CEN)</h3>
                             </div>
                             <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Impaired decision-making, working memory deficits, executive dysfunction</p>
-                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
                                     <span style="font-weight: 500; color: #475569;">Working Memory Function</span>
                                     <div style="display: flex; gap: 8px; align-items: center;">
@@ -2465,7 +2482,7 @@
                                 <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Limbic Emotional Processing</h3>
                             </div>
                             <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Emotional lability, impaired emotional recognition, heightened reactivity</p>
-                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
                                     <span style="font-weight: 500; color: #475569;">Emotional Regulation Ability</span>
                                     <div style="display: flex; gap: 8px; align-items: center;">
@@ -2589,29 +2606,6 @@
     </div>
     <!-- END DOCTOR'S NOTES MODAL -->
     
-    <!-- EEG PDF VIEWER MODAL -->
-    <div id="eegPdfViewerModal" class="assessment-modal" onclick="closeEegPdfViewer(event)" style="z-index: 1002;">
-        <div class="assessment-modal-content" style="width: 95vw; height: 95vh; max-width: none; max-height: none; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
-            <div class="assessment-modal-header">
-                <div class="assessment-modal-title">
-                    <h2>Here is your EEG Report</h2>
-                </div>
-                <button class="assessment-modal-close" onclick="closeEegPdfViewer()" title="Close modal">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <div style="flex: 1; overflow: auto; background: #f1f5f9; padding: 16px;">
-                <iframe id="eegReportFrame" src="" style="width: 100%; height: 100%; border: none; border-radius: 8px;"></iframe>
-            </div>
-            <div class="assessment-modal-header" style="border-top: 1px solid #e2e8f0;">
-                <button class="assessment-modal-close" onclick="closeEegPdfViewer()" style="background: #64748b; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold;">
-                    <i class="fa-solid fa-arrow-left mr-2"></i>Close
-                </button>
-            </div>
-        </div>
-    </div>
-    <!-- END EEG PDF VIEWER MODAL -->
-    
     <script>
         // PATIENT STATE - SINGLE SOURCE OF TRUTH
         const patientState = {
@@ -2625,6 +2619,15 @@
                     startDate: '2025-09-15',
                     completedDate: '2025-10-20',
                     blocks: [
+                        { 
+                            id: 'anamnesis-1', 
+                            name: 'Anamnesis', 
+                            desc: 'Patient Symptoms',
+                            type: 'anamnesis',
+                            status: 'completed', 
+                            completedBy: 'Clinical Assistant Maria', 
+                            completedAt: '2025-09-15' 
+                        },
                         { 
                             id: 'fnon-1', 
                             name: 'FNON', 
@@ -2650,16 +2653,7 @@
                             type: 'prs',
                             status: 'completed', 
                             completedBy: 'Dr. James', 
-                            completedAt: '2025-09-25',
-                            totalScore: 28,
-                            maxScore: 50,
-                            scorePercentage: 56,
-                            severity: 'Moderate',
-                            diseaseScores: [
-                                { disease: 'Depression', score: 12, max: 20 },
-                                { disease: 'Anxiety', score: 10, max: 15 },
-                                { disease: 'Sleep', score: 6, max: 15 }
-                            ]
+                            completedAt: '2025-09-25' 
                         },
                         { 
                             id: 'ana-1', 
@@ -2711,8 +2705,7 @@
                             type: 'anamnesis',
                             status: 'completed', 
                             completedBy: 'Clinical Assistant Maria', 
-                            completedAt: '2026-01-29',
-                            diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
+                            completedAt: '2026-01-15' 
                         },
                         { 
                             id: 'fnon-2', 
@@ -2742,16 +2735,7 @@
                             status: 'active', 
                             currentProgress: 40, 
                             performer: 'Clinical Assistant Alex', 
-                            startedAt: '2026-01-30',
-                            totalScore: 18,
-                            maxScore: 50,
-                            scorePercentage: 36,
-                            severity: 'Mild',
-                            diseaseScores: [
-                                { disease: 'Depression', score: 8, max: 20 },
-                                { disease: 'Anxiety', score: 6, max: 15 },
-                                { disease: 'Sleep', score: 4, max: 15 }
-                            ]
+                            startedAt: '2026-01-30' 
                         },
                         { 
                             id: 'ana-2', 
@@ -2793,7 +2777,6 @@
                     startDate: '2026-04-15',
                     completedDate: null,
                     blocks: [
-                        { id: 'anamnesis-3', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'fnon-3', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'eeg-3', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'prs-3', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', completedBy: null, completedAt: null },
@@ -2816,7 +2799,6 @@
                     startDate: '2026-07-15',
                     completedDate: null,
                     blocks: [
-                        { id: 'anamnesis-4', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'fnon-4', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'eeg-4', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'prs-4', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', completedBy: null, completedAt: null },
@@ -2944,28 +2926,6 @@
                         statusText = 'Locked';
                     }
 
-                    let scoreHTML = '';
-                    if (block.type === 'prs' && (block.status === 'completed' || block.status === 'active') && block.totalScore !== undefined) {
-                        scoreHTML = `
-                            <div style="margin-top: 12px; padding: 8px; background: #f0f9ff; border-radius: 4px; border-left: 3px solid #0ea5e9;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <span style="font-weight: 600; color: #0f172a; font-size: 12px;">Score Summary</span>
-                                    <span style="background: ${block.scorePercentage > 50 ? '#fca5a5' : '#fbbf24'}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;">${block.severity}</span>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                    <div>
-                                        <p style="margin: 0; font-size: 11px; color: #64748b;">Total Score</p>
-                                        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">${block.totalScore}/${block.maxScore}</p>
-                                    </div>
-                                    <div>
-                                        <p style="margin: 0; font-size: 11px; color: #64748b;">Severity</p>
-                                        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">${block.scorePercentage}%</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-
                     blockDiv.innerHTML = `
                         <div class="block-status">
                             <span class="block-status-icon">${statusIcon}</span>
@@ -2976,7 +2936,6 @@
                         </div>
                         <div class="block-name">${block.name}</div>
                         <div class="block-desc">${block.desc}</div>
-                        ${scoreHTML}
                     `;
 
                     blocksDiv.appendChild(blockDiv);
@@ -3304,7 +3263,7 @@
                                 }
                                 if (currentRole === 'doctor') {
                                     detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'brain-mapping\')" title="Edit EEG analysis (Doctor only)"><i class="fa-solid fa-pen"></i> Edit Details</button>';
-                                } else if (currentRole === 'clinical-assistant' || currentRole === 'patient') {
+                                } else if (currentRole === 'clinical-assistant') {
                                     detailsContent += '<button class="block-action-btn disabled" title="Only doctors can edit EEG data"><i class="fa-solid fa-lock"></i> Edit Restricted</button>';
                                 }
                                 detailsContent += '</div>';
@@ -3379,10 +3338,10 @@
                             if (permissions.canViewReports || permissions.canEditData) {
                                 detailsContent += '<div class="block-action-buttons">';
                                 if (permissions.canViewReports) {
-                                    detailsContent += '<button class="block-action-btn view" onclick="openPrsModal(false)" title="View current PRS assessment"><i class="fa-solid fa-eye"></i> View Details</button>';
+                                    detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'prs\')" title="View current PRS assessment"><i class="fa-solid fa-eye"></i> View Details</button>';
                                 }
                                 if (permissions.canEditData) {
-                                    detailsContent += '<button class="block-action-btn edit" onclick="window.location.href=\'prs-edit.html?mode=continue\'" title="Continue PRS assessment"><i class="fa-solid fa-play"></i> Continue Assessment</button>';
+                                    detailsContent += '<button class="block-action-btn edit" onclick="continueBlock(\''+block.id+'\')" title="Continue PRS assessment"><i class="fa-solid fa-play"></i> Continue Assessment</button>';
                                 }
                                 detailsContent += '</div>';
                             }
@@ -3511,7 +3470,7 @@
                                     </button>
                                 </div>
                             `;
-                        } else if (currentRole === 'clinical-assistant' || currentRole === 'patient') {
+                        } else if (currentRole === 'clinical-assistant') {
                             detailsContent += `
                                 <div class="block-actions tooltip" style="margin-top: 12px;">
                                     <button class="start-button disabled">
@@ -3560,12 +3519,12 @@
                                 <div class="block-actions" style="margin-top: 12px;">
                                     <button class="start-button primary" onclick="startNewPatientAssessment('${block.id}', '${block.name}')">
                                         <i class="fa-solid fa-play"></i>
-                                        Start ${block.type === 'doctor-notes' ? 'Notes' : block.type === 'treatment-plan' ? 'Planning' : block.type === 'final-report' ? 'Report' : 'Assessment'}
+                                        Start ${block.type === 'anamnesis' ? 'Anamnesis' : block.type === 'doctor-notes' ? 'Notes' : block.type === 'treatment-plan' ? 'Planning' : block.type === 'final-report' ? 'Report' : 'Assessment'}
                                     </button>
                                 </div>
                             `;
                         } else if (permissions.canViewScores) {
-                            const waitingFor = block.type === 'fnon' ? 'clinical assistant' : 'doctor';
+                            const waitingFor = block.waitingFor || (block.type === 'fnon' ? 'clinical assistant' : 'doctor');
                             detailsContent += '<div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; margin-top: 12px;"><span style="font-size: 12px; color: #64748b;">Waiting for ' + waitingFor + '</span></div>';
                         }
                     }
@@ -3934,16 +3893,14 @@
 
             // Define all blocks in completed state
             const allCompletedBlocks = [
-                {
-                    id: 'anamnesis-completed',
+                { 
+                    id: 'anamnesis-completed', 
                     name: 'Anamnesis', 
-                    desc: 'Patient Symptoms',
-                    type: 'anamnesis',
-                    status: 'completed',
+                    desc: 'Patient Symptoms', 
+                    type: 'anamnesis', 
+                    status: 'completed', 
                     completedBy: 'Clinical Assistant Maria',
                     completedAt: '2026-01-29',
-                    score: null,
-                    channelsCaptured: null,
                     diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
                 },
                 { 
@@ -4135,7 +4092,7 @@
                             }
                             if (currentRole === 'doctor') {
                                 detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'brain-mapping\')" title="Edit EEG analysis (Doctor only)"><i class="fa-solid fa-pen"></i> Edit Details</button>';
-                            } else if (currentRole === 'clinical-assistant' || currentRole === 'patient') {
+                            } else if (currentRole === 'clinical-assistant') {
                                 detailsContent += '<button class="block-action-btn disabled" title="Only doctors can edit EEG data"><i class="fa-solid fa-lock"></i> Edit Restricted</button>';
                             }
                             detailsContent += '</div>';
@@ -4604,7 +4561,7 @@
                 'receptionist': {
                     canStart: [],
                     canView: ['anamnesis', 'fnon', 'brain-mapping', 'prs', 'doctors-notes', 'treatment-plan', 'final-report'],
-                    showStartButtons: false,
+                    showStartButtons: true,
                     label: 'Receptionist'
                 },
                 'patient': {
@@ -4645,11 +4602,12 @@
                 let actionHTML = '';
                 if (permissions.showStartButtons && !isLocked) {
                     if (canStart) {
+                        const buttonText = block.id === 'anamnesis' ? 'Start Anamnesis' : 'Start Assessment';
                         actionHTML = `
                             <div class="block-actions" style="margin-top: auto;">
                                 <button class="start-button primary" onclick="startWorkingBlock('${block.id}', '${block.name}')">
                                     <i class="fa-solid fa-play"></i>
-                                    Start Assessment
+                                    ${buttonText}
                                 </button>
                             </div>
                         `;
@@ -4862,7 +4820,7 @@
         function continueBlock(blockId) {
             // Check if this is a PRS block
             if (blockId && blockId.includes('prs')) {
-                window.location.href = 'prs-edit.html?mode=continue';
+                openPrsModal(true);
             } else {
                 alert(`Continuing block: ${blockId}\\n\\nThis would open the data entry interface.`);
             }
@@ -4891,13 +4849,6 @@
 
                 // Prevent body scroll when modal is open
                 document.body.style.overflow = 'hidden';
-            } else if (blockType === 'brain-mapping') {
-                // Show EEG PDF report modal
-                const pdfModal = document.getElementById('eegPdfViewerModal');
-                const pdfFrame = document.getElementById('eegReportFrame');
-                pdfFrame.src = 'eeg.pdf';
-                pdfModal.classList.add('open');
-                document.body.style.overflow = 'hidden';
             } else if (blockType === 'prs') {
                 // Open PRS modal in read-only mode
                 openPrsModal(false);
@@ -4905,26 +4856,8 @@
                 // Open Doctor's Notes modal in read-only mode
                 openDoctorNotesModal(false);
             } else if (blockType === 'treatment-plan') {
-                // Store current role in session data before navigating to treatment plan
-                const treatmentPlanSession = {
-                    patientId: selectedPatientData?.id || 'unknown',
-                    patientName: selectedPatientData?.firstName && selectedPatientData?.lastName 
-                        ? `${selectedPatientData.firstName} ${selectedPatientData.lastName}`
-                        : 'Unknown Patient',
-                    currentRole: currentRole,
-                    blockType: 'treatment-plan',
-                    viewMode: 'edit',
-                    assessmentId: null,
-                    returnUrl: window.location.href
-                };
-                localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanSession));
-                
-                // Route based on role: doctors to full editor, clinical assistants to notes-only
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                // Navigate to treatment-plan.html in the same tab
+                window.location.href = './treatment-plan.html';
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
                 window.location.href = './final-report.html';
@@ -4983,43 +4916,38 @@
                 window.location.href = 'anamnesis.html';
                 return;
             } else if (blockType === 'fnon') {
-                // Navigate to fnon-edit.html page
-                window.location.href = 'fnon-edit.html';
-                return;
-            } else if (blockType === 'brain-mapping') {
-                // Navigate to eeg.html page for doctor role
-                if (currentRole === 'doctor') {
-                    const patientNameElement = document.getElementById('patientFullName');
-                    const patientName = patientNameElement ? patientNameElement.textContent : 'Patient';
-                    
-                    const sessionData = {
-                        currentRole: currentRole,
-                        patientName: patientName,
-                        blockType: 'brain-mapping',
-                        viewMode: 'edit',
-                        returnUrl: window.location.href
-                    };
-                    localStorage.setItem('eegSession', JSON.stringify(sessionData));
-                    window.location.href = 'eeg.html';
-                } else {
-                    alert('Only doctors can edit EEG brain mapping assessments.');
-                }
+                // Get patient name from header or state
+                const patientNameElement = document.getElementById('patientFullName');
+                const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
+
+                // Update modal with patient information (guard missing elements)
+                const apEl = document.getElementById('assessmentPatientName');
+                if (apEl) apEl.textContent = patientName;
+                const modalNameEl = document.getElementById('modalPatientName');
+                if (modalNameEl) modalNameEl.textContent = patientName;
+
+                // Render FNON sections in editable mode
+                renderFnonModal(true);
+
+                // Show the modal
+                const modal = document.getElementById('fnonAssessmentModal');
+                if (modal) modal.classList.add('open');
+
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
+
                 return;
             } else if (blockType === 'prs') {
-                // Navigate to prs-edit.html page
-                window.location.href = 'prs-edit.html';
+                // Open PRS modal in edit mode
+                openPrsModal(true);
                 return;
             } else if (blockType === 'doctor-notes') {
                 // Open Doctor's Notes modal in edit mode
                 openDoctorNotesModal(true);
                 return;
             } else if (blockType === 'treatment-plan') {
-                // Navigate to treatment plan based on role
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                // Navigate to treatment-plan.html in the same tab
+                window.location.href = './treatment-plan.html';
                 return;
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
@@ -5263,35 +5191,6 @@
                 </div>
             </div>`;
 
-            // Clinical Notes Section - After Summary
-            html += `<div style="margin-bottom: 24px; background: white; border-radius: 8px; border-left: 4px solid #8b5cf6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Clinical Notes</p>
-                <p style="font-size: 13px; color: #0f172a; margin: 0; line-height: 1.5;">Patient tolerated assessment well. No adverse effects reported. Functional networks show expected patterns with minor variations in motor network activation.</p>
-            </div>`;
-
-            // Activities Performed Section
-            const activities = [
-                { name: 'Crossword', image: 'crossword.avif' },
-                { name: 'Toe Touch', image: 'exercise.png' },
-                { name: 'Walking', image: 'walking.jpeg' },
-                { name: 'Sudoku', image: 'sudoku.jpg' },
-                { name: 'Balance Test', image: 'balance.jpeg' }
-            ];
-
-            html += `<div style="margin-bottom: 24px;">
-                <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">Activities Performed</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">`;
-            
-            activities.forEach(activity => {
-                html += `<div style="background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <img src="${activity.image}" alt="${activity.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">
-                    <p style="font-size: 12px; font-weight: 600; color: #0f172a; margin: 0;">${activity.name}</p>
-                </div>`;
-            });
-
-            html += `</div>
-            </div>`;
-
             // Assessment Overview cards
             html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
                 <div style="background: white; border-radius: 8px; border-left: 4px solid #3b82f6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
@@ -5378,6 +5277,12 @@
 
             html += `</div></div>`;
 
+            // Notes section
+            html += `<div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 14px;">Clinical Notes</label>
+                <textarea id="fnonNotesField" placeholder="Add any clinical notes or observations..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; ${!editable ? 'background: #f8fafc; opacity: 0.8;' : 'background: white;'}" ${!editable ? 'readonly' : ''}>${fnonState.notes || ''}</textarea>
+            </div>`;
+
             // Action buttons
             html += `<div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;">`;
             if (editable) {
@@ -5401,6 +5306,11 @@
         }
 
         function saveFnonEdits() {
+            // Capture notes from textarea if it exists
+            const notesField = document.getElementById('fnonNotesField');
+            if (notesField) {
+                fnonState.notes = notesField.value;
+            }
             // Re-render in read-only mode to show saved changes
             renderFnonModal(false);
             // Optionally: You can add console.log to verify saved state
@@ -5495,61 +5405,9 @@
 
             let html = '';
 
-            // SCORE SUMMARY AT THE TOP
-            const totalScore = prsState.totalScore || 0;
-            const maxScore = 100;
-            const scorePercentage = (totalScore / maxScore) * 100;
-            const scoreSeverity = scorePercentage > 70 ? 'Severe' : scorePercentage > 50 ? 'Moderate' : scorePercentage > 30 ? 'Mild' : 'Normal';
-            const severityColor = scorePercentage > 70 ? '#ef4444' : scorePercentage > 50 ? '#f59e0b' : scorePercentage > 30 ? '#eab308' : '#10b981';
-
-            html += `<div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border-radius: 8px; color: white;">
-                <div style="text-align: center;">
-                    <p style="font-size: 14px; margin: 0 0 8px 0; opacity: 0.9;">Patient Score</p>
-                    <h2 style="font-size: 48px; font-weight: 900; margin: 0 0 12px 0;">${totalScore}</h2>
-                    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-                        <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px;">
-                            <p style="font-size: 12px; margin: 0 0 4px 0; opacity: 0.9;">Severity</p>
-                            <p style="font-size: 16px; font-weight: 700; margin: 0; color: ${severityColor};">${scoreSeverity}</p>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px;">
-                            <p style="font-size: 12px; margin: 0 0 4px 0; opacity: 0.9;">Percentage</p>
-                            <p style="font-size: 16px; font-weight: 700; margin: 0;">${scorePercentage.toFixed(1)}%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-
-            // PRS SUMMARY
-            html += `<div style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <h3 style="font-weight: 700; font-size: 16px; color: #0f172a; margin: 0 0 12px 0;">Summary of PRS Assessment</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
-                    <div style="padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #3b82f6;">
-                        <p style="font-size: 12px; color: #64748b; margin: 0 0 6px 0;">Assessment Type</p>
-                        <p style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">${config.title}</p>
-                    </div>
-                    <div style="padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #8b5cf6;">
-                        <p style="font-size: 12px; color: #64748b; margin: 0 0 6px 0;">Date</p>
-                        <p style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <div style="padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #10b981;">
-                        <p style="font-size: 12px; color: #64748b; margin: 0 0 6px 0;">Status</p>
-                        <p style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">${editable ? 'In Progress' : 'Completed'}</p>
-                    </div>
-                </div>
-            </div>`;
-
-            // CLINICAL NOTES
+            // Title and description
             html += `<div style="margin-bottom: 24px;">
-                <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 14px;">Clinical Notes</label>
-                <textarea id="prsNotesField" placeholder="Add any clinical notes..." style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; ${!editable ? 'background: #f8fafc; opacity: 0.8;' : 'background: white;'}" ${!editable ? 'readonly' : ''}>${prsState.notes || ''}</textarea>
-            </div>`;
-
-            // DIVIDER
-            html += `<hr style="border: none; border-top: 2px solid #e2e8f0; margin: 24px 0;">`;
-
-            // Title and description for questionnaire section
-            html += `<div style="margin-bottom: 24px;">
-                <h2 style="font-size: 20px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0;">Assessment Questionnaire</h2>
+                <h2 style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0;">${config.title}</h2>
                 <p style="font-size: 14px; color: #64748b; margin: 0;">Personalized Response System Assessment</p>
             </div>`;
 
@@ -5893,15 +5751,6 @@
             document.body.style.overflow = 'auto';
         }
 
-        function closeEegPdfViewer(event) {
-            if (event && event.target !== event.currentTarget && event.target.closest('.assessment-modal-close') === null) {
-                return;
-            }
-            const modal = document.getElementById('eegPdfViewerModal');
-            if (modal) modal.classList.remove('open');
-            document.body.style.overflow = 'auto';
-        }
-
         function renderDoctorNotesModal(editable) {
             const body = document.getElementById('doctorNotesModalBody');
             if (!body) return;
@@ -5980,13 +5829,9 @@
             saveDoctorNotes();
             // Close doctor notes modal
             closeDoctorNotesModal();
-            // Open treatment plan based on role
+            // Open treatment plan modal
             setTimeout(() => {
-                if (window.currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                window.location.href = './treatment-plan.html';
             }, 300);
         }
 
@@ -6134,7 +5979,7 @@
                 window.location.href = 'anamnesis.html';
                 return;
             }
-
+            
             // Handle FNON assessment
             if (assessmentId === 'fnon-paid') {
                 const patientNameElement = document.getElementById('patientFullName');

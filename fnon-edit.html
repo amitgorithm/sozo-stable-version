@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNON Assessment - Editable</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --sozo-600: #f47520;
+            --orange-primary: #f47520;
+            --orange-lighter: rgba(244, 117, 32, 0.1);
+            --brand-blue: #00a1e4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-info { background-color: #dbeafe; color: #1e40af; }
+        .badge-warning { background-color: #fef08a; color: #854d0e; }
+        .badge-danger { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="p-8">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
+            <p class="text-slate-500">Functional Network of Neurons - Assessment Overview</p>
+        </div>
+
+        <!-- FNON Assessment Read-Only Display -->
+        <div class="card p-6 mb-8 bg-gradient-to-br from-blue-50 to-blue-50 border-2 border-blue-200">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-blue-300">
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-900">Assessment Overview</h3>
+                    <p class="text-sm text-blue-600">Functional Network Assessment - Editable</p>
+                </div>
+                <i class="fa-solid fa-brain text-4xl text-blue-500 opacity-70"></i>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500 shadow-sm">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Assessment Status</p>
+                    <p class="text-2xl font-bold text-slate-700">Assessment Ready</p>
+                    <p class="text-xs text-slate-500 mt-2">Review the questions below to understand this assessment</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 border-l-4 border-brand-blue shadow-sm">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Assessment Type</p>
+                    <p class="text-lg font-bold text-brand-blue">Neural Network Evaluation</p>
+                    <p class="text-xs text-slate-500 mt-2">7 functional networks assessment</p>
+                </div>
+            </div>
+
+            <!-- Assessment Summary with Scores -->
+            <div class="mt-6 p-6 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border-2 border-slate-300 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">
+                        <i class="fa-solid fa-chart-line mr-2 text-sozo-600"></i>
+                        Assessment Summary
+                    </h3>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Assessed by</p>
+                        <p class="text-sm font-bold text-slate-800">Dr. James Wilson</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Total Score</p>
+                        <p class="text-4xl font-black text-slate-900" id="totalScore">0</p>
+                        <p class="text-xs text-slate-500 mt-1">out of 30 points</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-slate-600 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Score Percentage</p>
+                        <p class="text-4xl font-black text-slate-900" id="scorePercentage">0%</p>
+                        <p class="text-xs text-slate-500 mt-1">deficit index</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-orange-500 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Assessment Date</p>
+                        <p class="text-lg font-black text-slate-900" id="assessmentDate">Today</p>
+                        <p class="text-xs text-slate-500 mt-1">completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activities Performed Section -->
+            <div class="card p-6 mb-6">
+                <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">Activities Performed</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;" id="availableActivities">
+                    <!-- Activity capsules will be inserted here -->
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 12px; font-weight: 600; color: #64748b; margin: 0 0 8px 0;">Selected Activities:</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;" id="selectedActivities">
+                        <p style="color: #94a3b8; font-size: 12px; margin: 0;">No activities selected</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Notes Section -->
+            <div style="margin-bottom: 24px; background: white; border-radius: 8px; border-left: 4px solid #8b5cf6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 24px;">
+                <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Clinical Notes</p>
+                <textarea id="clinicalNotesField" placeholder="Patient tolerated assessment well. No adverse effects reported..." style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: white;"></textarea>
+            </div>
+
+            <!-- FNON Assessment Questions - Read Only -->
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+                <h4 class="font-bold text-slate-900 mb-4 text-lg">Assessment Questions</h4>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Motor Network Function</p>
+                            <p class="text-sm text-slate-600">How well can you perform coordinated movements and physical tasks?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Cognitive Processing Speed</p>
+                            <p class="text-sm text-slate-600">How quickly can you process information and make decisions?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Memory & Recall</p>
+                            <p class="text-sm text-slate-600">How effectively do you recall recent and past events?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Attention & Focus</p>
+                            <p class="text-sm text-slate-600">How well can you concentrate on a single task?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">5</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Language & Communication</p>
+                            <p class="text-sm text-slate-600">How clear and effective is your verbal and written communication?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">6</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Emotional Regulation</p>
+                            <p class="text-sm text-slate-600">How well do you manage emotions and respond to stress?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">7</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 mb-1">Sleep & Autonomic Function</p>
+                            <p class="text-sm text-slate-600">How satisfied are you with your sleep patterns and autonomic regulation?</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-700">Scoring:</span>
+                                <span class="badge badge-info text-xs">0=Normal</span>
+                                <span class="badge badge-warning text-xs">1=Mild</span>
+                                <span class="badge badge-danger text-xs">2=Deficit</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Box -->
+            <div class="mt-4 p-4 bg-blue-100 border border-blue-300 rounded-lg">
+                <p class="text-xs text-blue-900"><strong>ℹ️ Note:</strong> This assessment evaluates functional brain networks. Each question is scored on a scale from 0-2, where 0 indicates normal function, 1 indicates mild concerns, and 2 indicates significant deficits. This assessment helps create a personalized treatment plan.</p>
+            </div>
+        </div>
+
+        <!-- Section A: Clinical Checklist - Editable -->
+        <div class="card p-0 mb-8 overflow-hidden">
+            <div class="bg-slate-800 text-white p-4 font-bold flex justify-between">
+                <span>Section A: Clinical Checklist</span>
+                <span class="text-xs font-normal opacity-70">0=Normal, 1=Mild, 2=Deficit</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- DMN Network -->
+                <div class="border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">DMN</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Rumination, Mind-wandering</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Gaze fixation</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_gaze" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_gaze" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_gaze" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Romberg dual-task</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_romberg" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_romberg" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_romberg" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Clock drawing</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_clock" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_clock" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="dmn_clock" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CEN Network -->
+                <div class="border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">CEN</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Poor planning, Memory deficits</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Digit Span</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_digit" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_digit" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_digit" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Serial subtraction (100-7)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_serial" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_serial" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_serial" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Motor sequencing</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_motor" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_motor" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="cen_motor" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SN Network -->
+                <div class="border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">SN</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Anxiety, Hyperarousal</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Startle response</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_startle" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_startle" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_startle" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Interoceptive awareness</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_interoceptive" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_interoceptive" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="sn_interoceptive" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SMN Network -->
+                <div class="border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">SMN</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Motor/Sensory deficits</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Finger-to-nose</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_finger" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_finger" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_finger" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Heel-to-shin</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_heel" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_heel" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_heel" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Rapid movements</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_rapid" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_rapid" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="smn_rapid" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limbic Network -->
+                <div class="border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">Limbic</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Emotional lability, Apathy</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Facial expression check</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_facial" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_facial" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_facial" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Emotional reactivity</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_emotional" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_emotional" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="limbic_emotional" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attention Network -->
+                <div class="pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg text-sozo-700">Attention</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 italic mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Distractibility, Neglect</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Cancellation test</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_cancellation" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_cancellation" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_cancellation" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm bg-slate-50 p-3 rounded border-l-4 border-l-blue-300">
+                            <span class="font-medium text-slate-700">Eye tracking</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-600">Score:</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_eye" value="0"> <span class="badge badge-info text-xs">0</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_eye" value="1"> <span class="badge badge-warning text-xs">1</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" name="attention_eye" value="2"> <span class="badge badge-danger text-xs">2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Save Button Section -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+            <button onclick="saveFnonAssessment()" style="flex: 1; background: #0ea5e9; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);" onmouseover="this.style.background='#0284c7'; this.style.boxShadow='0 4px 12px rgba(14, 165, 233, 0.4)';" onmouseout="this.style.background='#0ea5e9'; this.style.boxShadow='0 2px 8px rgba(14, 165, 233, 0.3)';">
+                <i class="fa-solid fa-save" style="margin-right: 8px;"></i>Save Assessment
+            </button>
+            <button onclick="window.history.back()" style="flex: 1; background: white; color: #64748b; padding: 12px 24px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='white';">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i>Cancel
+            </button>
+        </div>
+
+        <style>
+            .activity-capsule {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 12px;
+                background: white;
+                border: 2px solid #e2e8f0;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                color: #0f172a;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+            }
+            
+            .activity-capsule:hover {
+                border-color: #0ea5e9;
+                background: #0ea5e9;
+                color: white;
+            }
+            
+            .activity-capsule:hover .add-btn {
+                display: inline-block;
+            }
+            
+            .add-btn {
+                display: none;
+                width: 16px;
+                height: 16px;
+                line-height: 16px;
+                text-align: center;
+                font-weight: bold;
+                margin-left: 4px;
+            }
+            
+            .image-preview {
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 8px;
+                width: 80px;
+                height: 80px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                object-fit: cover;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s;
+            }
+            
+            .activity-capsule:hover .image-preview {
+                opacity: 1;
+            }
+            
+            .selected-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                background: #0ea5e9;
+                color: white;
+                border-radius: 16px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+            
+            .remove-tag {
+                cursor: pointer;
+                font-weight: bold;
+                margin-left: 4px;
+            }
+        </style>
+        <div class="card p-6 bg-gradient-to-r from-sozo-600 to-orange-500 text-white border-0">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Ready for Assessment?</h3>
+                    <p class="text-sm opacity-90">Contact your healthcare provider to schedule your FNON assessment when you're ready to participate.</p>
+                </div>
+                <button onclick="saveFnonAssessment()" class="bg-white text-sozo-600 px-6 py-2 rounded-lg font-bold hover:bg-slate-100 transition flex items-center gap-2">
+                    Save Changes <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize date
+        document.getElementById('assessmentDate').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        // Update score calculations
+        function updateScores() {
+            let totalScore = 0;
+            const scorableFields = [
+                'dmn_gaze', 'dmn_romberg', 'dmn_clock',
+                'cen_digit', 'cen_serial', 'cen_motor',
+                'sn_startle', 'sn_interoceptive',
+                'smn_finger', 'smn_heel', 'smn_rapid',
+                'limbic_facial', 'limbic_emotional',
+                'attention_cancellation', 'attention_eye'
+            ];
+
+            scorableFields.forEach(field => {
+                const selected = document.querySelector(`input[name="${field}"]:checked`);
+                if (selected) {
+                    totalScore += parseInt(selected.value);
+                }
+            });
+
+            const maxScore = 30;
+            const percentage = (totalScore / maxScore) * 100;
+
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('scorePercentage').textContent = percentage.toFixed(1) + '%';
+        }
+
+        // Listen for changes
+        document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.addEventListener('change', updateScores);
+        });
+
+        // Initialize activities
+        function initializeActivities() {
+            const activities = [
+                { name: 'Crossword', value: 'crossword', image: 'crossword.avif' },
+                { name: 'Toe Touch', value: 'toe-touch', image: 'exercise.png' },
+                { name: 'Walking', value: 'walking', image: 'walking.jpeg' },
+                { name: 'Sudoku', value: 'sudoku', image: 'sudoku.jpg' },
+                { name: 'Balance Test', value: 'balance-test', image: 'balance.jpeg' }
+            ];
+
+            const container = document.getElementById('availableActivities');
+            container.innerHTML = '';
+
+            activities.forEach(activity => {
+                const capsule = document.createElement('div');
+                capsule.className = 'activity-capsule';
+                capsule.style.position = 'relative';
+                capsule.innerHTML = `
+                    ${activity.name}
+                    <img class="image-preview" src="${activity.image}" alt="${activity.name}">
+                    <span class="add-btn">+</span>
+                `;
+
+                capsule.addEventListener('click', () => addActivity(activity.name, activity.value));
+                container.appendChild(capsule);
+            });
+        }
+
+        function addActivity(name, value) {
+            const selected = document.getElementById('selectedActivities');
+            
+            // Check if activity already selected
+            if (selected.querySelector(`[data-value="${value}"]`)) {
+                return;
+            }
+
+            // Remove placeholder text if exists
+            if (selected.querySelector('p')) {
+                selected.innerHTML = '';
+            }
+
+            const tag = document.createElement('div');
+            tag.className = 'selected-tag';
+            tag.setAttribute('data-value', value);
+            tag.innerHTML = `
+                ${name}
+                <span class="remove-tag" onclick="removeActivity('${value}')">×</span>
+            `;
+
+            selected.appendChild(tag);
+        }
+
+        function removeActivity(value) {
+            const tag = document.querySelector(`[data-value="${value}"]`);
+            if (tag) {
+                tag.remove();
+            }
+
+            // Show placeholder if no activities selected
+            const selected = document.getElementById('selectedActivities');
+            if (selected.children.length === 0) {
+                selected.innerHTML = '<p style="color: #94a3b8; font-size: 12px; margin: 0;">No activities selected</p>';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeActivities();
+        });
+
+        function saveFnonAssessment() {
+            // Capture clinical notes
+            const clinicalNotes = document.getElementById('clinicalNotesField').value;
+            
+            // Capture selected activities
+            const selectedActivities = [];
+            document.querySelectorAll('[data-value]').forEach(tag => {
+                selectedActivities.push(tag.getAttribute('data-value'));
+            });
+
+            console.log('Assessment Data:', {
+                clinicalNotes: clinicalNotes,
+                activitiesPerformed: selectedActivities
+            });
+            
+            alert('FNON Assessment saved successfully!');
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

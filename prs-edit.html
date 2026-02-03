@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRS Assessment - Editable</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --sozo-600: #f47520;
+            --orange-primary: #f47520;
+            --orange-lighter: rgba(244, 117, 32, 0.1);
+            --brand-blue: #00a1e4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-info { background-color: #dbeafe; color: #1e40af; }
+        .badge-warning { background-color: #fef08a; color: #854d0e; }
+        .badge-danger { background-color: #fee2e2; color: #991b1b; }
+
+        .question-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border-left: 4px solid #f97316;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="email"], input[type="date"], input[type="number"],
+        select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .radio-group, .checkbox-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .likert-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .likert-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="p-8">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">PRS Assessment</h2>
+            <p class="text-slate-500">Personalized Response System - Assessment Overview</p>
+        </div>
+
+        <!-- PRS Assessment Display -->
+        <div class="card p-6 mb-8 bg-gradient-to-br from-orange-50 to-orange-50 border-2 border-orange-200">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-orange-300">
+                <div>
+                    <h3 class="text-2xl font-bold text-orange-900">Assessment Overview</h3>
+                    <p class="text-sm text-orange-600">Personalized Response System - Editable</p>
+                </div>
+                <i class="fa-solid fa-comments text-4xl text-orange-500 opacity-70"></i>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white rounded-lg p-4 border-l-4 border-orange-500 shadow-sm">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Assessment Status</p>
+                    <p class="text-2xl font-bold text-slate-700">Assessment Ready</p>
+                    <p class="text-xs text-slate-500 mt-2">Review the form below to complete this assessment</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 border-l-4 border-brand-blue shadow-sm">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Assessment Type</p>
+                    <p class="text-lg font-bold text-brand-blue" id="assessmentType">Loading...</p>
+                    <p class="text-xs text-slate-500 mt-2">Patient-reported symptom assessment</p>
+                </div>
+            </div>
+
+            <!-- Assessment Summary with Scores -->
+            <div class="mt-6 p-6 bg-gradient-to-r from-slate-50 to-orange-50 rounded-lg border-2 border-slate-300 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">
+                        <i class="fa-solid fa-chart-line mr-2 text-sozo-600"></i>
+                        Assessment Summary
+                    </h3>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Assessed by</p>
+                        <p class="text-sm font-bold text-slate-800">Clinical Staff</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-orange-500 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Total Score</p>
+                        <p class="text-4xl font-black text-slate-900" id="totalScore">0</p>
+                        <p class="text-xs text-slate-500 mt-1">assessment score</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-slate-600 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Severity Level</p>
+                        <p class="text-4xl font-black text-slate-900" id="scorePercentage">0%</p>
+                        <p class="text-xs text-slate-500 mt-1">symptom burden</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-l-4 border-orange-500 shadow-sm">
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-1">Assessment Date</p>
+                        <p class="text-lg font-black text-slate-900" id="assessmentDate">Today</p>
+                        <p class="text-xs text-slate-500 mt-1">completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Notes Section -->
+            <div style="margin-bottom: 24px; background: white; border-radius: 8px; border-left: 4px solid #8b5cf6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Clinical Notes</p>
+                <textarea id="clinicalNotesField" placeholder="Record any clinical observations or patient-reported details..." style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: white;"></textarea>
+            </div>
+
+            <!-- PRS Assessment Form -->
+            <div class="bg-white rounded-lg p-5 border border-slate-200 mb-8">
+                <h4 class="font-bold text-slate-900 mb-4 text-lg">PRS Assessment Form</h4>
+                
+                <!-- Disease/Condition Selector -->
+                <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Select Condition:</label>
+                    <select id="diseaseSelect" onchange="updateFormDisplay()" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                        <!-- Options will be populated from prs.json -->
+                    </select>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Questions will be inserted here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button Section -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+            <button onclick="savePrsAssessment()" style="flex: 1; background: #0ea5e9; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);" onmouseover="this.style.background='#0284c7'; this.style.boxShadow='0 4px 12px rgba(14, 165, 233, 0.4)';" onmouseout="this.style.background='#0ea5e9'; this.style.boxShadow='0 2px 8px rgba(14, 165, 233, 0.3)';">
+                <i class="fa-solid fa-save" style="margin-right: 8px;"></i>Save Assessment
+            </button>
+            <button onclick="window.history.back()" style="flex: 1; background: white; color: #64748b; padding: 12px 24px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='white';">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i>Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let prsData = null;
+        let prsState = {
+            currentDisease: null,
+            answers: {},
+            notes: ''
+        };
+
+        // Load PRS data from prs.json
+        async function loadPRSData() {
+            try {
+                const response = await fetch('prs.json');
+                prsData = await response.json();
+                initializePRS();
+            } catch (error) {
+                console.error('Error loading PRS data:', error);
+                document.getElementById('questionsContainer').innerHTML = '<p style="color: #ef4444;">Error loading assessment data</p>';
+            }
+        }
+
+        // Initialize PRS form
+        function initializePRS() {
+            if (!prsData || Object.keys(prsData).length === 0) {
+                console.error('No PRS data available');
+                return;
+            }
+
+            // Populate disease selector
+            const diseaseSelect = document.getElementById('diseaseSelect');
+            diseaseSelect.innerHTML = '';
+
+            const diseases = Object.keys(prsData);
+            diseases.forEach(diseaseId => {
+                const option = document.createElement('option');
+                option.value = diseaseId;
+                option.textContent = prsData[diseaseId].title;
+                diseaseSelect.appendChild(option);
+            });
+
+            // Set first disease as default
+            prsState.currentDisease = diseases[0];
+            updateFormDisplay();
+        }
+
+        // Check if question should be displayed based on showIf condition
+        function shouldShowQuestion(question) {
+            if (!question.showIf) return true;
+            const { field, value } = question.showIf;
+            const answerId = `prs_${prsState.currentDisease}_${field}`;
+            return prsState.answers[answerId] === value;
+        }
+
+        // Update form display based on selected disease
+        function updateFormDisplay() {
+            const diseaseSelect = document.getElementById('diseaseSelect');
+            prsState.currentDisease = diseaseSelect.value;
+
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            const config = prsData[prsState.currentDisease];
+            if (!config) return;
+
+            // Update assessment type
+            document.getElementById('assessmentType').textContent = config.title;
+
+            // Render sections (skip first section "General Data")
+            if (config.sections && Array.isArray(config.sections)) {
+                config.sections.forEach((section, sectionIdx) => {
+                    // Skip first section (General Data)
+                    if (sectionIdx === 0) return;
+
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.style.marginBottom = '24px';
+                    sectionDiv.style.padding = '20px';
+                    sectionDiv.style.background = 'white';
+                    sectionDiv.style.borderRadius = '8px';
+                    sectionDiv.style.border = '1px solid #e2e8f0';
+
+                    const sectionTitle = document.createElement('h3');
+                    sectionTitle.style.fontWeight = '700';
+                    sectionTitle.style.fontSize = '16px';
+                    sectionTitle.style.color = '#0f172a';
+                    sectionTitle.style.margin = '0 0 16px 0';
+                    sectionTitle.textContent = section.title;
+                    sectionDiv.appendChild(sectionTitle);
+
+                    const questionsDiv = document.createElement('div');
+                    questionsDiv.style.display = 'flex';
+                    questionsDiv.style.flexDirection = 'column';
+                    questionsDiv.style.gap = '16px';
+
+                    if (section.questions && Array.isArray(section.questions)) {
+                        section.questions.forEach((question) => {
+                            // Skip based on showIf condition
+                            if (!shouldShowQuestion(question)) {
+                                return;
+                            }
+
+                            const questionDiv = renderQuestion(question);
+                            questionsDiv.appendChild(questionDiv);
+                        });
+                    }
+
+                    sectionDiv.appendChild(questionsDiv);
+                    container.appendChild(sectionDiv);
+                });
+            }
+        }
+
+        // Render individual question based on type
+        function renderQuestion(question) {
+            const answerId = `prs_${prsState.currentDisease}_${question.id}`;
+            const currentAnswer = prsState.answers[answerId];
+
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+
+            const label = document.createElement('p');
+            label.style.fontWeight = '700';
+            label.style.color = '#0f172a';
+            label.style.margin = '0 0 8px 0';
+            label.style.fontSize = '14px';
+            label.textContent = question.label;
+            questionDiv.appendChild(label);
+
+            // Render input based on type
+            if (question.type === 'text' || question.type === 'email' || question.type === 'date' || question.type === 'number') {
+                const input = document.createElement('input');
+                input.type = question.type;
+                input.value = currentAnswer || '';
+                input.setAttribute('data-answer-id', answerId);
+                input.style.width = '100%';
+                input.style.padding = '8px 12px';
+                input.style.border = '1px solid #e2e8f0';
+                input.style.borderRadius = '6px';
+                input.style.fontSize = '13px';
+                input.addEventListener('change', (e) => {
+                    prsState.answers[answerId] = e.target.value;
+                });
+                questionDiv.appendChild(input);
+            } else if (question.type === 'radio' && question.options) {
+                const radioGroup = document.createElement('div');
+                radioGroup.style.display = 'grid';
+                radioGroup.style.gap = '8px';
+
+                question.options.forEach((option, idx) => {
+                    const optValue = typeof option === 'object' ? option.value : option;
+                    const optLabel = typeof option === 'object' ? option.label : option;
+                    const uniqueId = `${answerId}_${idx}`;
+
+                    const label = document.createElement('label');
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '8px';
+                    label.style.cursor = 'pointer';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = answerId;
+                    radio.value = optValue;
+                    radio.checked = currentAnswer === optValue;
+                    radio.addEventListener('change', (e) => {
+                        prsState.answers[answerId] = e.target.value;
+                        updateFormDisplay(); // Re-render for dependent questions
+                    });
+
+                    const span = document.createElement('span');
+                    span.style.fontSize = '13px';
+                    span.style.color = '#475569';
+                    span.textContent = optLabel;
+
+                    label.appendChild(radio);
+                    label.appendChild(span);
+                    radioGroup.appendChild(label);
+                });
+
+                questionDiv.appendChild(radioGroup);
+            } else if (question.type === 'likert' && question.options) {
+                const likertGroup = document.createElement('div');
+                likertGroup.style.display = 'grid';
+                likertGroup.style.gap = '8px';
+
+                question.options.forEach((option, idx) => {
+                    const uniqueId = `${answerId}_${idx}`;
+
+                    const label = document.createElement('label');
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '8px';
+                    label.style.cursor = 'pointer';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = answerId;
+                    radio.value = option;
+                    radio.checked = currentAnswer === option;
+                    radio.addEventListener('change', (e) => {
+                        prsState.answers[answerId] = e.target.value;
+                        updateFormDisplay();
+                    });
+
+                    const span = document.createElement('span');
+                    span.style.fontSize = '13px';
+                    span.style.color = '#475569';
+                    span.textContent = option;
+
+                    label.appendChild(radio);
+                    label.appendChild(span);
+                    likertGroup.appendChild(label);
+                });
+
+                questionDiv.appendChild(likertGroup);
+            } else if (question.type === 'checkbox' && question.options) {
+                const checkboxGroup = document.createElement('div');
+                checkboxGroup.style.display = 'grid';
+                checkboxGroup.style.gap = '8px';
+
+                question.options.forEach((option, idx) => {
+                    const optValue = typeof option === 'object' ? option.value : option;
+                    const optLabel = typeof option === 'object' ? option.label : option;
+                    const uniqueId = `${answerId}_${idx}`;
+
+                    const label = document.createElement('label');
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '8px';
+                    label.style.cursor = 'pointer';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = optValue;
+                    const currentValues = (currentAnswer || '').split(',');
+                    checkbox.checked = currentValues.includes(optValue);
+                    checkbox.addEventListener('change', (e) => {
+                        const values = (prsState.answers[answerId] || '').split(',').filter(v => v);
+                        if (e.target.checked) {
+                            values.push(optValue);
+                        } else {
+                            values.splice(values.indexOf(optValue), 1);
+                        }
+                        prsState.answers[answerId] = values.join(',');
+                    });
+
+                    const span = document.createElement('span');
+                    span.style.fontSize = '13px';
+                    span.style.color = '#475569';
+                    span.textContent = optLabel;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    checkboxGroup.appendChild(label);
+                });
+
+                questionDiv.appendChild(checkboxGroup);
+            } else if (question.type === 'slider') {
+                const sliderDiv = document.createElement('div');
+                sliderDiv.style.display = 'flex';
+                sliderDiv.style.alignItems = 'center';
+                sliderDiv.style.gap = '12px';
+
+                const slider = document.createElement('input');
+                slider.type = 'range';
+                slider.min = question.min || 0;
+                slider.max = question.max || 10;
+                slider.value = currentAnswer || (question.min || 0);
+                slider.style.flex = '1';
+                slider.addEventListener('change', (e) => {
+                    prsState.answers[answerId] = e.target.value;
+                    valueSpan.textContent = e.target.value;
+                });
+
+                const valueSpan = document.createElement('span');
+                valueSpan.style.fontWeight = '700';
+                valueSpan.style.color = '#0ea5e9';
+                valueSpan.style.minWidth = '30px';
+                valueSpan.style.textAlign = 'center';
+                valueSpan.textContent = currentAnswer || (question.min || 0);
+
+                sliderDiv.appendChild(slider);
+                sliderDiv.appendChild(valueSpan);
+                questionDiv.appendChild(sliderDiv);
+            }
+
+            return questionDiv;
+        }
+
+        // Save assessment
+        function savePrsAssessment() {
+            const clinicalNotes = document.getElementById('clinicalNotesField').value;
+
+            console.log('PRS Assessment Data:', {
+                disease: prsState.currentDisease,
+                answers: prsState.answers,
+                clinicalNotes: clinicalNotes
+            });
+
+            alert('PRS Assessment saved successfully!');
+            window.history.back();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('assessmentDate').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            loadPRSData();
+        });
+    </script>
+</body>
+</html>

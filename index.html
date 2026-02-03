@@ -23725,6 +23725,174 @@ function addNetworkFromDropdown(deviceIndex) {
   select.value = '';
 }
 
+// Disease and Disease-Specific Montage Management
+function handleDiseaseSelection(deviceIndex, diseaseValue) {
+  const diseaseMontageSection = document.getElementById(`diseaseMontageSection_${deviceIndex}`);
+  const diseaseMontageSelect = document.getElementById(`diseaseMontageSelect_${deviceIndex}`);
+  
+  if (!diseaseValue) {
+    diseaseMontageSection?.classList.add('hidden');
+    return;
+  }
+  
+  // Show the disease-specific montage section
+  diseaseMontageSection?.classList.remove('hidden');
+  
+  // Get disease-specific montages
+  const diseaseProtocols = getDiseaseMontages(diseaseValue);
+  
+  // Populate the disease montage dropdown
+  if (diseaseMontageSelect) {
+    diseaseMontageSelect.innerHTML = `
+      <option value="">-- Select Network --</option>
+      ${diseaseProtocols.map((protocol, idx) => `
+        <option value="${diseaseValue}_${idx}">${protocol.name}</option>
+      `).join('')}
+    `;
+  }
+  
+  console.log('Disease selected:', diseaseValue, 'Available protocols:', diseaseProtocols.length);
+}
+
+function handleDiseaseMontageSelection(deviceIndex, protocolValue) {
+  if (!protocolValue) return;
+  
+  const [diseaseId, protocolIdx] = protocolValue.split('_');
+  const protocols = getDiseaseMontages(diseaseId);
+  const protocol = protocols[parseInt(protocolIdx)];
+  
+  if (!protocol) return;
+  
+  const device = treatmentPlanState.devices[deviceIndex];
+  if (!device) return;
+  
+  // Apply the disease-specific protocol to the device
+  device.montage.anodes = protocol.anodes;
+  device.montage.cathode = protocol.cathode;
+  device.selectedProtocol = protocolValue;
+  device.protocolName = protocol.name;
+  
+  // Update visualization if this device uses brain montage
+  if (usesBrainMontage(device.value)) {
+    highlightNetworkElectrodes(deviceIndex, protocol.anodes, protocol.cathode);
+    
+    // Update network details panel
+    document.getElementById(`networkDetails_${deviceIndex}`).classList.remove('hidden');
+    document.getElementById(`networkName_${deviceIndex}`).textContent = `Protocol: ${protocol.name}`;
+    document.getElementById(`networkDesc_${deviceIndex}`).textContent = protocol.description;
+    document.getElementById(`networkAnodes_${deviceIndex}`).textContent = protocol.anodes.join(', ');
+    document.getElementById(`networkCathode_${deviceIndex}`).textContent = protocol.cathode;
+    document.getElementById(`networkIndication_${deviceIndex}`).textContent = `${getDiseaseLabel(diseaseId)} - ${protocol.indication}`;
+    
+    // Update left panel info
+    document.getElementById(`networkInfo_${deviceIndex}`).innerHTML = `
+      <div class="text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold mb-2">
+          <i class="fa-solid fa-check-circle"></i>
+          ${protocol.name}
+        </div>
+        <p class="text-xs text-green-700">${getDiseaseLabel(diseaseId)} Protocol Active</p>
+        <div class="mt-2 space-y-1 text-[10px] text-slate-600">
+          <div class="flex justify-center gap-4">
+            <span><span class="text-red-600">●</span> Anodes: ${protocol.anodes.length}</span>
+            <span><span class="text-blue-600">●</span> Cathode: 1</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Show success notification
+  showNotification(`✓ ${protocol.name} protocol applied successfully!`, 'success');
+  
+  saveTreatmentPlanState();
+}
+
+function getDiseaseMontages(diseaseId) {
+  const diseaseMontages = {
+    disease1: [ // Depression
+      {
+        name: "Left DLPFC Stimulation",
+        description: "High-frequency stimulation of left dorsolateral prefrontal cortex",
+        anodes: ['F3'],
+        cathode: 'Fp2',
+        indication: "Major Depressive Disorder - First-line protocol"
+      },
+      {
+        name: "Bilateral DLPFC Protocol",
+        description: "Bilateral dorsolateral prefrontal cortex targeting",
+        anodes: ['F3', 'F4'],
+        cathode: 'Cz',
+        indication: "Treatment-resistant depression"
+      },
+      {
+        name: "Left M1-Right DLPFC",
+        description: "Motor cortex to right prefrontal stimulation",
+        anodes: ['C3'],
+        cathode: 'F4',
+        indication: "Depression with motor symptoms"
+      }
+    ],
+    disease2: [ // Anxiety Disorders
+      {
+        name: "Right DLPFC Modulation",
+        description: "Low-frequency stimulation for anxiety reduction",
+        anodes: ['F4'],
+        cathode: 'F3',
+        indication: "Generalized Anxiety Disorder"
+      },
+      {
+        name: "Frontopolar Protocol",
+        description: "Bilateral frontopolar cortex stimulation",
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Cz',
+        indication: "Social anxiety and panic disorders"
+      },
+      {
+        name: "ACC-DLPFC Circuit",
+        description: "Anterior cingulate to prefrontal connectivity",
+        anodes: ['Fz'],
+        cathode: 'F4',
+        indication: "Anxiety with rumination"
+      }
+    ],
+    disease3: [ // Chronic Pain
+      {
+        name: "Primary Motor Cortex",
+        description: "M1 stimulation for pain modulation",
+        anodes: ['C3'],
+        cathode: 'Fp2',
+        indication: "Neuropathic pain - Gold standard"
+      },
+      {
+        name: "Bilateral Motor Protocol",
+        description: "Bilateral primary motor cortex activation",
+        anodes: ['C3', 'C4'],
+        cathode: 'Cz',
+        indication: "Fibromyalgia and widespread pain"
+      },
+      {
+        name: "S1-M1 Complex",
+        description: "Somatosensory and motor cortex co-stimulation",
+        anodes: ['C3'],
+        cathode: 'P3',
+        indication: "Chronic regional pain syndrome"
+      }
+    ]
+  };
+  
+  return diseaseMontages[diseaseId] || [];
+}
+
+function getDiseaseLabel(diseaseId) {
+  const labels = {
+    disease1: 'Depression',
+    disease2: 'Anxiety Disorders',
+    disease3: 'Chronic Pain'
+  };
+  return labels[diseaseId] || diseaseId;
+}
+
 // Expose functions to global scope for onclick handlers
 window.addNetworkTab = addNetworkTab;
 window.removeNetworkTab = removeNetworkTab;
@@ -23732,6 +23900,8 @@ window.switchNetworkTab = switchNetworkTab;
 window.renderNetworkTabs = renderNetworkTabs;
 window.applyNetworkToDevice = applyNetworkToDevice;
 window.addNetworkFromDropdown = addNetworkFromDropdown;
+window.handleDiseaseSelection = handleDiseaseSelection;
+window.handleDiseaseMontageSelection = handleDiseaseMontageSelection;
 
 // Dummy Network Data Generator - Device-Specific Montages
 function getDummyNetworks(deviceValue) {
@@ -24564,7 +24734,7 @@ function renderDeviceJourney(device, deviceIndex) {
             onclick="switchMontageTab(${deviceIndex}, 'network')" 
             class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-green-600 text-green-700 bg-green-100"
           >
-            <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
+            <i class="fa-solid fa-network-wired mr-2"></i>
           </button>
           ${showCustomMontageTab ? `
           <button 
@@ -24579,98 +24749,68 @@ function renderDeviceJourney(device, deviceIndex) {
         
         <!-- Network Selection Tab Content -->
         <div id="networkTabContent_${deviceIndex}" class="space-y-4">
-          <!-- Add Network to Tabs -->
+          <!-- Disease Selection (Only for non-standard placement devices) -->
+          ${!['device3', 'alpha_stim_aid', 'alpha_stim_met', 'tvns', 'plato'].includes(device.value) ? `
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">
-              <i class="fa-solid fa-sitemap mr-1"></i>
-              Add Network to Tabs
+              <i class="fa-solid fa-stethoscope mr-1 text-green-600"></i>
+              Clinical Condition
             </label>
-            <div class="flex gap-2">
-              <select 
-                id="networkSelect_${deviceIndex}" 
-                class="input-royal flex-1"
-              >
-                <option value="">-- Choose a Brain Network to Add --</option>
-                ${networks && networks.length > 0 ? networks.map((network, idx) => `
-                  <option value="${idx}">Network ${idx + 1}: ${network.name}</option>
-                `).join('') : '<option value="" disabled>No networks available for this device</option>'}
-              </select>
-              <button 
-                onclick="addNetworkFromDropdown(${deviceIndex})"
-                class="btn-primary text-sm whitespace-nowrap"
-              >
-                <i class="fa-solid fa-plus mr-1"></i>Add Tab
-              </button>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">Select networks to compare them side by side in tabs</p>
+            <select 
+              id="diseaseSelect_${deviceIndex}" 
+              class="input-royal w-full"
+              onchange="handleDiseaseSelection(${deviceIndex}, this.value)"
+            >
+              <option value="">-- Select Clinical Condition --</option>
+              <option value="disease1">Depression</option>
+              <option value="disease2">Anxiety Disorders</option>
+              <option value="disease3">Chronic Pain</option>
+            </select>
+            <p class="text-xs text-slate-500 mt-1">Select the primary condition to see relevant treatment protocols</p>
           </div>
           
-          <!-- Network Tabs Container -->
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Open Network Tabs</label>
-            <div id="networkTabsContainer_${deviceIndex}">
-              <!-- Network tabs will be rendered here -->
-            </div>
+          <!-- Disease-Specific Montage Selection (Hidden by default) -->
+          <div id="diseaseMontageSection_${deviceIndex}" class="hidden">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              <i class="fa-solid fa-brain mr-1 text-purple-600"></i>
+              Network
+            </label>
+            <select 
+              id="diseaseMontageSelect_${deviceIndex}" 
+              class="input-royal w-full"
+              onchange="handleDiseaseMontageSelection(${deviceIndex}, this.value)"
+            >
+              <option value="">-- Select Network --</option>
+              <!-- Options will be populated by JavaScript based on disease selection -->
+            </select>
+            <p class="text-xs text-slate-500 mt-1">Network-specific electrode configurations for optimal treatment</p>
           </div>
-          
-          <!-- Selected Network Details (Legacy - still used for compatibility) -->
-          <div id="networkDetails_${deviceIndex}" class="hidden">
-            <div class="bg-white p-4 rounded-lg border border-green-300 space-y-3">
-              <div>
-                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Network Name</p>
-                <p id="networkName_${deviceIndex}" class="text-sm font-semibold text-slate-900"></p>
+          ` : `
+          <!-- Standard Placement Device - No Network Configuration Required -->
+          <div class="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0">
+                <i class="fa-solid fa-exclamation-triangle text-amber-600 text-xl"></i>
               </div>
-              
               <div>
-                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Description</p>
-                <p id="networkDesc_${deviceIndex}" class="text-sm text-slate-700"></p>
-              </div>
-              
-              <div class="pt-3 border-t border-green-200">
-                <p class="text-xs font-bold text-slate-500 uppercase mb-2">Electrode Configuration</p>
-                <div class="space-y-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
-                    <div class="text-xs">
-                      <span class="font-semibold text-red-700">Anodes (+):</span>
-                      <span id="networkAnodes_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
-                    <div class="text-xs">
-                      <span class="font-semibold text-blue-700">Cathode (-):</span>
-                      <span id="networkCathode_${deviceIndex}" class="ml-1 text-slate-900 font-mono"></span>
-                    </div>
-                  </div>
+                <h4 class="text-amber-900 font-bold text-sm mb-2">
+                  <i class="fa-solid fa-map-pin mr-1"></i>
+                  Standard Placement Device
+                </h4>
+                <p class="text-amber-800 text-xs leading-relaxed mb-2">
+                  This device uses <strong>fixed electrode placement</strong> according to established clinical protocols. 
+                  No network configuration is required as the placement is standardized for optimal therapeutic outcomes.
+                </p>
+                <div class="bg-amber-100 rounded p-2 border border-amber-200">
+                  <p class="text-amber-900 text-[10px] font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-info-circle"></i>
+                    CAUTION: Follow device-specific placement guidelines as shown in the visualization panel
+                  </p>
                 </div>
               </div>
-              
-              <div class="pt-3 border-t border-green-200">
-                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Clinical Indication</p>
-                <p id="networkIndication_${deviceIndex}" class="text-xs text-slate-700 mb-4"></p>
-              </div>
             </div>
           </div>
-          
-          <!-- Quick Network Summary -->
-          <div class="bg-white p-4 rounded-lg border border-green-200">
-            <p class="text-xs font-semibold text-green-900 mb-2">
-              <i class="fa-solid fa-list mr-1"></i>
-              Available Networks: ${networks.length}
-            </p>
-            <div class="space-y-1 max-h-48 overflow-y-auto">
-              ${networks.map((network, idx) => `
-                <button 
-                  onclick="selectNetwork(${deviceIndex}, ${idx})"
-                  class="w-full text-left px-3 py-2 rounded hover:bg-green-50 transition-colors text-xs border border-transparent hover:border-green-300"
-                >
-                  <span class="font-semibold text-slate-900">Network ${idx + 1}:</span>
-                  <span class="text-slate-600 ml-1">${network.name}</span>
-                </button>
-              `).join('')}
-            </div>
-          </div>
+          `}
           
           <!-- Action Buttons -->
           <div class="flex gap-2">
@@ -26175,26 +26315,30 @@ function renderPatientTreatmentPlan() {
     return;
   }
   
-  // Sample treatment data for patients (pre-filled by doctor)
+  // Get disease-specific treatment protocol for patient
+  const patientCondition = p.condition || 'Depression';
+  const diseaseProtocol = getPatientDiseaseProtocol(patientCondition);
+  
+  // Sample treatment data for patients (pre-filled by doctor with disease-specific protocols)
   const treatmentData = {
     session1: {
       number: '1-10',
-      protocol: 'High Beta Training',
+      protocol: diseaseProtocol.primary.name || 'High Beta Training',
       duration: '20 minutes',
       frequency: '5x per week',
-      notes: 'Focus on attention and cognitive performance improvement',
-      targetArea: 'Left DLPFC',
+      notes: diseaseProtocol.primary.description || 'Focus on attention and cognitive performance improvement',
+      targetArea: diseaseProtocol.primary.anodes?.join(', ') || 'Left DLPFC',
       modality: 'tDCS',
       intensity: '2mA',
       outcome: 'Improved attention, focus, and executive function. Reduction in cognitive fatigue and enhancement of working memory.'
     },
     session2: {
       number: '11-20',
-      protocol: 'Alpha/Theta Training',
+      protocol: diseaseProtocol.secondary.name || 'Alpha/Theta Training',
       duration: '20 minutes',
       frequency: '3x per week',
-      notes: 'Relaxation and stress reduction protocol',
-      targetArea: 'Right PFC',
+      notes: diseaseProtocol.secondary.description || 'Relaxation and stress reduction protocol',
+      targetArea: diseaseProtocol.secondary.anodes?.join(', ') || 'Right PFC',
       modality: 'Neurofeedback',
       intensity: 'Low-Medium',
       outcome: 'Stress reduction, improved emotional regulation, enhanced relaxation response, and better sleep quality.'
@@ -26902,6 +27046,55 @@ Note: All medications to be taken as prescribed. Report any side effects to your
       });
     }
   }, 100);
+}
+
+function getPatientDiseaseProtocol(condition) {
+  const protocols = {
+    'Depression': {
+      primary: {
+        name: 'Left DLPFC Stimulation',
+        description: 'High-frequency stimulation of left dorsolateral prefrontal cortex for depression treatment',
+        anodes: ['F3'],
+        cathode: 'Fp2'
+      },
+      secondary: {
+        name: 'Bilateral DLPFC Protocol',
+        description: 'Bilateral dorsolateral prefrontal cortex targeting for treatment-resistant cases',
+        anodes: ['F3', 'F4'],
+        cathode: 'Cz'
+      }
+    },
+    'Anxiety': {
+      primary: {
+        name: 'Right DLPFC Modulation',
+        description: 'Low-frequency stimulation for anxiety reduction and emotional regulation',
+        anodes: ['F4'],
+        cathode: 'F3'
+      },
+      secondary: {
+        name: 'Frontopolar Protocol',
+        description: 'Bilateral frontopolar cortex stimulation for social anxiety',
+        anodes: ['Fp1', 'Fp2'],
+        cathode: 'Cz'
+      }
+    },
+    'Chronic Pain': {
+      primary: {
+        name: 'Primary Motor Cortex',
+        description: 'M1 stimulation for neuropathic pain modulation',
+        anodes: ['C3'],
+        cathode: 'Fp2'
+      },
+      secondary: {
+        name: 'Bilateral Motor Protocol',
+        description: 'Bilateral primary motor cortex activation for widespread pain',
+        anodes: ['C3', 'C4'],
+        cathode: 'Cz'
+      }
+    }
+  };
+  
+  return protocols[condition] || protocols['Depression']; // Default to depression if condition not found
 }
 
 // -- FNON MODULE LOGIC --
