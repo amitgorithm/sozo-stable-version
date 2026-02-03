@@ -876,6 +876,7 @@
             padding: 0;
             justify-content: flex-start;
             align-items: flex-start;
+            overflow: visible;
         }
 
         .activity-tag {
@@ -890,7 +891,7 @@
             transition: all 0.2s ease;
             z-index: 101;
             white-space: nowrap;
-            overflow: hidden;
+            overflow: visible;
             text-overflow: ellipsis;
             max-width: 120px;
             text-align: center;
@@ -900,7 +901,8 @@
         .activity-tag:hover {
             background: rgba(0, 161, 228, 0.25);
             transform: translateY(-2px);
-            z-index: 9999;
+            z-index: 99999;
+            overflow: visible;
         }
 
         .activity-tag-image {
@@ -909,7 +911,7 @@
             bottom: calc(100% + 12px);
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10000;
+            z-index: 100000;
             width: 250px;
             height: auto;
             max-height: 250px;
@@ -2735,9 +2737,9 @@
 
             <!-- TODAY'S JOURNEY TAB -->
             <div id="todayTabContent" class="tab-content active">
-                <div class="today-header">
+                <div class="today-header" id="todayHeaderSection" style="display: none;">
                     <h2>Today's Activity</h2>
-                    <p id="todayDate">February 1, 2026 - Clinical Assessment 2 in Progress</p>
+                    <p id="todayDate"></p>
                 </div>
 
                 <div id="todayContent">
@@ -4118,20 +4120,62 @@
             
             // Add Header - different for sessions vs assessments
             const headerDiv = document.createElement('div');
-            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.className = 'today-journey-header';
+            headerDiv.style.cssText = 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border-left: 4px solid #10b981; padding: 20px 24px; border-radius: 12px; margin-bottom: 32px;';
+            
             if (hasSessions) {
+                // Find today's session (pending or completed today)
+                const todayDate = '2026-02-03'; // Current date
+                const todaySession = patientData.sessions.find(s => 
+                    s.status === 'pending' || 
+                    (s.status === 'completed' && s.completedAt === todayDate)
+                );
+                
+                // Count completed sessions
+                const completedCount = patientData.sessions.filter(s => s.status === 'completed').length;
+                const totalSessions = patientData.sessions.length;
+                
+                let sessionTitle = 'Treatment Sessions';
+                let sessionSubtitle = `${completedCount} of ${totalSessions} sessions completed`;
+                
+                if (todaySession) {
+                    if (todaySession.status === 'pending') {
+                        sessionTitle = `Today: ${todaySession.name}`;
+                        sessionSubtitle = `Scheduled for ${todaySession.scheduledDate || 'today'}`;
+                    } else if (todaySession.status === 'completed') {
+                        sessionTitle = `${todaySession.name} Completed`;
+                        sessionSubtitle = `Completed by ${todaySession.completedBy} - ${todaySession.completedAt}`;
+                    }
+                }
+                
                 headerDiv.innerHTML = `
-                    <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-                        <i class="fa-solid fa-calendar-check" style="color: #10b981;"></i> Today's Session
+                    <h3 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 8px 0; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-calendar-check" style="color: #10b981; font-size: 24px;"></i> 
+                        <span>${sessionTitle}</span>
                     </h3>
-                    <p style="font-size: 14px; color: #64748b;">Treatment sessions based on completed assessment plan</p>
+                    <p style="font-size: 15px; color: #475569; margin: 0;">${sessionSubtitle}</p>
                 `;
             } else {
+                // Check if this is first visit or ongoing assessment
+                const completedBlocks = patientData.blocks.filter(b => b.status === 'completed').length;
+                const totalBlocks = patientData.blocks.length;
+                const isFirstVisit = activeAssessment.number === 1 || completedBlocks === 0;
+                
+                let assessmentTitle = isFirstVisit ? 'First Visit - Clinical Assessment' : `Clinical Assessment ${activeAssessment.number}`;
+                let assessmentSubtitle = `${completedBlocks} of ${totalBlocks} assessments completed`;
+                
+                if (isFirstVisit && completedBlocks === 0) {
+                    assessmentSubtitle = `Initial consultation - Started ${activeAssessment.startDate}`;
+                } else if (completedBlocks === totalBlocks) {
+                    assessmentSubtitle = 'All assessments completed - Ready for treatment planning';
+                }
+                
                 headerDiv.innerHTML = `
-                    <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-                        <i class="fa-solid fa-calendar-day" style="color: #10b981;"></i> Today's Active Assessment
+                    <h3 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 8px 0; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-calendar-day" style="color: #10b981; font-size: 24px;"></i> 
+                        <span>${assessmentTitle}</span>
                     </h3>
-                    <p style="font-size: 14px; color: #64748b;">Clinical Assessment ${activeAssessment.number} - Started ${activeAssessment.startDate}</p>
+                    <p style="font-size: 15px; color: #475569; margin: 0;">${assessmentSubtitle}</p>
                 `;
             }
             container.appendChild(headerDiv);
@@ -4747,15 +4791,35 @@
         // START BLOCK - Navigate to assessment pages
         // Session action functions
         function startSession(sessionId) {
-            window.location.href = 'workshop_detail.html';
+            // Store session context
+            sessionStorage.setItem('activeSessionId', sessionId);
+            sessionStorage.setItem('currentPatientId', selectedPatientData?.id || 'unknown');
+            sessionStorage.setItem('patientName', selectedPatientData ? `${selectedPatientData.firstName} ${selectedPatientData.lastName}` : 'Unknown');
+            sessionStorage.setItem('currentRole', currentRole);
+            
+            // Navigate to active journey to start session
+            window.location.href = 'working-active-journey.html?session=' + sessionId;
         }
 
         function continueSession(sessionId) {
-            window.location.href = 'working-active-journey.html';
+            // Store session context
+            sessionStorage.setItem('activeSessionId', sessionId);
+            sessionStorage.setItem('currentPatientId', selectedPatientData?.id || 'unknown');
+            sessionStorage.setItem('currentRole', currentRole);
+            
+            // Navigate to active journey to continue session
+            window.location.href = 'working-active-journey.html?session=' + sessionId;
         }
 
         function viewSessionDetails(sessionId) {
-            window.location.href = 'workshop_detail.html';
+            // Store session context for viewing
+            sessionStorage.setItem('sessionId', sessionId);
+            sessionStorage.setItem('currentPatientId', selectedPatientData?.id || 'unknown');
+            sessionStorage.setItem('sessionMode', 'view');
+            sessionStorage.setItem('currentRole', currentRole);
+            
+            // Navigate to workshop detail page
+            window.location.href = 'workshop_detail.html?session=' + sessionId;
         }
 
         function startBlock(blockId, blockType) {
@@ -4788,14 +4852,10 @@
                 // Open Doctor's Notes modal in edit mode
                 openDoctorNotesModal(true);
             } else if (blockType === 'treatment-plan') {
-                // Navigate to treatment plan based on role
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                // Navigate to treatment plan page (role-based view handled in target page)
+                window.location.href = 'treatment-plan.html';
             } else if (blockType === 'final-report') {
-                window.location.href = './final-report.html';
+                window.location.href = 'final-report.html';
             } else {
                 alert(`Starting: ${blockType}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface.`);
             }
@@ -5003,29 +5063,11 @@
                 // Open Doctor's Notes modal in read-only mode
                 openDoctorNotesModal(false);
             } else if (blockType === 'treatment-plan') {
-                // Store current role in session data before navigating to treatment plan
-                const treatmentPlanSession = {
-                    patientId: selectedPatientData?.id || 'unknown',
-                    patientName: selectedPatientData?.firstName && selectedPatientData?.lastName 
-                        ? `${selectedPatientData.firstName} ${selectedPatientData.lastName}`
-                        : 'Unknown Patient',
-                    currentRole: currentRole,
-                    blockType: 'treatment-plan',
-                    viewMode: 'edit',
-                    assessmentId: null,
-                    returnUrl: window.location.href
-                };
-                localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanSession));
-                
-                // Route based on role: doctors to full editor, clinical assistants to notes-only
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                // Navigate to treatment plan page (role-based view handled in target page)
+                window.location.href = 'treatment-plan.html';
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
-                window.location.href = './final-report.html';
+                window.location.href = 'final-report.html';
             } else {
                 // For other block types, show placeholder alert
                 const blockNames = {
@@ -5112,16 +5154,12 @@
                 openDoctorNotesModal(true);
                 return;
             } else if (blockType === 'treatment-plan') {
-                // Navigate to treatment plan based on role
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
+                // Navigate to treatment plan page (role-based view handled in target page)
+                window.location.href = 'treatment-plan.html';
                 return;
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
-                window.location.href = './final-report.html';
+                window.location.href = 'final-report.html';
                 return;
             }
 
@@ -5129,12 +5167,15 @@
             alert(`Editing Assessment Data\\n\\nBlock: ${blockNames[blockType] || blockType}\\nRole: ${currentRole}\\n\\nThis would open an edit interface with:\\n- Editable assessment fields\\n- Data validation\\n- Save/Cancel options\\n- Audit trail logging`);
         }
 
-        function viewSessionDetails(sessionId) {
-            alert(`Viewing Session Report\\n\\nSession: ${sessionId}\\nRole: ${currentRole}\\n\\nThis would open a detailed session view with:\\n- Complete session data\\n- Device parameters\\n- Patient responses\\n- Clinical observations\\n- Downloadable report`);
-        }
-
         function editSessionDetails(sessionId) {
-            alert(`Editing Session Notes\\n\\nSession: ${sessionId}\\nRole: ${currentRole}\\n\\nThis would open an edit interface with:\\n- Clinical notes editor\\n- Session parameters\\n- Patient feedback\\n- Save/Cancel options`);
+            // Store session context for editing
+            sessionStorage.setItem('sessionId', sessionId);
+            sessionStorage.setItem('currentPatientId', selectedPatientData?.id || 'unknown');
+            sessionStorage.setItem('sessionMode', 'edit');
+            sessionStorage.setItem('currentRole', currentRole);
+            
+            // Navigate to workshop detail page in edit mode
+            window.location.href = 'workshop_detail.html?session=' + sessionId + '&mode=edit';
         }
 
         function activateSession(sessionId) {
@@ -6221,10 +6262,6 @@
             document.getElementById('consentFormPage').style.display = 'block';
         }
 
-
-        function startSession(sessionId) {
-            alert(`Starting Session\\n\\nSession: ${sessionId}\\nRole: ${currentRole}\\n\\nThis would:\\n- Open session interface\\n- Select device and montage\\n- Begin treatment protocol\\n- Start timer and monitoring`);
-        }
 
         function startNewPatientAssessment(assessmentId, assessmentName) {
             // Handle Anamnesis assessment
