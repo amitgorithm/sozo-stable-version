@@ -2684,7 +2684,7 @@ function renderDeviceJourney(device, deviceIndex) {
             onclick="switchMontageTab(${deviceIndex}, 'network')" 
             class="flex-1 px-4 py-3 font-semibold transition-all border-b-4 border-green-600 text-green-700 bg-green-100"
           >
-            <i class="fa-solid fa-network-wired mr-2"></i>
+            <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
           </button>
           ${(showBrainMontage && allowsCustomMontage(device.value)) ? `
           <button 
@@ -2701,7 +2701,10 @@ function renderDeviceJourney(device, deviceIndex) {
         <div id="networkTabContent_${deviceIndex}" class="space-y-4">
           <!-- Add Network to Tabs -->
           <div>
-            <!-- Removed network selection label/title as requested -->
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              <i class="fa-solid fa-sitemap mr-1"></i>
+              Add Network to Tabs
+            </label>
             <div class="flex gap-2">
               <select 
                 id="networkSelect_${deviceIndex}" 
@@ -4420,6 +4423,8 @@ setInterval(function() {
     }
 }, 30000); // Auto-save every 30 seconds
 
+// Initialize global role variable BEFORE DOMContentLoaded
+let currentRole = 'doctor'; // Default role
 
 // Initialize the application when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -4428,7 +4433,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load session data from patient journey if available
     const treatmentPlanSessionData = localStorage.getItem('treatmentPlanSession');
     let sessionData = null;
-    let currentRole = 'doctor'; // Default role
     let currentPatient = null;
     
     if (treatmentPlanSessionData) {
