@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Portal - Sozo Clinical Operating System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --orange-primary: rgb(244, 121, 32);
+            --blue-primary: rgb(0, 161, 228);
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --slate-border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #1e293b;
+        }
+
+        .container-journey {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .assessment-section {
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .assessment-section.expanded {
+            border-color: var(--orange-primary);
+        }
+
+        .assessment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .assessment-header:hover {
+            background: rgba(244, 121, 32, 0.05);
+        }
+
+        .assessment-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .assessment-title h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .expand-icon {
+            font-size: 18px;
+            color: #64748b;
+            transition: transform 0.3s ease;
+            margin-left: 12px;
+        }
+
+        .assessment-section.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .assessment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .assessment-badge.completed {
+            background: rgba(244, 121, 32, 0.15);
+            color: var(--orange-primary);
+        }
+
+        .assessment-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .assessment-section.expanded .assessment-content {
+            max-height: 2000px;
+        }
+
+        .assessment-content-inner {
+            padding: 0 20px 20px 20px;
+        }
+
+        .blocks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .block-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--slate-border);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .block-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .block-card.completed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--orange-primary);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .block-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: var(--orange-primary);
+        }
+
+        .block-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .block-desc {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .block-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            background: rgba(244, 121, 32, 0.1);
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
+
+        .block-action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--slate-border);
+            width: 100%;
+        }
+
+        .block-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .block-action-btn.view {
+            background: rgba(0, 161, 228, 0.1);
+            color: var(--blue-primary);
+        }
+
+        .block-action-btn.view:hover {
+            background: rgba(0, 161, 228, 0.2);
+        }
+
+        .block-action-btn.edit {
+            background: rgba(244, 121, 32, 0.1);
+            color: var(--orange-primary);
+        }
+
+        .block-action-btn.edit:hover {
+            background: rgba(244, 121, 32, 0.2);
+        }
+
+        /* MODALS */
+        .assessment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .assessment-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .assessment-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+            border-bottom: 1px solid var(--slate-border);
+            background: #f8f9fa;
+        }
+
+        .assessment-modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .assessment-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .assessment-modal-close:hover {
+            color: #0f172a;
+        }
+
+        .assessment-modal-body {
+            padding: 24px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--slate-border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--orange-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #dc6027;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid var(--slate-border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .header-section {
+            margin-bottom: 32px;
+        }
+
+        .header-section h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark-bg);
+            margin-bottom: 8px;
+        }
+
+        .header-section p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .patient-info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--slate-border);
+        }
+
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--slate-border);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section-divider {
+            margin: 40px 0;
+            border-top: 2px solid var(--slate-border);
+            padding-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-journey">
+        <div id="mainContent"></div>
+    </div>
+
+    <!-- FNON ASSESSMENT MODAL -->
+    <div id="fnonAssessmentModal" class="assessment-modal" onclick="if(event.target === this) closeAssessmentModal('fnon')" style="display: none;">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <h2><i class="fas fa-list-check" style="color: var(--orange-primary); margin-right: 12px;"></i>FNON Assessment - Network Analysis</h2>
+                <button class="assessment-modal-close" onclick="closeAssessmentModal('fnon')" title="Close assessment">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="assessment-modal-body" id="fnonModalBody">
+                <!-- FNON content will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PRS ASSESSMENT MODAL -->
+    <div id="prsAssessmentModal" class="assessment-modal" onclick="if(event.target === this) closeAssessmentModal('prs')" style="display: none;">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <h2><i class="fas fa-clipboard-list" style="color: var(--orange-primary); margin-right: 12px;"></i>PRS Assessment - Patient Reported Symptoms</h2>
+                <button class="assessment-modal-close" onclick="closeAssessmentModal('prs')" title="Close assessment">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="assessment-modal-body" id="prsModalBody">
+                <!-- PRS content will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCTOR'S NOTES MODAL -->
+    <div id="doctorNotesModal" class="assessment-modal" onclick="if(event.target === this) closeDoctorNotesModal()" style="display: none;">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <h2><i class="fas fa-comment-medical" style="color: var(--orange-primary); margin-right: 12px;"></i>Doctor's Notes - Clinical Assessment</h2>
+                <button class="assessment-modal-close" onclick="closeDoctorNotesModal()" title="Close notes">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="assessment-modal-body" id="doctorNotesModalBody">
+                <!-- Doctor's Notes content will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state and variables
+        let currentRole = 'doctor';
+        let currentPatient = null;
+        let prsDataCache = null;
+        let prsState = { conditionId: 'depression' };
+        let doctorNotesState = {
+            clinicalObservations: 'The patient presents with moderate symptoms of depression characterized by low mood, reduced motivation, and difficulties with sleep. Initial FNON assessment shows significant hypoactivity in the left dorsolateral prefrontal cortex. EEG analysis reveals elevated Beta wave activity suggesting anxiety-related hyperarousal.',
+            recommendations: 'Consider non-invasive neuromodulation therapy targeting the left prefrontal cortex. Recommend cognitive behavioral therapy in conjunction with neuromodulation to reinforce behavioral changes. Lifestyle modifications including improved sleep hygiene and reduced caffeine intake should be advised.',
+            prescribedMedications: 'Current medications: Sertraline 50mg daily. Additional recommendation: Consider augmentation with a low-dose atypical antipsychotic if symptoms do not improve within 4 weeks. Monitor for side effects and adjust dosage accordingly.'
+        };
+
+        let fnonState = { scores: {} };
+
+        // Patient data
+        const samplePatients = [
+            { id: 'P-001', name: 'Sarah Mitchell', dob: '1990-05-15', condition: 'Depression', age: 34, status: 'Active' },
+            { id: 'P-002', name: 'John Smith', dob: '1985-08-20', condition: 'Anxiety Disorder', age: 39, status: 'Active' }
+        ];
+
+        // PRS Conditions
+        const PRS_CONDITIONS = [
+            { id: 'dementia', name: 'DEMENTIA' },
+            { id: 'depression', name: 'DEPRESSION' },
+            { id: 'anxiety', name: 'ANXIETY DISORDER' }
+        ];
+
+        // Initialize
+        function initializeDoctorPortal() {
+            currentPatient = samplePatients[0];
+            renderDoctorPortal();
+        }
+
+        function renderDoctorPortal() {
+            const content = document.getElementById('mainContent');
+            
+            content.innerHTML = `
+                <div class="header-section">
+                    <h1>Doctor Portal</h1>
+                    <p>Patient Case Management & Deep Dive Analysis</p>
+                </div>
+
+                <div class="patient-info-card">
+                    <div class="patient-info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Patient Name</div>
+                            <div class="info-value">${currentPatient.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Patient ID</div>
+                            <div class="info-value">${currentPatient.id}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Age</div>
+                            <div class="info-value">${currentPatient.age} years</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Condition</div>
+                            <div class="info-value">${currentPatient.condition}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value" style="color: #22c55e;">${currentPatient.status}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="header-section">
+                    <h1 style="font-size: 24px;">All Success Case - Deep Dive</h1>
+                    <p>View all completed assessments and clinical analysis</p>
+                </div>
+
+                <div class="assessment-section expanded" id="deepDiveSection">
+                    <div class="assessment-header" onclick="toggleSection('deepDiveSection')">
+                        <div class="assessment-title">
+                            <span style="font-size: 24px; color: var(--orange-primary);"><i class="fas fa-folder-open"></i></span>
+                            <div>
+                                <h2>Clinical Case Assessment</h2>
+                                <div class="assessment-meta">
+                                    <div class="meta-item"><i class="fas fa-check-circle" style="color: var(--orange-primary);"></i> All Assessments Complete</div>
+                                    <div class="meta-item"><i class="fas fa-calendar"></i> Last Updated: 2026-02-01</div>
+                                </div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down expand-icon"></i>
+                    </div>
+
+                    <div class="assessment-content">
+                        <div class="assessment-content-inner">
+                            <div class="blocks-container" id="completedBlocksGrid">
+                                <!-- Assessment blocks will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            renderCompletedBlocks();
+        }
+
+        function renderCompletedBlocks() {
+            const completedBlocksGrid = document.getElementById('completedBlocksGrid');
+            
+            const allCompletedBlocks = [
+                { 
+                    id: 'fnon-completed', 
+                    name: 'FNON', 
+                    desc: 'Network Analysis', 
+                    type: 'fnon', 
+                    status: 'completed', 
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-30',
+                    score: 55,
+                    icon: 'fa-list-check'
+                },
+                { 
+                    id: 'prs-completed', 
+                    name: 'PRS', 
+                    desc: 'Symptoms Assessment',
+                    type: 'prs', 
+                    status: 'completed', 
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-30',
+                    icon: 'fa-clipboard-list'
+                },
+                { 
+                    id: 'ana-completed', 
+                    name: "Doctor's Notes", 
+                    desc: 'Clinical Analysis',
+                    type: 'doctor-notes',
+                    status: 'completed', 
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31',
+                    icon: 'fa-comment-medical'
+                },
+                { 
+                    id: 'treatment-completed', 
+                    name: 'Treatment Plan', 
+                    desc: 'Therapy Protocol',
+                    type: 'treatment-plan',
+                    status: 'completed', 
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31',
+                    icon: 'fa-prescription-bottle'
+                },
+                { 
+                    id: 'report-completed', 
+                    name: 'Final Report', 
+                    desc: 'Comprehensive Analysis',
+                    type: 'final-report',
+                    status: 'completed', 
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31',
+                    icon: 'fa-file-medical'
+                }
+            ];
+
+            completedBlocksGrid.innerHTML = allCompletedBlocks.map(block => {
+                let actionButtons = '';
+                
+                if (block.type === 'fnon') {
+                    actionButtons = `
+                        <div class="block-action-buttons">
+                            <button class="block-action-btn view" onclick="viewBlockDetails('${block.type}')" title="View FNON assessment">
+                                <i class="fa-solid fa-eye"></i> View
+                            </button>
+                            <button class="block-action-btn edit" onclick="editBlockDetails('${block.type}')" title="Edit FNON assessment">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                        </div>
+                    `;
+                } else if (block.type === 'prs') {
+                    actionButtons = `
+                        <div class="block-action-buttons">
+                            <button class="block-action-btn view" onclick="viewBlockDetails('${block.type}')" title="View PRS assessment">
+                                <i class="fa-solid fa-eye"></i> View
+                            </button>
+                            <button class="block-action-btn edit" onclick="editBlockDetails('${block.type}')" title="Edit PRS assessment">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                        </div>
+                    `;
+                } else if (block.type === 'doctor-notes') {
+                    actionButtons = `
+                        <div class="block-action-buttons">
+                            <button class="block-action-btn view" onclick="viewBlockDetails('${block.type}')" title="View doctor notes">
+                                <i class="fa-solid fa-eye"></i> View
+                            </button>
+                            <button class="block-action-btn edit" onclick="editBlockDetails('${block.type}')" title="Edit doctor notes">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                        </div>
+                    `;
+                } else if (block.type === 'treatment-plan') {
+                    actionButtons = `
+                        <div class="block-action-buttons">
+                            <button class="block-action-btn view" onclick="viewBlockDetails('${block.type}')" title="View treatment plan">
+                                <i class="fa-solid fa-eye"></i> View
+                            </button>
+                        </div>
+                    `;
+                } else if (block.type === 'final-report') {
+                    actionButtons = `
+                        <div class="block-action-buttons">
+                            <button class="block-action-btn view" onclick="viewBlockDetails('${block.type}')" title="View final report">
+                                <i class="fa-solid fa-eye"></i> View
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="block-card completed" style="padding-bottom: 8px;">
+                        <div class="block-icon"><i class="fas ${block.icon}"></i></div>
+                        <div class="block-name">${block.name}</div>
+                        <div class="block-desc">${block.desc}</div>
+                        <div class="block-status">Done</div>
+                        ${actionButtons}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.classList.toggle('expanded');
+        }
+
+        function viewBlockDetails(blockType) {
+            if (blockType === 'fnon') {
+                renderFnonModal(false);
+                document.getElementById('fnonAssessmentModal').style.display = 'flex';
+            } else if (blockType === 'prs') {
+                renderPrsModal(false);
+                document.getElementById('prsAssessmentModal').style.display = 'flex';
+            } else if (blockType === 'doctor-notes') {
+                renderDoctorNotesModal(false);
+                document.getElementById('doctorNotesModal').style.display = 'flex';
+            } else if (blockType === 'treatment-plan') {
+                window.location.href = './treatment-plan.html';
+            } else if (blockType === 'final-report') {
+                window.location.href = './final-report.html';
+            }
+        }
+
+        function editBlockDetails(blockType) {
+            if (blockType === 'fnon') {
+                renderFnonModal(true);
+                document.getElementById('fnonAssessmentModal').style.display = 'flex';
+            } else if (blockType === 'prs') {
+                renderPrsModal(true);
+                document.getElementById('prsAssessmentModal').style.display = 'flex';
+            } else if (blockType === 'doctor-notes') {
+                renderDoctorNotesModal(true);
+                document.getElementById('doctorNotesModal').style.display = 'flex';
+            } else if (blockType === 'treatment-plan') {
+                window.location.href = './treatment-plan.html';
+            } else if (blockType === 'final-report') {
+                window.location.href = './final-report.html';
+            }
+        }
+
+        // FNON Modal Functions
+        function renderFnonModal(editable) {
+            const body = document.getElementById('fnonModalBody');
+            const sections = [
+                { title: 'Attention & Focus', fields: ['Sustained Attention', 'Selective Attention', 'Divided Attention'] },
+                { title: 'Memory', fields: ['Working Memory', 'Short-term Memory', 'Long-term Memory'] },
+                { title: 'Executive Function', fields: ['Planning', 'Problem Solving', 'Impulse Control'] }
+            ];
+
+            let html = '<div class="space-y-4">';
+            
+            sections.forEach((section, sIdx) => {
+                html += `
+                    <div class="form-field">
+                        <h3 style="font-weight: 700; font-size: 14px; margin-bottom: 12px; color: var(--orange-primary);">${section.title}</h3>
+                        ${section.fields.map((field, fIdx) => {
+                            const key = `${sIdx}-${fIdx}`;
+                            const value = fnonState.scores[key] || '';
+                            return `
+                                <div style="margin-bottom: 12px;">
+                                    <label class="form-label">${field}</label>
+                                    <input type="number" min="0" max="100" value="${value}" ${editable ? '' : 'readonly'} 
+                                        class="form-input" ${editable ? `onchange="fnonState.scores['${key}'] = this.value"` : ''} />
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            if (editable) {
+                html += `
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="saveFnonEdits()"><i class="fas fa-save"></i> Save Assessment</button>
+                        <button class="btn-secondary" onclick="closeAssessmentModal('fnon')">Cancel</button>
+                    </div>
+                `;
+            }
+
+            body.innerHTML = html;
+        }
+
+        function saveFnonEdits() {
+            alert('FNON Assessment saved successfully!');
+            closeAssessmentModal('fnon');
+        }
+
+        function closeAssessmentModal(type) {
+            document.getElementById(`${type}AssessmentModal`).style.display = 'none';
+        }
+
+        // PRS Modal Functions
+        async function loadPRSData() {
+            if (prsDataCache) return prsDataCache;
+            try {
+                const response = await fetch('./prs.json');
+                prsDataCache = await response.json();
+                return prsDataCache;
+            } catch (error) {
+                console.error('Error loading PRS data:', error);
+                return null;
+            }
+        }
+
+        function renderPrsModal(editable) {
+            const body = document.getElementById('prsModalBody');
+            const prsCondition = PRS_CONDITIONS.find(c => c.id === prsState.conditionId);
+
+            body.innerHTML = `
+                <div class="space-y-4">
+                    <div class="form-field">
+                        <label class="form-label">Select Condition</label>
+                        <select class="form-input" ${editable ? `onchange="prsState.conditionId = this.value; renderPrsModal(${editable})"` : 'disabled'}>
+                            ${PRS_CONDITIONS.map(c => `
+                                <option value="${c.id}" ${c.id === prsState.conditionId ? 'selected' : ''}>${c.name}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                        <h3 style="font-weight: 700; margin-bottom: 12px;">Assessment: ${prsCondition ? prsCondition.name : 'Select a condition'}</h3>
+                        <p style="font-size: 12px; color: #64748b; line-height: 1.6;">
+                            This comprehensive assessment evaluates patient-reported symptoms related to the selected condition. 
+                            Please review each question carefully and update responses as needed.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Current Status</label>
+                        <div style="padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
+                            <i class="fas fa-check-circle" style="color: var(--orange-primary); margin-right: 8px;"></i>
+                            Assessment Completed - 100%
+                        </div>
+                    </div>
+
+                    ${editable ? `
+                        <div class="form-field">
+                            <label class="form-label">Update Assessment Notes</label>
+                            <textarea class="form-input" rows="4" placeholder="Add any updates or observations..."></textarea>
+                        </div>
+                    ` : ''}
+                </div>
+
+                ${editable ? `
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="savePrsEdits()"><i class="fas fa-save"></i> Save Assessment</button>
+                        <button class="btn-secondary" onclick="closeAssessmentModal('prs')">Cancel</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function savePrsEdits() {
+            alert('PRS Assessment saved successfully!');
+            closeAssessmentModal('prs');
+        }
+
+        // Doctor's Notes Modal Functions
+        function renderDoctorNotesModal(editable) {
+            const body = document.getElementById('doctorNotesModalBody');
+
+            body.innerHTML = `
+                <div class="space-y-6">
+                    <div class="form-field">
+                        <label class="form-label">Clinical Observations</label>
+                        <textarea class="form-input" rows="4" ${editable ? '' : 'readonly'}
+                            placeholder="Enter clinical observations..."
+                            ${editable ? `onchange="doctorNotesState.clinicalObservations = this.value"` : ''}
+                        >${doctorNotesState.clinicalObservations}</textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Recommendations</label>
+                        <textarea class="form-input" rows="4" ${editable ? '' : 'readonly'}
+                            placeholder="Enter recommendations..."
+                            ${editable ? `onchange="doctorNotesState.recommendations = this.value"` : ''}
+                        >${doctorNotesState.recommendations}</textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Prescribed Medications</label>
+                        <textarea class="form-input" rows="4" ${editable ? '' : 'readonly'}
+                            placeholder="Enter prescribed medications..."
+                            ${editable ? `onchange="doctorNotesState.prescribedMedications = this.value"` : ''}
+                        >${doctorNotesState.prescribedMedications}</textarea>
+                    </div>
+
+                    ${editable ? `
+                        <div class="form-field">
+                            <button class="btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="continueTreatmentPlan()">
+                                <i class="fas fa-arrow-right"></i> Continue to Treatment Plan
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                ${editable ? `
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="saveDoctorNotes()"><i class="fas fa-save"></i> Save Notes</button>
+                        <button class="btn-secondary" onclick="closeDoctorNotesModal()">Cancel</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function saveDoctorNotes() {
+            alert('Doctor notes saved successfully!');
+            closeDoctorNotesModal();
+        }
+
+        function closeDoctorNotesModal() {
+            document.getElementById('doctorNotesModal').style.display = 'none';
+        }
+
+        function continueTreatmentPlan() {
+            window.location.href = './treatment-plan.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeDoctorPortal);
+    </script>
+</body>
+</html>
