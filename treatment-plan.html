@@ -120,6 +120,20 @@
         .electrode-cathode {
             animation: pulse-cathode 2s infinite;
         }
+        
+        /* Clinical Assistant Read-Only Styles */
+        .clinical-readonly {
+            pointer-events: none !important;
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .clinical-readonly button,
+        .clinical-readonly input,
+        .clinical-readonly select {
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -167,6 +181,12 @@ function loadCustomMontages() {
 }
 
 function saveCustomMontageToLibrary(montageName, anodes, cathode, deviceType, baseNetwork) {
+  // Prevent clinical assistants from saving montages to library
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot save montages to library - read-only access');
+    return;
+  }
+  
   console.log('[saveCustomMontageToLibrary] Saving:', { montageName, anodes, cathode, deviceType, baseNetwork });
   
   const customMontage = {
@@ -291,16 +311,19 @@ function renderParametersContent(device, deviceIndex) {
   if (!device.parameters) device.parameters = { duration: '', intensity: '', ramp: '', daysPerWeek: '', selectedDays: '', timeOfDay: '' };
 
   const params = device.parameters;
+  const isReadOnly = window.currentRole === 'clinical-assistant';
+  const disabledAttr = isReadOnly ? 'disabled' : '';
+  const readOnlyClass = isReadOnly ? 'opacity-60 cursor-not-allowed' : '';
 
   return `
     <div class="bg-white p-4 rounded-lg border border-slate-200">
-      <h5 class="text-sm font-bold text-slate-900 mb-3">Device Parameters - Device ${deviceIndex + 1}: ${device.name}</h5>
+      <h5 class="text-sm font-bold text-slate-900 mb-3">Device Parameters - Device ${deviceIndex + 1}: ${device.name}${isReadOnly ? ' <span class="text-xs font-normal bg-orange-100 text-orange-800 px-2 py-1 rounded-full ml-2">READ ONLY</span>' : ''}</h5>
 
       <!-- Top row: Duration / Intensity / Ramp -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <div>
           <label class="text-xs font-semibold text-slate-700">Duration</label>
-          <select onchange="updateDeviceParameter(${deviceIndex}, 'duration', this.value)" class="input-royal w-full">
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'duration', this.value)" class="input-royal w-full ${readOnlyClass}" ${disabledAttr}>
             <option value="">Duration</option>
             <option value="10" ${params.duration === '10' ? 'selected' : ''}>10 min</option>
             <option value="15" ${params.duration === '15' ? 'selected' : ''}>15 min</option>
@@ -310,7 +333,7 @@ function renderParametersContent(device, deviceIndex) {
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-700">Intensity</label>
-          <select onchange="updateDeviceParameter(${deviceIndex}, 'intensity', this.value)" class="input-royal w-full">
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'intensity', this.value)" class="input-royal w-full ${readOnlyClass}" ${disabledAttr}>
             <option value="">Intensity</option>
             <option value="low" ${params.intensity === 'low' ? 'selected' : ''}>Low</option>
             <option value="medium" ${params.intensity === 'medium' ? 'selected' : ''}>Medium</option>
@@ -319,7 +342,7 @@ function renderParametersContent(device, deviceIndex) {
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-700">Ramp</label>
-          <select onchange="updateDeviceParameter(${deviceIndex}, 'ramp', this.value)" class="input-royal w-full">
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'ramp', this.value)" class="input-royal w-full ${readOnlyClass}" ${disabledAttr}>
             <option value="">Ramp</option>
             <option value="slow" ${params.ramp === 'slow' ? 'selected' : ''}>Slow</option>
             <option value="medium" ${params.ramp === 'medium' ? 'selected' : ''}>Medium</option>
@@ -332,7 +355,7 @@ function renderParametersContent(device, deviceIndex) {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label class="text-xs font-semibold text-slate-700">Number of days/week</label>
-          <select onchange="updateDeviceParameter(${deviceIndex}, 'daysPerWeek', this.value)" class="input-royal w-full">
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'daysPerWeek', this.value)" class="input-royal w-full ${readOnlyClass}" ${disabledAttr}>
             <option value="">Number of days/week</option>
             <option value="1" ${params.daysPerWeek === '1' ? 'selected' : ''}>1</option>
             <option value="2" ${params.daysPerWeek === '2' ? 'selected' : ''}>2</option>
@@ -345,7 +368,7 @@ function renderParametersContent(device, deviceIndex) {
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-700">Select days</label>
-          <select multiple onchange="updateDeviceParameter(${deviceIndex}, 'selectedDays', Array.from(this.selectedOptions).map(o=>o.value).join(', '))" class="input-royal w-full h-28">
+          <select multiple onchange="updateDeviceParameter(${deviceIndex}, 'selectedDays', Array.from(this.selectedOptions).map(o=>o.value).join(', '))" class="input-royal w-full h-28 ${readOnlyClass}" ${disabledAttr}>
             <option value="Mon" ${params.selectedDays?.includes('Mon') ? 'selected' : ''}>Mon</option>
             <option value="Tue" ${params.selectedDays?.includes('Tue') ? 'selected' : ''}>Tue</option>
             <option value="Wed" ${params.selectedDays?.includes('Wed') ? 'selected' : ''}>Wed</option>
@@ -357,7 +380,7 @@ function renderParametersContent(device, deviceIndex) {
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-700">Time of day</label>
-          <select onchange="updateDeviceParameter(${deviceIndex}, 'timeOfDay', this.value)" class="input-royal w-full">
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'timeOfDay', this.value)" class="input-royal w-full ${readOnlyClass}" ${disabledAttr}>
             <option value="">time of day</option>
             <option value="morning" ${params.timeOfDay === 'morning' ? 'selected' : ''}>Morning</option>
             <option value="midday" ${params.timeOfDay === 'midday' ? 'selected' : ''}>Midday</option>
@@ -372,6 +395,12 @@ function renderParametersContent(device, deviceIndex) {
 }
 
 function updateDeviceParameter(deviceIndex, key, value) {
+  // Prevent clinical assistants from updating parameters
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot modify treatment parameters - read-only access');
+    return;
+  }
+  
   if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
   if (!treatmentPlanState.devices[deviceIndex].parameters) treatmentPlanState.devices[deviceIndex].parameters = {};
   treatmentPlanState.devices[deviceIndex].parameters[key] = value;
@@ -644,7 +673,7 @@ function renderTreatmentPlan() {
         <h2 class="text-2xl font-bold text-slate-800">Treatment Plan</h2>
         <p class="text-slate-500">Neuromodulation Treatment Planning & Documentation</p>
       </div>
-      ${currentRole !== 'patient' ? `
+      ${currentRole !== 'patient' && currentRole !== 'clinical-assistant' ? `
       <div class="flex items-center gap-3">
         <div class="relative">
           <select id="patientNavigationSelectTreatment" class="input-royal pr-10 font-bold text-slate-900 bg-white border-2 border-orange-300">
@@ -703,7 +732,7 @@ function renderTreatmentPlan() {
             <div class="bg-white px-4 py-2 rounded-lg border-2 border-blue-400 flex items-center gap-2 shadow">
               <i class="fa-solid fa-microchip text-blue-600"></i>
               <span class="font-semibold text-slate-800">${device.name}</span>
-              <button onclick="removeDevice(${idx})" class="ml-2 text-red-500 hover:text-red-700" ${currentRole === 'patient' ? 'disabled' : ''}>
+              <button onclick="removeDevice(${idx})" class="ml-2 text-red-500 hover:text-red-700" ${currentRole === 'patient' || currentRole === 'clinical-assistant' ? 'disabled' : ''}>
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
@@ -713,7 +742,7 @@ function renderTreatmentPlan() {
         
         ${treatmentPlanState.devices.length < treatmentPlanState.maxDevices ? `
         <div class="flex gap-3 items-center">
-          <select id="newDeviceSelect" class="input-royal flex-1" ${currentRole === 'patient' ? 'disabled' : ''}>
+          <select id="newDeviceSelect" class="input-royal flex-1" ${currentRole === 'patient' || currentRole === 'clinical-assistant' ? 'disabled' : ''}>
             <option value="">-- Select a Device to Add --</option>
             <optgroup label="tDCS/tACS Devices">
               <option value="plato">Plato Neurostimulation - 4 specialized electrode blocks</option>
@@ -732,7 +761,7 @@ function renderTreatmentPlan() {
               <option value="robotic_arm">Robotic Arm - Standard placement</option>
             </optgroup>
           </select>
-          <button onclick="addDevice()" class="btn-primary" ${currentRole === 'patient' ? 'disabled' : ''}>
+          <button onclick="addDevice()" class="btn-primary" ${currentRole === 'patient' || currentRole === 'clinical-assistant' ? 'disabled' : ''}>
             <i class="fa-solid fa-plus mr-2"></i>Add Device
           </button>
         </div>
@@ -788,7 +817,7 @@ function renderTreatmentPlan() {
               class="input-royal w-full text-sm" 
               rows="8" 
               placeholder="Enter medication suggestions, dosages, and instructions...&#10;&#10;Example:&#10;1. Medication Name: [Drug name]&#10;   Dosage: [Amount and frequency]&#10;   Duration: [Treatment period]&#10;   Instructions: [Special instructions]&#10;&#10;2. ..." 
-              ${currentRole === 'patient' ? 'readonly' : ''}
+              ${currentRole === 'patient' || currentRole === 'clinical-assistant' ? 'readonly' : ''}
             ></textarea>
           </div>
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -809,7 +838,7 @@ function renderTreatmentPlan() {
       </div>
 
       <!-- Save Button -->
-      ${currentRole !== 'patient' ? `
+      ${currentRole !== 'patient' && currentRole !== 'clinical-assistant' ? `
       <div class="flex justify-end gap-3 mt-6">
         <button id="saveTreatmentPlanBtn" class="btn-primary">
           <i class="fa-solid fa-save mr-2"></i>Save Treatment Plan
@@ -1294,6 +1323,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Device Management Functions for Treatment Plan
 function addDevice() {
+  // Prevent clinical assistants from adding devices
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot add devices - read-only access');
+    return;
+  }
+  
   const select = document.getElementById('newDeviceSelect');
   if (!select || !select.value) {
     alert('Please select a device first');
@@ -1334,6 +1369,12 @@ function addDevice() {
 }
 
 function removeDevice(index) {
+  // Prevent clinical assistants from removing devices
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot remove devices - read-only access');
+    return;
+  }
+  
   if (confirm('Are you sure you want to remove this device?')) {
     treatmentPlanState.devices.splice(index, 1);
     
@@ -1734,6 +1775,12 @@ function applyNetworkToDevice(deviceIndex, networkId) {
 
 // Add network from dropdown to tabs
 function addNetworkFromDropdown(deviceIndex) {
+  // Prevent clinical assistants from adding network tabs
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot add network tabs - read-only access');
+    return;
+  }
+  
   const select = document.getElementById(`networkSelect_${deviceIndex}`);
   if (!select || !select.value) {
     console.warn('No network select or no value selected for device:', deviceIndex);
@@ -2064,6 +2111,12 @@ const customMontageState = {
 };
 
 function startCustomMontage(deviceIndex) {
+  // Prevent clinical assistants from starting custom montages
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot create custom montages - read-only access');
+    return;
+  }
+  
   customMontageState.isEditing = true;
   customMontageState.activeDeviceIndex = deviceIndex;
   customMontageState.activeTool = 'anode';
@@ -2085,6 +2138,12 @@ function startCustomMontage(deviceIndex) {
 }
 
 function setElectrodeTool(deviceIndex, tool) {
+  // Prevent clinical assistants from using electrode tools
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot modify electrode settings - read-only access');
+    return;
+  }
+  
   customMontageState.activeTool = tool;
   updateToolUI(deviceIndex);
 }
@@ -2179,6 +2238,12 @@ function applySameMontage(deviceIndex) {
 }
 
 function saveCustomMontage(deviceIndex) {
+  // Prevent clinical assistants from saving custom montages
+  if (window.currentRole === 'clinical-assistant') {
+    console.log('Clinical assistants cannot save custom montages - read-only access');
+    return;
+  }
+  
   customMontageState.isEditing = false;
   customMontageState.activeDeviceIndex = null;
   
@@ -2643,7 +2708,8 @@ function renderDeviceJourney(device, deviceIndex) {
             <div class="flex gap-2">
               <select 
                 id="networkSelect_${deviceIndex}" 
-                class="input-royal flex-1"
+                class="input-royal flex-1 ${window.currentRole === 'clinical-assistant' ? 'opacity-60 cursor-not-allowed' : ''}"
+                ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}
               >
                 <option value="">-- Choose a Brain Network to Add --</option>
                 ${networks && networks.length > 0 ? networks.map((network, idx) => `
@@ -2652,9 +2718,10 @@ function renderDeviceJourney(device, deviceIndex) {
               </select>
               <button 
                 onclick="addNetworkFromDropdown(${deviceIndex})"
-                class="btn-primary text-sm whitespace-nowrap"
+                class="${window.currentRole === 'clinical-assistant' ? 'bg-gray-400 cursor-not-allowed opacity-60' : 'btn-primary'} text-sm whitespace-nowrap"
+                ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}
               >
-                <i class="fa-solid fa-plus mr-1"></i>Add Tab
+                <i class="fa-solid ${window.currentRole === 'clinical-assistant' ? 'fa-lock' : 'fa-plus'} mr-1"></i>${window.currentRole === 'clinical-assistant' ? 'Read Only' : 'Add Tab'}
               </button>
             </div>
             <p class="text-xs text-slate-500 mt-1">Select networks to compare them side by side in tabs</p>
@@ -2746,8 +2813,9 @@ function renderDeviceJourney(device, deviceIndex) {
             </h5>
             <select 
               id="customMontageSelect_${deviceIndex}" 
-              class="input-royal w-full text-sm mb-2" 
+              class="input-royal w-full text-sm mb-2 ${window.currentRole === 'clinical-assistant' ? 'opacity-60 cursor-not-allowed' : ''}" 
               onchange="loadCustomMontageForDevice(${deviceIndex}, this.value)"
+              ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}
             >
               <option value="">-- Select Custom Montage --</option>
               <optgroup label="Custom Montages" id="customMontagesOptgroup_${deviceIndex}">
@@ -2778,11 +2846,11 @@ function renderDeviceJourney(device, deviceIndex) {
             </h5>
             
             <div id="startCustomBtn_${deviceIndex}">
-               <button onclick="startCustomMontage(${deviceIndex})" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95">
-                 <i class="fa-solid fa-sliders"></i> 
-                 Start Custom Configuration
+               <button onclick="startCustomMontage(${deviceIndex})" class="w-full ${window.currentRole === 'clinical-assistant' ? 'bg-gray-400 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700'} text-white p-2.5 rounded-lg text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95" ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}>
+                 <i class="fa-solid ${window.currentRole === 'clinical-assistant' ? 'fa-lock' : 'fa-sliders'}"></i> 
+                 ${window.currentRole === 'clinical-assistant' ? 'Read Only Access' : 'Start Custom Configuration'}
                </button>
-               <p class="text-[10px] text-slate-500 text-center mt-2">Click to modify electrode placement for this patient</p>
+               <p class="text-[10px] text-slate-500 text-center mt-2">${window.currentRole === 'clinical-assistant' ? 'Only doctors can create custom montages' : 'Click to modify electrode placement for this patient'}</p>
             </div>
             
             <!-- Custom Edit Controls (Hidden by default) -->
@@ -2792,10 +2860,10 @@ function renderDeviceJourney(device, deviceIndex) {
                 </h6>
                 
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    <button id="toolAnode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'anode')" class="p-2 bg-white border border-red-200 rounded text-xs font-bold text-red-700 hover:bg-red-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                    <button id="toolAnode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'anode')" class="p-2 ${window.currentRole === 'clinical-assistant' ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white hover:bg-red-50'} border border-red-200 rounded text-xs font-bold text-red-700 flex items-center justify-center gap-1 transition-all shadow-sm" ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}>
                         <div class="w-3 h-3 rounded-full bg-red-500"></div> Place Anode
                     </button>
-                    <button id="toolCathode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'cathode')" class="p-2 bg-white border border-blue-200 rounded text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1 transition-all shadow-sm">
+                    <button id="toolCathode_${deviceIndex}" onclick="setElectrodeTool(${deviceIndex}, 'cathode')" class="p-2 ${window.currentRole === 'clinical-assistant' ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white hover:bg-blue-50'} border border-blue-200 rounded text-xs font-bold text-blue-700 flex items-center justify-center gap-1 transition-all shadow-sm" ${window.currentRole === 'clinical-assistant' ? 'disabled' : ''}>
                         <div class="w-3 h-3 rounded-full bg-blue-500"></div> Place Cathode
                     </button>
                 </div>
@@ -2808,7 +2876,7 @@ function renderDeviceJourney(device, deviceIndex) {
                 
                 <div class="mb-3">
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custom Montage Name</label>
-                    <input type="text" id="customMontageName_${deviceIndex}" placeholder="e.g., Patient Specific F3-F4" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="customMontageName_${deviceIndex}" placeholder="e.g., Patient Specific F3-F4" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none ${window.currentRole === 'clinical-assistant' ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}" ${window.currentRole === 'clinical-assistant' ? 'disabled readonly' : ''}>
                 </div>
                 
                 <div class="space-y-2">
@@ -4193,17 +4261,216 @@ function addSVGGradients() {
   svg.insertBefore(defs, svg.firstChild);
 }
 
+// Function to add a return button to navigate back to patient journey
+function addReturnButton(returnUrl) {
+    const container = document.body;
+    if (!container) return;
+    
+    // Create return button
+    const returnButton = document.createElement('div');
+    returnButton.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+    `;
+    
+    returnButton.innerHTML = `
+        <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i>
+        Back to Patient Journey
+    `;
+    
+    returnButton.addEventListener('click', function() {
+        // Save any changes before returning
+        saveTreatmentPlanForPatient();
+        window.location.href = returnUrl;
+    });
+    
+    returnButton.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    });
+    
+    returnButton.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+    });
+    
+    container.appendChild(returnButton);
+}
+
+// Function to save treatment plan data for the current patient
+function saveTreatmentPlanForPatient() {
+    const sessionData = localStorage.getItem('treatmentPlanSession');
+    if (!sessionData) return;
+    
+    // Prevent clinical assistants from saving changes
+    if (window.currentRole === 'clinical-assistant') {
+        console.log('Clinical assistants cannot save treatment plan changes - read-only access');
+        return;
+    }
+    
+    try {
+        const session = JSON.parse(sessionData);
+        const patientId = session.patientId;
+        
+        // Get current treatment plan state
+        const treatmentData = {
+            devices: treatmentPlanState.devices,
+            lastModified: new Date().toISOString(),
+            modifiedBy: window.currentRole || 'doctor',
+            patientId: patientId,
+            patientName: session.patientName,
+            status: 'draft', // Can be 'draft', 'approved', 'active'
+            sessionId: session.assessmentId || session.blockType,
+            customMontages: customMontagesLibrary
+        };
+        
+        // Save to localStorage with patient-specific key
+        const treatmentKey = `treatmentPlan_${patientId}`;
+        localStorage.setItem(treatmentKey, JSON.stringify(treatmentData));
+        
+        // Also update a general index of all patient treatment plans
+        let treatmentPlansIndex = {};
+        try {
+            const indexData = localStorage.getItem('treatmentPlansIndex');
+            if (indexData) {
+                treatmentPlansIndex = JSON.parse(indexData);
+            }
+        } catch (e) {
+            console.error('Error loading treatment plans index:', e);
+        }
+        
+        treatmentPlansIndex[patientId] = {
+            patientName: session.patientName,
+            lastModified: treatmentData.lastModified,
+            modifiedBy: treatmentData.modifiedBy,
+            status: treatmentData.status,
+            hasData: treatmentData.devices.length > 0
+        };
+        
+        localStorage.setItem('treatmentPlansIndex', JSON.stringify(treatmentPlansIndex));
+        
+        console.log('Treatment plan saved for patient:', patientId, treatmentData);
+        
+        // Show confirmation
+        showSaveConfirmation();
+        
+    } catch (e) {
+        console.error('Error saving treatment plan:', e);
+    }
+}
+
+// Function to show save confirmation
+function showSaveConfirmation() {
+    // Create temporary confirmation message
+    const confirmation = document.createElement('div');
+    confirmation.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        font-size: 14px;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    `;
+    
+    confirmation.innerHTML = `
+        <i class="fa-solid fa-check-circle" style="margin-right: 8px;"></i>
+        Treatment plan saved successfully
+    `;
+    
+    document.body.appendChild(confirmation);
+    
+    // Animate in
+    setTimeout(() => {
+        confirmation.style.opacity = '1';
+        confirmation.style.transform = 'translateY(0)';
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        confirmation.style.opacity = '0';
+        confirmation.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            document.body.removeChild(confirmation);
+        }, 300);
+    }, 3000);
+}
+
+// Auto-save functionality - save every 30 seconds if there are changes
+setInterval(function() {
+    const sessionData = localStorage.getItem('treatmentPlanSession');
+    if (sessionData && treatmentPlanState.devices.length > 0 && window.currentRole !== 'clinical-assistant') {
+        saveTreatmentPlanForPatient();
+    }
+}, 30000); // Auto-save every 30 seconds
 
 
 // Initialize the application when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Treatment Plan System Initialized');
     
+    // Load session data from patient journey if available
+    const treatmentPlanSessionData = localStorage.getItem('treatmentPlanSession');
+    let sessionData = null;
+    let currentRole = 'doctor'; // Default role
+    let currentPatient = null;
+    
+    if (treatmentPlanSessionData) {
+        try {
+            sessionData = JSON.parse(treatmentPlanSessionData);
+            console.log('Loaded treatment plan session data:', sessionData);
+            
+            // Set role from session
+            currentRole = sessionData.currentRole || 'doctor';
+            window.currentRole = currentRole;
+            
+            // Set patient info
+            currentPatient = {
+                id: sessionData.patientId,
+                name: sessionData.patientName,
+                sessionId: sessionData.assessmentId || sessionData.blockType,
+                viewMode: sessionData.viewMode || 'edit',
+                returnUrl: sessionData.returnUrl
+            };
+            
+            // Display patient info in header (if header exists)
+            const pageTitle = document.querySelector('h1, .page-title, [data-title]');
+            if (pageTitle) {
+                const readOnlyIndicator = currentRole === 'clinical-assistant' ? ' <span style="background: #f59e0b; color: white; font-size: 0.6em; padding: 2px 8px; border-radius: 12px; font-weight: 600; margin-left: 8px;">READ ONLY</span>' : '';
+                pageTitle.innerHTML = `Treatment Plan - ${currentPatient.name} <span style="font-size: 0.7em; color: #64748b;">(${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)})</span>${readOnlyIndicator}`;
+            }
+            
+            console.log('Session initialized for patient:', currentPatient.name, 'Role:', currentRole);
+            
+        } catch (e) {
+            console.error('Error parsing treatment plan session data:', e);
+        }
+    }
+    
     // Set up some sample data if needed
     if (typeof sampleData === 'undefined') {
         window.sampleData = {
             patients: [
-                { id: 'P001', name: 'John Doe', age: 45, gender: 'Male', status: 'Active' },
+                currentPatient || { id: 'P001', name: 'John Doe', age: 45, gender: 'Male', status: 'Active' },
                 { id: 'P002', name: 'Jane Smith', age: 38, gender: 'Female', status: 'Active' },
                 { id: 'P003', name: 'Robert Johnson', age: 52, gender: 'Male', status: 'Active' }
             ]
@@ -4211,17 +4478,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (typeof currentRole === 'undefined') {
-        window.currentRole = 'clinician';
+        window.currentRole = currentRole;
     }
     
     if (typeof globalState === 'undefined') {
         window.globalState = {
-            currentPatient: sampleData.patients[0]
+            currentPatient: currentPatient || sampleData.patients[0],
+            sessionData: sessionData
         };
     }
     
     if (typeof globalSelectedPatientId === 'undefined') {
-        window.globalSelectedPatientId = sampleData.patients[0].id;
+        window.globalSelectedPatientId = currentPatient ? currentPatient.id : sampleData.patients[0].id;
+    }
+    
+    // Add return button if we came from patient journey
+    if (sessionData && sessionData.returnUrl) {
+        addReturnButton(sessionData.returnUrl);
     }
     
     // Load and render the treatment plan
