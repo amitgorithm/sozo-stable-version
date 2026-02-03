@@ -3347,6 +3347,7 @@
             paidBlocksGrid.className = 'blocks-container';
 
             const paidBlocks = [
+                { id: 'anamnesis-paid', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending', canStart: currentRole === 'clinical-assistant' || currentRole === 'doctor' },
                 { id: 'fnon-paid', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending', canStart: currentRole === 'clinical-assistant' },
                 { id: 'eeg-paid', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'ready', requiresUnlock: true, canStart: currentRole === 'doctor' || currentRole === 'clinical-assistant' },
                 { id: 'prs-paid', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending', canStart: currentRole === 'doctor' || currentRole === 'clinical-assistant' },
@@ -3441,12 +3442,12 @@
                                 <div class="block-actions" style="margin-top: 12px;">
                                     <button class="start-button primary" onclick="startNewPatientAssessment('${block.id}', '${block.name}')">
                                         <i class="fa-solid fa-play"></i>
-                                        Start ${block.type === 'doctor-notes' ? 'Notes' : block.type === 'treatment-plan' ? 'Planning' : block.type === 'final-report' ? 'Report' : 'Assessment'}
+                                        Start ${block.type === 'anamnesis' ? 'Anamnesis' : block.type === 'doctor-notes' ? 'Notes' : block.type === 'treatment-plan' ? 'Planning' : block.type === 'final-report' ? 'Report' : 'Assessment'}
                                     </button>
                                 </div>
                             `;
                         } else if (permissions.canViewScores) {
-                            const waitingFor = block.type === 'fnon' ? 'clinical assistant' : 'doctor';
+                            const waitingFor = block.waitingFor || (block.type === 'fnon' ? 'clinical assistant' : 'doctor');
                             detailsContent += '<div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; margin-top: 12px;"><span style="font-size: 12px; color: #64748b;">Waiting for ' + waitingFor + '</span></div>';
                         }
                     }
@@ -3501,6 +3502,7 @@
             laterBlocksGrid.className = 'blocks-container';
 
             const laterBlocks = [
+                { id: 'anamnesis-later', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending', canStart: false, waitingFor: 'clinical assistant' },
                 { id: 'fnon-later', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending', canStart: currentRole === 'clinical-assistant' },
                 { id: 'eeg-later', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', requiresUnlock: true, canStart: false },
                 { id: 'prs-later', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', canStart: false },
@@ -3815,6 +3817,16 @@
             // Define all blocks in completed state
             const allCompletedBlocks = [
                 { 
+                    id: 'anamnesis-completed', 
+                    name: 'Anamnesis', 
+                    desc: 'Patient Symptoms', 
+                    type: 'anamnesis', 
+                    status: 'completed', 
+                    completedBy: 'Clinical Assistant Maria',
+                    completedAt: '2026-01-29',
+                    diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
+                },
+                { 
                     id: 'fnon-completed', 
                     name: 'FNON', 
                     desc: 'Network Analysis', 
@@ -3888,7 +3900,38 @@
                 if (permissions.canViewScores || permissions.canViewReports || permissions.canEditData) {
                     let detailsContent = '';
                     
-                    if (block.type === 'fnon' && permissions.canViewScores) {
+                    if (block.type === 'anamnesis' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Diagnosis</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.diagnosis}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">30 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'anamnesis\')" title="View anamnesis summary"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'anamnesis\')" title="Edit anamnesis data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'fnon' && permissions.canViewScores) {
                         detailsContent = `
                             <div class="block-info-grid">
                                 <div class="block-info-item">
@@ -4372,6 +4415,13 @@
         // WORKING JOURNEY - BLOCKS DEFINITION
         const workingBlocks = [
             {
+                id: 'working-block-0',
+                type: 'anamnesis',
+                name: 'Anamnesis',
+                desc: 'Patient symptoms and medical history',
+                requiresPrevious: false
+            },
+            {
                 id: 'working-block-1',
                 type: 'fnon',
                 name: 'FNON Assessment',
@@ -4479,7 +4529,7 @@
                             <div class="block-actions" style="margin-top: auto;">
                                 <button class="start-button primary" onclick="startWorkingBlock('${block.id}', '${block.name}')">
                                     <i class="fa-solid fa-play"></i>
-                                    Start Assessment
+                                    Start ${block.type === 'anamnesis' ? 'Anamnesis' : 'Assessment'}
                                 </button>
                             </div>
                         `;
@@ -4535,7 +4585,13 @@
 
         // START WORKING BLOCK
         function startWorkingBlock(blockId, blockName) {
-            alert(`Starting: ${blockName}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface for data entry.`);
+            // Check if this is an anamnesis block and redirect appropriately
+            const block = workingBlocks.find(b => b.id === blockId);
+            if (block && block.type === 'anamnesis') {
+                window.location.href = 'anamnesis.html';
+            } else {
+                alert(`Starting: ${blockName}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface for data entry.`);
+            }
         }
 
         // RENDER DEVICE LOCKING VIEW
@@ -5840,6 +5896,12 @@
         }
 
         function startNewPatientAssessment(assessmentId, assessmentName) {
+            // Handle Anamnesis assessment
+            if (assessmentId === 'anamnesis-paid') {
+                window.location.href = 'anamnesis.html';
+                return;
+            }
+            
             // Handle FNON assessment
             if (assessmentId === 'fnon-paid') {
                 const patientNameElement = document.getElementById('patientFullName');
