@@ -187,6 +187,8 @@
             z-index: 1;
             position: relative;
             min-height: fit-content;
+            word-wrap: break-word;
+            box-sizing: border-box;
         }
 
         .block-card.expanded:hover {
@@ -735,19 +737,22 @@
         }
 
         .block-card.expanded .block-expanded-details {
-            max-height: 800px;
+            max-height: 1000px;
             overflow: visible;
             opacity: 1;
-            padding: 0 8px 16px 8px;
+            padding: 8px 12px 16px 12px;
             margin-bottom: 8px;
+            width: calc(100% - 24px);
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .block-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
             background: #f8fafc;
-            padding: 16px;
+            padding: 14px;
             border-radius: 8px;
             position: relative;
             z-index: 1;
@@ -755,6 +760,7 @@
             width: 100%;
             box-sizing: border-box;
             overflow: hidden;
+            word-wrap: break-word;
         }
 
         .block-info-item {
@@ -763,15 +769,22 @@
             min-width: 0;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            hyphens: auto;
+            text-align: left;
+            align-items: flex-start;
+            justify-content: flex-start;
         }
 
         .block-info-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             color: #64748b;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .block-info-value {
@@ -782,6 +795,9 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
+            white-space: normal;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         .action-button {
@@ -826,19 +842,27 @@
             width: 100%;
             box-sizing: border-box;
             padding: 0;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
 
         .activity-tag {
-            padding: 6px 12px;
+            padding: 6px 10px;
             background: rgba(0, 161, 228, 0.15);
             color: #0369a1;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
             z-index: 101;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            text-align: center;
+            box-sizing: border-box;
         }
 
         .activity-tag:hover {
@@ -877,6 +901,7 @@
             padding: 0;
             width: 100%;
             box-sizing: border-box;
+            word-wrap: break-word;
         }
 
         .detail-section-title {
@@ -886,6 +911,8 @@
             color: #64748b;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .block-action-buttons {
@@ -896,25 +923,33 @@
             flex-wrap: wrap;
             box-sizing: border-box;
             padding: 0;
+            justify-content: flex-start;
+            align-items: center;
         }
 
         .block-action-btn {
             flex: 1;
-            min-width: 120px;
-            padding: 10px 16px;
-            border-radius: 8px;
+            min-width: 100px;
+            max-width: 140px;
+            padding: 8px 12px;
+            border-radius: 6px;
             border: 2px solid;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             position: relative;
             z-index: 10;
             pointer-events: auto;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            text-align: center;
         }
 
         .block-action-btn.view {
