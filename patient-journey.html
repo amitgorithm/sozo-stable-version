@@ -4870,22 +4870,26 @@
                 // Open Doctor's Notes modal in read-only mode
                 openDoctorNotesModal(false);
             } else if (blockType === 'treatment-plan') {
-                // Save session data before navigating to treatment-plan.html
-                const patientNameElement = document.getElementById('patientFullName');
-                const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
-                
-                const sessionData = {
+                // Store current role in session data before navigating to treatment plan
+                const treatmentPlanSession = {
+                    patientId: selectedPatientData?.id || 'unknown',
+                    patientName: selectedPatientData?.firstName && selectedPatientData?.lastName 
+                        ? `${selectedPatientData.firstName} ${selectedPatientData.lastName}`
+                        : 'Unknown Patient',
                     currentRole: currentRole,
-                    patientId: 'P-001',
-                    patientName: patientName,
                     blockType: 'treatment-plan',
-                    viewMode: 'view',
+                    viewMode: 'edit',
+                    assessmentId: null,
                     returnUrl: window.location.href
                 };
-                localStorage.setItem('treatmentPlanSession', JSON.stringify(sessionData));
+                localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanSession));
                 
-                // Navigate to treatment-plan.html in the same tab
-                window.location.href = './treatment-plan.html';
+                // Route based on role: doctors to full editor, clinical assistants to notes-only
+                if (currentRole === 'doctor') {
+                    window.location.href = './treatment-plan-doctor.html';
+                } else {
+                    window.location.href = './treatment-plan.html';
+                }
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
                 window.location.href = './final-report.html';
@@ -4975,8 +4979,12 @@
                 openDoctorNotesModal(true);
                 return;
             } else if (blockType === 'treatment-plan') {
-                // Navigate to treatment-plan.html in the same tab
-                window.location.href = './treatment-plan.html';
+                // Navigate to treatment plan based on role
+                if (currentRole === 'doctor') {
+                    window.location.href = './treatment-plan-doctor.html';
+                } else {
+                    window.location.href = './treatment-plan.html';
+                }
                 return;
             } else if (blockType === 'final-report') {
                 // Navigate to final-report.html in the same tab
@@ -5937,9 +5945,13 @@
             saveDoctorNotes();
             // Close doctor notes modal
             closeDoctorNotesModal();
-            // Open treatment plan modal
+            // Open treatment plan based on role
             setTimeout(() => {
-                window.location.href = './treatment-plan.html';
+                if (window.currentRole === 'doctor') {
+                    window.location.href = './treatment-plan-doctor.html';
+                } else {
+                    window.location.href = './treatment-plan.html';
+                }
             }, 300);
         }
 
