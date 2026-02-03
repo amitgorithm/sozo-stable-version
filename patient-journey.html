@@ -185,6 +185,8 @@
             overflow: visible;
             padding-bottom: 24px;
             z-index: 1;
+            position: relative;
+            min-height: fit-content;
         }
 
         .block-card.expanded:hover {
@@ -727,29 +729,40 @@
             margin-top: 16px;
             opacity: 0;
             width: 100%;
+            position: relative;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .block-card.expanded .block-expanded-details {
             max-height: 800px;
             overflow: visible;
             opacity: 1;
-            padding-bottom: 8px;
+            padding: 0 8px 16px 8px;
+            margin-bottom: 8px;
         }
 
         .block-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             background: #f8fafc;
             padding: 16px;
             border-radius: 8px;
             position: relative;
             z-index: 1;
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .block-info-item {
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .block-info-label {
@@ -762,9 +775,13 @@
         }
 
         .block-info-value {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: #0f172a;
+            line-height: 1.3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
 
         .action-button {
@@ -806,6 +823,9 @@
             margin-top: 12px;
             position: relative;
             z-index: 100;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0;
         }
 
         .activity-tag {
@@ -854,6 +874,9 @@
             position: relative;
             z-index: 50;
             overflow: visible;
+            padding: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .detail-section-title {
@@ -871,6 +894,8 @@
             margin-top: 16px;
             width: 100%;
             flex-wrap: wrap;
+            box-sizing: border-box;
+            padding: 0;
         }
 
         .block-action-btn {
@@ -2472,6 +2497,26 @@
     </div>
     <!-- END FNON ASSESSMENT MODAL -->
 
+    <!-- ANAMNESIS MODAL -->
+    <div id="anamnesisModal" class="assessment-modal" onclick="closeAnamnesisModal(event)">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <div class="assessment-modal-title">
+                    <h2>Anamnesis Assessment</h2>
+                    <p>Patient symptoms and medical history</p>
+                </div>
+                <button class="assessment-modal-close" onclick="closeAnamnesisModal(event)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assessment-modal-body" id="anamnesisModalBody">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    <!-- END ANAMNESIS MODAL -->
+
     <!-- PRS ASSESSMENT MODAL -->
     <div id="prsAssessmentModal" class="assessment-modal" onclick="closePrsModal(event)">
         <div class="assessment-modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
@@ -2625,6 +2670,16 @@
                     completedDate: null,
                     blocks: [
                         { 
+                            id: 'anamnesis-2', 
+                            name: 'Anamnesis', 
+                            desc: 'Patient Symptoms',
+                            type: 'anamnesis',
+                            status: 'completed', 
+                            completedBy: 'Clinical Assistant Maria', 
+                            completedAt: '2026-01-29',
+                            diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
+                        },
+                        { 
                             id: 'fnon-2', 
                             name: 'FNON', 
                             desc: 'Network Analysis',
@@ -2703,6 +2758,7 @@
                     startDate: '2026-04-15',
                     completedDate: null,
                     blocks: [
+                        { id: 'anamnesis-3', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'fnon-3', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'eeg-3', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'prs-3', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', completedBy: null, completedAt: null },
@@ -2725,6 +2781,7 @@
                     startDate: '2026-07-15',
                     completedDate: null,
                     blocks: [
+                        { id: 'anamnesis-4', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'fnon-4', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'eeg-4', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', completedBy: null, completedAt: null },
                         { id: 'prs-4', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', completedBy: null, completedAt: null },
@@ -3842,6 +3899,18 @@
 
             // Define all blocks in completed state
             const allCompletedBlocks = [
+                {
+                    id: 'anamnesis-completed',
+                    name: 'Anamnesis', 
+                    desc: 'Patient Symptoms',
+                    type: 'anamnesis',
+                    status: 'completed',
+                    completedBy: 'Clinical Assistant Maria',
+                    completedAt: '2026-01-29',
+                    score: null,
+                    channelsCaptured: null,
+                    diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
+                },
                 { 
                     id: 'fnon-completed', 
                     name: 'FNON', 
@@ -3916,7 +3985,38 @@
                 if (permissions.canViewScores || permissions.canViewReports || permissions.canEditData) {
                     let detailsContent = '';
                     
-                    if (block.type === 'fnon' && permissions.canViewScores) {
+                    if (block.type === 'anamnesis' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Diagnosis</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.diagnosis}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">30 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'anamnesis\')" title="View anamnesis summary"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'anamnesis\')" title="Edit anamnesis data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'fnon' && permissions.canViewScores) {
                         detailsContent = `
                             <div class="block-info-grid">
                                 <div class="block-info-item">
@@ -4734,7 +4834,10 @@
         }
 
         function viewBlockDetails(blockType) {
-            if (blockType === 'fnon') {
+            if (blockType === 'anamnesis') {
+                // Open Anamnesis modal in read-only mode
+                openAnamnesisModal(false);
+            } else if (blockType === 'fnon') {
                 // Get patient name from the header or from state
                 const patientNameElement = document.getElementById('patientFullName');
                 const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
@@ -5606,6 +5709,122 @@
             }
             renderPrsModal(false);
             console.log('PRS Assessment saved:', prsState);
+        }
+
+        // --- ANAMNESIS FUNCTIONS ---
+        let anamnesisState = {
+            diagnosis: 'Chronic fatigue and concentration issues',
+            mainSymptoms: 'Difficulty concentrating, memory problems, persistent fatigue',
+            initialSymptoms: 'Started with mild fatigue 6 months ago',
+            diagnosisRelated: 'Yes - diagnosed with chronic fatigue syndrome',
+            symptomsStart: '6 months ago',
+            symptomsDuration: '6 months ongoing',
+            symptomsFrequency: 'Daily',
+            symptomsIntensity: 'Moderate to severe',
+            symptomsProgression: 'Getting worse',
+            secondarySymptoms: {
+                sleep: 'Difficulty falling asleep, frequent waking',
+                concentration: 'Severe concentration issues',
+                memory: 'Short-term memory problems',
+                gastrointestinal: 'None reported',
+                mood: 'Mild depression due to symptoms',
+                fatigue: 'Severe persistent fatigue',
+                weakness: 'General muscle weakness',
+                pain: 'Mild headaches',
+                depression: 'Mild',
+                bladder: 'Normal'
+            },
+            operations: 'None',
+            treatments: 'Previous physiotherapy (6 weeks, 2x/week) - minimal improvement',
+            medications: 'Multivitamin, Omega-3 supplements',
+            brainMRI: 'Yes - performed 3 months ago, results normal',
+            neuromodulation: 'No previous experience with neuromodulation devices'
+        };
+
+        function openAnamnesisModal(editable) {
+            console.log('Opening Anamnesis modal, editable:', editable);
+            if (editable) {
+                window.location.href = 'anamnesis.html';
+            } else {
+                renderAnamnesisModal(false);
+                document.getElementById('anamnesisModal').classList.add('open');
+            }
+        }
+
+        function closeAnamnesisModal(event) {
+            if (event && event.target === event.currentTarget) {
+                document.getElementById('anamnesisModal').classList.remove('open');
+            }
+        }
+
+        function renderAnamnesisModal(editable) {
+            const modalBody = document.getElementById('anamnesisModalBody');
+            modalBody.innerHTML = `
+                <div class="assessment-section-group">
+                    <div class="assessment-section-title">
+                        <i class="fas fa-stethoscope"></i>
+                        Patient Anamnesis Summary
+                    </div>
+                    
+                    <div class="assessment-info-table" style="margin-bottom: 24px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569;">Category</th>
+                                    <th style="background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569;">Information</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Diagnosis</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.diagnosis}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Main Symptoms</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.mainSymptoms}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Symptoms Duration</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.symptomsDuration}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Symptoms Progression</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.symptomsProgression}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Sleep Issues</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.secondarySymptoms.sleep}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Concentration</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.secondarySymptoms.concentration}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Previous Treatments</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.treatments}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Current Medications</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.medications}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Brain MRI</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.brainMRI}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0; font-weight: 600;">Previous Neuromodulation</td>
+                                    <td style="padding: 14px; border: 1px solid #e2e8f0;">${anamnesisState.neuromodulation}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="assessment-conclusion-box">
+                        <h4>Clinical Assessment Summary</h4>
+                        <p>Patient presents with chronic fatigue syndrome with significant impact on daily functioning. Comprehensive symptom assessment completed with detailed medical history documented.</p>
+                    </div>
+                </div>
+            `;
         }
 
         // --- DOCTOR'S NOTES FUNCTIONS ---
