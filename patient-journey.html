@@ -1280,6 +1280,195 @@
             align-items: center;
             gap: 8px;
         }
+
+        /* ASSESSMENT MODAL STYLES */
+        .assessment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .assessment-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .assessment-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .assessment-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, rgba(244, 121, 32, 0.05), rgba(0, 161, 228, 0.05));
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .assessment-modal-title {
+            flex: 1;
+        }
+
+        .assessment-modal-title h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+
+        .assessment-modal-title p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .assessment-modal-close {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .assessment-modal-close:hover {
+            background: #f8fafc;
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+        }
+
+        .assessment-modal-body {
+            padding: 32px;
+        }
+
+        .assessment-section-group {
+            margin-bottom: 32px;
+        }
+
+        .assessment-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--orange-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assessment-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .assessment-info-table thead {
+            background: #f8fafc;
+        }
+
+        .assessment-info-table th {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #475569;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+            letter-spacing: 0.5px;
+        }
+
+        .assessment-info-table td {
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .assessment-info-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .assessment-badge-info {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .assessment-badge-info.sozo {
+            background: rgba(244, 121, 32, 0.15);
+            color: var(--orange-primary);
+        }
+
+        .assessment-badge-info.blue {
+            background: rgba(0, 161, 228, 0.15);
+            color: var(--blue-primary);
+        }
+
+        .assessment-conclusion-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-left: 4px solid var(--orange-primary);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .assessment-conclusion-box h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .assessment-conclusion-box p {
+            font-size: 13px;
+            color: #0f172a;
+            margin: 0;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -1627,10 +1816,10 @@
                 <div style="margin-bottom: 32px;">
                     <label style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 12px;">I AM:</label>
                     <select id="entryRoleSelector" onchange="handleEntryRoleChange()" style="padding: 10px 20px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
-                        <option value="receptionist">Receptionist</option>
+                        <option value="receptionist" selected>Receptionist</option>
                         <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
-                        <option value="clinical-assistant" selected>Clinical Assistant</option>
+                        <option value="clinical-assistant">Clinical Assistant</option>
                     </select>
                 </div>
 
@@ -1802,10 +1991,10 @@
                     <div id="journeyRoleSelector" style="display: none;">
                         <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">VIEW AS:</label>
                         <select id="roleSelector" onchange="handleRoleChange()" style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
-                            <option value="receptionist">Receptionist</option>
+                            <option value="receptionist" selected>Receptionist</option>
                             <option value="patient">Patient</option>
                             <option value="doctor">Doctor</option>
-                            <option value="clinical-assistant" selected>Clinical Assistant</option>
+                            <option value="clinical-assistant">Clinical Assistant</option>
                         </select>
                     </div>
                     <button onclick="backToPatientList()" style="padding: 10px 20px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
@@ -1997,6 +2186,329 @@
     </div>
     <!-- END CONTAINER -->
 
+    <!-- FNON ASSESSMENT MODAL -->
+    <div id="fnonAssessmentModal" class="assessment-modal" onclick="closeAssessmentModal(event)">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <div class="assessment-modal-title">
+                    <h2>FNON Assessment</h2>
+                    <p id="assessmentPatientName">Patient Name</p>
+                </div>
+                <button class="assessment-modal-close" onclick="closeAssessmentModal()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assessment-modal-body">
+                <!-- FNON Assessment Header -->
+                <div style="margin-bottom: 24px;">
+                    <h2 style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0;">FNON Assessment</h2>
+                    <p style="font-size: 14px; color: #64748b; margin: 0;">Functional Network of Neurons - Assessment Overview</p>
+                </div>
+
+                <!-- FNON Assessment Read-Only Display -->
+                <div style="border-radius: 12px; border: 2px solid #bfdbfe; background: linear-gradient(135deg, #eff6ff 0%, #eff6ff 100%); padding: 24px; margin-bottom: 32px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #93c5fd;">
+                        <div>
+                            <h3 style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 0 0 4px 0;">Assessment Overview</h3>
+                            <p style="font-size: 13px; color: #2563eb; margin: 0;">Functional Network Assessment - Read Only</p>
+                        </div>
+                        <i class="fa-solid fa-brain" style="font-size: 32px; color: #3b82f6; opacity: 0.7;"></i>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: white; border-radius: 8px; border-left: 4px solid #3b82f6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin: 0 0 8px 0;">Assessment Status</p>
+                            <p style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0;">Assessment Ready</p>
+                            <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Review the questions below to understand this assessment</p>
+                        </div>
+                        <div style="background: white; border-radius: 8px; border-left: 4px solid #2563eb; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin: 0 0 8px 0;">Assessment Type</p>
+                            <p style="font-size: 18px; font-weight: 900; color: #2563eb; margin: 0;">Neural Network Evaluation</p>
+                            <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">7 functional networks assessment</p>
+                        </div>
+                    </div>
+
+                    <!-- FNON Assessment Questions -->
+                    <div style="background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px;">
+                        <h4 style="font-weight: 700; color: #0f172a; margin: 0 0 16px 0; font-size: 16px;">Assessment Questions</h4>
+                        <div style="space-y: 16px;">
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">1</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Motor Network Function</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How well can you perform coordinated movements and physical tasks?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">2</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Cognitive Processing Speed</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How quickly can you process information and make decisions?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">3</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Memory & Recall</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How effectively do you recall recent and past events?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">4</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Attention & Focus</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How well can you concentrate on a single task?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">5</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Language & Communication</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How clear and effective is your verbal and written communication?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">6</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Emotional Regulation</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How well do you manage emotions and respond to stress?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">7</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">Sleep & Autonomic Function</p>
+                                    <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">How satisfied are you with your sleep patterns and autonomic regulation?</p>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                                        <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                                        <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Information Box -->
+                    <div style="margin-top: 16px; padding: 16px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px;">
+                        <p style="font-size: 12px; color: #1e3a8a; margin: 0;"><strong>ℹ️ Note:</strong> This assessment evaluates functional brain networks. Each question is scored on a scale from 0-2, where 0 indicates normal function, 1 indicates mild concerns, and 2 indicates significant deficits. This assessment helps create a personalized treatment plan.</p>
+                    </div>
+                </div>
+
+                <!-- Section A: Clinical Checklist - Read Only -->
+                <div style="border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; margin-bottom: 32px;">
+                    <div style="background: #1e293b; color: white; padding: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 15px; font-weight: 700;">Section A: Clinical Checklist</span>
+                        <span style="font-size: 11px; font-weight: 400; opacity: 0.7;">0=Normal, 1=Mild, 2=Deficit</span>
+                    </div>
+                    <div style="padding: 24px; background: white;">
+                        <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Dorsal Attention Mapping Interface (DAMI)</h3>
+                            </div>
+                            <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Hypervigilance, sustained attention deficits, distractibility</p>
+                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                                    <span style="font-weight: 500; color: #475569;">Attention Orientation Stability</span>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; box-shadow: 0 0 8px rgba(14, 165, 233, 0.6);">1 ✓</span>
+                                        <span style="background: #0ea5e9; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">1</span>
+                                        <span style="background: #ef4444; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">2</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                                    <span style="font-weight: 500; color: #475569;">Attention Span Capacity</span>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>
+                                        <span style="background: #0ea5e9; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">0</span>
+                                        <span style="background: #f59e0b; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);">1 ✓</span>
+                                        <span style="background: #ef4444; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Central Executive Network (CEN)</h3>
+                            </div>
+                            <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Impaired decision-making, working memory deficits, executive dysfunction</p>
+                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                                    <span style="font-weight: 500; color: #475569;">Working Memory Function</span>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>
+                                        <span style="background: #0ea5e9; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">0</span>
+                                        <span style="background: #f59e0b; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">1</span>
+                                        <span style="background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);">2 ✓</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                                    <span style="font-weight: 500; color: #475569;">Planning & Decision Making</span>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>
+                                        <span style="background: #0ea5e9; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; box-shadow: 0 0 8px rgba(14, 165, 233, 0.6);">0 ✓</span>
+                                        <span style="background: #f59e0b; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">1</span>
+                                        <span style="background: #ef4444; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0;">Limbic Emotional Processing</h3>
+                            </div>
+                            <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> Signs: Emotional lability, impaired emotional recognition, heightened reactivity</p>
+                            <div style="display: grid; grid-cols-1; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                                    <span style="font-weight: 500; color: #475569;">Emotional Regulation Ability</span>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>
+                                        <span style="background: #0ea5e9; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">0</span>
+                                        <span style="background: #f59e0b; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);">1 ✓</span>
+                                        <span style="background: #ef4444; opacity: 0.4; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assessment Summary -->
+                        <div style="margin-top: 24px; padding: 24px; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-radius: 8px; border: 2px solid #e2e8f0;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                                <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0;">
+                                    <i class="fa-solid fa-chart-line" style="margin-right: 8px; color: #ea580c;"></i>
+                                    Assessment Summary
+                                </h3>
+                                <div style="text-align: right;">
+                                    <p style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; margin: 0;">Assessed by</p>
+                                    <p style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 4px 0 0 0;">Dr. James Wilson</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                                <div style="background: white; border-radius: 8px; border-left: 4px solid #2563eb; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Total Score</p>
+                                    <p style="font-size: 32px; font-weight: 900; color: #0f172a; margin: 0;">14</p>
+                                    <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">out of 42 points</p>
+                                </div>
+                                
+                                <div style="background: white; border-radius: 8px; border-left: 4px solid #475569; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Score Percentage</p>
+                                    <p style="font-size: 32px; font-weight: 900; color: #0f172a; margin: 0;">46.7%</p>
+                                    <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">deficit index</p>
+                                </div>
+                                
+                                <div style="background: white; border-radius: 8px; border-left: 4px solid #ea580c; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Assessment Date</p>
+                                    <p style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0;">Feb 2, 2026</p>
+                                    <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">completed</p>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 16px; background: #fed7aa; border: 2px solid #fb923c; border-radius: 8px;">
+                                <p style="font-weight: 700; margin: 0 0 6px 0; color: #7c2d12;">
+                                    <i class="fa-solid fa-stethoscope" style="margin-right: 8px;"></i>
+                                    Clinical Interpretation
+                                </p>
+                                <p style="font-size: 13px; font-weight: 600; margin: 0; color: #92400e;">Moderate - Several areas need attention</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 12px;">
+                    <p style="margin: 0 0 4px 0;">This assessment report is confidential and intended for clinical use only.</p>
+                    <p style="margin: 0;">SOZ© Brain Center - FNON Assessment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END FNON ASSESSMENT MODAL -->
+
+    <!-- PRS ASSESSMENT MODAL -->
+    <div id="prsAssessmentModal" class="assessment-modal" onclick="closePrsModal(event)">
+        <div class="assessment-modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <div class="assessment-modal-title">
+                    <h2>PRS Assessment</h2>
+                    <p id="prsPatientName">Patient Name</p>
+                </div>
+                <button class="assessment-modal-close" onclick="closePrsModal()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assessment-modal-body" id="prsModalBody">
+                <!-- PRS content will be rendered here -->
+            </div>
+        </div>
+    </div>
+    <!-- END PRS ASSESSMENT MODAL -->
+    
+    <!-- DOCTOR'S NOTES MODAL -->
+    <div id="doctorNotesModal" class="assessment-modal" onclick="closeDoctorNotesModal(event)" style="z-index: 1001;">
+        <div class="assessment-modal-content" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <h2>Doctor's Notes & Clinical Observations</h2>
+                <button class="assessment-modal-close" onclick="closeDoctorNotesModal()" title="Close modal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assessment-modal-body" id="doctorNotesModalBody">
+                <!-- Doctor's Notes content will be rendered here -->
+            </div>
+        </div>
+    </div>
+    <!-- END DOCTOR'S NOTES MODAL -->
+    
     <script>
         // PATIENT STATE - SINGLE SOURCE OF TRUTH
         const patientState = {
@@ -2411,79 +2923,7 @@
         }
 
         // CURRENT ROLE STATE
-        let currentRole = 'clinical-assistant';
-        
-        // TREATMENT PLAN STATE AND DATA
-        let selectedPatientId = 'PAT-001'; // Default to first patient
-        
-        // Sample saved treatment plan data
-        let savedTreatmentPlans = {
-            'PAT-001': {
-                patientName: 'Sarah Mitchell',
-                treatmentDate: '2026-02-02',
-                devices: [
-                    {
-                        value: 'plato',
-                        name: 'Plato Neurostimulation - 4 specialized electrode blocks',
-                        selectedNetwork: 0,
-                        montage: {
-                            anodes: ['F3', 'F4'],
-                            cathode: 'FPZ'
-                        },
-                        parameters: {
-                            duration: '20',
-                            intensity: 'medium',
-                            ramp: 'slow',
-                            daysPerWeek: '5',
-                            selectedDays: 'Mon, Tue, Wed, Thu, Fri',
-                            timeOfDay: 'morning'
-                        },
-                        details: 'Primary device for DLPFC stimulation targeting executive function networks.'
-                    },
-                    {
-                        value: 'newronika',
-                        name: 'Newronika - 10-20 system placement',
-                        selectedNetwork: 1,
-                        montage: {
-                            anodes: ['FCZ', 'FC1'],
-                            cathode: 'CZ'
-                        },
-                        parameters: {
-                            duration: '15',
-                            intensity: 'low',
-                            ramp: 'medium',
-                            daysPerWeek: '3',
-                            selectedDays: 'Mon, Wed, Fri',
-                            timeOfDay: 'afternoon'
-                        },
-                        details: 'Secondary device for salience network regulation and anxiety management.'
-                    }
-                ],
-                medicationSuggestions: 'Sertraline 50mg once daily in the morning\nDuration: 12 weeks minimum\n\nLorazepam 0.5mg as needed for severe anxiety\nMaximum 2 doses per week\n\nNote: Monitor for interactions with neuromodulation therapy',
-                session1: {
-                    number: '1',
-                    protocol: 'Standard DLPFC',
-                    duration: '20 min',
-                    frequency: '20 Hz',
-                    notes: 'Initial session with conservative parameters',
-                    targetArea: 'Left DLPFC',
-                    modality: 'tDCS',
-                    intensity: '1.5 mA',
-                    outcome: 'Well tolerated'
-                },
-                session2: {
-                    number: '2',
-                    protocol: 'Salience Network',
-                    duration: '15 min',
-                    frequency: '40 Hz',
-                    notes: 'Focus on anxiety regulation',
-                    targetArea: 'Anterior Cingulate',
-                    modality: 'tACS',
-                    intensity: '1.0 mA',
-                    outcome: 'Reduced anxiety symptoms'
-                }
-            }
-        };
+        let currentRole = 'receptionist';
 
         // TAB SWITCHING
         function switchTab(tab) {
@@ -2968,15 +3408,7 @@
                             `;
                         } else if (permissions.canViewScores) {
                             const waitingFor = block.type === 'fnon' ? 'clinical assistant' : 'doctor';
-                            detailsContent += '<div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; margin-top: 12px;">';
-                            if (block.type === 'treatment-plan' && currentRole === 'clinical-assistant') {
-                                detailsContent += '<span style="font-size: 12px; color: #64748b;">Treatment plan can be viewed - Only doctors can create/edit</span>';
-                            } else if (block.type === 'treatment-plan' && currentRole === 'doctor') {
-                                detailsContent += '<span style="font-size: 12px; color: #64748b;">Treatment planning available - Contact doctor to create</span>';
-                            } else {
-                                detailsContent += '<span style="font-size: 12px; color: #64748b;">Waiting for ' + waitingFor + '</span>';
-                            }
-                            detailsContent += '</div>';
+                            detailsContent += '<div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; margin-top: 12px;"><span style="font-size: 12px; color: #64748b;">Waiting for ' + waitingFor + '</span></div>';
                         }
                     }
                     
@@ -3506,6 +3938,64 @@
                             }
                             detailsContent += '</div>';
                         }
+                    } else if (block.type === 'prs' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Progress</div>
+                                    <div class="block-info-value">${block.currentProgress || 100}%</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">25 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'prs\')" title="View PRS assessment responses"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'prs\')" title="Edit PRS assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'treatment-plan' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Date</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedAt}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'treatment-plan\')" title="View detailed report"><i class="fa-solid fa-eye"></i> View Treatment Plan</button>';
+                            }
+                            if (currentRole === 'doctor') {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'treatment-plan\')" title="Edit treatment plan"><i class="fa-solid fa-pen"></i> Edit Treatment Plan</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
                     } else if (permissions.canViewScores) {
                         detailsContent = `
                             <div class="block-info-grid">
@@ -3528,12 +4018,8 @@
                             if (permissions.canViewReports) {
                                 detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\''+block.type+'\')" title="View detailed report"><i class="fa-solid fa-eye"></i> View Details</button>';
                             }
-                            if (permissions.canEditData && block.type !== 'treatment-plan') {
+                            if (permissions.canEditData) {
                                 detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\''+block.type+'\')" title="Edit assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
-                            } else if (block.type === 'treatment-plan' && currentRole === 'doctor') {
-                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\''+block.type+'\')" title="Edit treatment plan (Doctor only)"><i class="fa-solid fa-pen"></i> Edit Plan</button>';
-                            } else if (block.type === 'treatment-plan' && currentRole === 'clinical-assistant') {
-                                detailsContent += '<span class="block-info-note" style="font-size: 11px; color: #64748b; font-style: italic;">View only - Only doctors can edit treatment plans</span>';
                             }
                             detailsContent += '</div>';
                         }
@@ -4159,46 +4645,84 @@
         }
 
         function continueBlock(blockId) {
-            alert(`Continuing block: ${blockId}\\n\\nThis would open the data entry interface.`);
+            // Check if this is a PRS block
+            if (blockId && blockId.includes('prs')) {
+                openPrsModal(true);
+            } else {
+                alert(`Continuing block: ${blockId}\\n\\nThis would open the data entry interface.`);
+            }
         }
 
         function viewBlockDetails(blockType) {
-            const blockNames = {
-                'fnon': 'FNON Assessment',
-                'brain-mapping': 'Brain Mapping (EEG)',
-                'prs': 'PRS Evaluation',
-                'doctor-notes': "Doctor's Notes",
-                'treatment-plan': 'Treatment Plan',
-                'final-report': 'Final Report'
-            };
-            
-            if (blockType === 'treatment-plan') {
-                // Store current patient data and role in localStorage for treatment plan access
-                const treatmentPlanData = {
-                    patientId: selectedPatientId || 'PAT-001',
-                    patientName: selectedPatientId ? `Patient ${selectedPatientId}` : 'John Smith',
-                    currentRole: currentRole,
-                    blockType: blockType,
-                    blockName: blockNames[blockType],
-                    viewMode: 'view', // This is for viewing existing treatment plan
-                    timestamp: new Date().toISOString(),
-                    returnUrl: window.location.href,
-                    // Pass existing patient state if available
-                    patientState: patientState || null
-                };
+            if (blockType === 'fnon') {
+                // Get patient name from the header or from state
+                const patientNameElement = document.getElementById('patientFullName');
+                const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
                 
-                // Store in localStorage for treatment-plan.html to access
-                localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanData));
-                localStorage.setItem('currentRole', currentRole);
-                localStorage.setItem('selectedPatient', selectedPatientId || 'PAT-001');
-                
-                console.log('Redirecting to treatment-plan.html for viewing with patient data:', treatmentPlanData);
-                
-                // Redirect to treatment-plan.html
-                window.location.href = 'treatment-plan.html';
+                // Update modal with patient information (guard missing elements)
+                const apEl = document.getElementById('assessmentPatientName');
+                if (apEl) apEl.textContent = patientName;
+                const modalNameEl = document.getElementById('modalPatientName');
+                if (modalNameEl) modalNameEl.textContent = patientName;
+                // Render FNON sections in read-only mode
+                renderFnonModal(false);
+
+                // Show the modal
+                const modal = document.getElementById('fnonAssessmentModal');
+                if (modal) modal.classList.add('open');
+
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
+            } else if (blockType === 'prs') {
+                // Open PRS modal in read-only mode
+                openPrsModal(false);
+            } else if (blockType === 'doctor-notes') {
+                // Open Doctor's Notes modal in read-only mode
+                openDoctorNotesModal(false);
+            } else if (blockType === 'treatment-plan') {
+                // Navigate to treatment-plan.html in the same tab
+                window.location.href = './treatment-plan.html';
+            } else if (blockType === 'final-report') {
+                // Navigate to final-report.html in the same tab
+                window.location.href = './final-report.html';
             } else {
+                // For other block types, show placeholder alert
+                const blockNames = {
+                    'brain-mapping': 'Brain Mapping (EEG)',
+                    'prs': 'PRS Evaluation',
+                    'doctor-notes': "Doctor's Notes",
+                    'treatment-plan': 'Treatment Plan',
+                    'final-report': 'Final Report'
+                };
                 alert(`Viewing Detailed Report\\n\\nBlock: ${blockNames[blockType] || blockType}\\nRole: ${currentRole}\\n\\nThis would open a comprehensive view with:\\n- Full assessment data\\n- Charts and visualizations\\n- Historical comparisons\\n- Downloadable reports`);
             }
+        }
+
+        function closeAssessmentModal(event) {
+            // If clicking on the modal background or close button, close it
+            if (event && event.target !== event.currentTarget && event.target.closest('.assessment-modal-close') === null) {
+                return;
+            }
+            
+            const modal = document.getElementById('fnonAssessmentModal');
+            if (modal) {
+                modal.classList.remove('open');
+                modal.classList.remove('editing');
+
+                // If we set the body editable for edit mode, remove it
+                const modalBody = modal.querySelector('.assessment-modal-body');
+                if (modalBody) {
+                    modalBody.removeAttribute('contenteditable');
+                    modalBody.style.outline = '';
+                }
+
+                // Reset header title if it was changed during edit
+                const titleEl = modal.querySelector('.assessment-modal-title h2');
+                if (titleEl) titleEl.textContent = 'FNON Assessment';
+            }
+
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
         }
 
         function editBlockDetails(blockType) {
@@ -4210,317 +4734,48 @@
                 'treatment-plan': 'Treatment Plan',
                 'final-report': 'Final Report'
             };
-            alert(`Editing Assessment Data\\n\\nBlock: ${blockNames[blockType] || blockType}\\nRole: ${currentRole}\\n\\nThis would open an edit interface with:\\n- Editable assessment fields\\n- Data validation\\n- Save/Cancel options\\n- Audit trail logging`);
-        }
+            if (blockType === 'fnon') {
+                // Get patient name from header or state
+                const patientNameElement = document.getElementById('patientFullName');
+                const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
 
-        function showTreatmentPlanModal() {
-            const patientId = selectedPatientId || 'PAT-001'; // Default to current patient
-            
-            // Try to load treatment plan from localStorage first
-            const savedTreatmentPlan = loadPatientTreatmentPlan(patientId);
-            let treatmentPlan;
-            
-            if (savedTreatmentPlan && savedTreatmentPlan.devices.length > 0) {
-                // Use saved treatment plan data
-                treatmentPlan = savedTreatmentPlan;
-                console.log('Using saved treatment plan for patient:', patientId, treatmentPlan);
-            } else {
-                // Fall back to static sample data if no saved data exists
-                treatmentPlan = savedTreatmentPlans[patientId];
-                if (!treatmentPlan) {
-                    // Show message that no treatment plan exists yet
-                    const modalOverlay = document.createElement('div');
-                    modalOverlay.id = 'treatmentPlanModal';
-                    modalOverlay.style.cssText = `
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0, 0, 0, 0.8);
-                        z-index: 1000;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 20px;
-                        overflow-y: auto;
-                    `;
-                    
-                    const modalContent = document.createElement('div');
-                    modalContent.style.cssText = `
-                        background: white;
-                        border-radius: 12px;
-                        padding: 32px;
-                        max-width: 500px;
-                        text-align: center;
-                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                    `;
-                    
-                    modalContent.innerHTML = `
-                        <div>
-                            <i class="fa-solid fa-prescription-bottle-medical" style="font-size: 64px; color: #cbd5e1; margin-bottom: 16px;"></i>
-                            <h3 style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">No Treatment Plan Yet</h3>
-                            <p style="color: #64748b; margin-bottom: 24px;">This patient doesn't have a treatment plan created yet.</p>
-                            <div style="display: flex; gap: 12px; justify-content: center;">
-                                ${currentRole === 'doctor' ? `
-                                    <button onclick="createNewTreatmentPlan('${patientId}')" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-                                        <i class="fa-solid fa-plus" style="margin-right: 8px;"></i>Create Treatment Plan
-                                    </button>
-                                ` : ''}
-                                <button onclick="closeTreatmentPlanModal()" style="background: white; color: #475569; padding: 12px 24px; border-radius: 8px; border: 2px solid #e2e8f0; font-weight: 600; cursor: pointer;">
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    modalOverlay.appendChild(modalContent);
-                    document.body.appendChild(modalOverlay);
-                    
-                    modalOverlay.addEventListener('click', (e) => {
-                        if (e.target === modalOverlay) {
-                            closeTreatmentPlanModal();
-                        }
-                    });
-                    
-                    return;
-                }
+                // Update modal with patient information (guard missing elements)
+                const apEl = document.getElementById('assessmentPatientName');
+                if (apEl) apEl.textContent = patientName;
+                const modalNameEl = document.getElementById('modalPatientName');
+                if (modalNameEl) modalNameEl.textContent = patientName;
+
+                // Render FNON sections in editable mode
+                renderFnonModal(true);
+
+                // Show the modal
+                const modal = document.getElementById('fnonAssessmentModal');
+                if (modal) modal.classList.add('open');
+
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
+
+                return;
+            } else if (blockType === 'prs') {
+                // Open PRS modal in edit mode
+                openPrsModal(true);
+                return;
+            } else if (blockType === 'doctor-notes') {
+                // Open Doctor's Notes modal in edit mode
+                openDoctorNotesModal(true);
+                return;
+            } else if (blockType === 'treatment-plan') {
+                // Navigate to treatment-plan.html in the same tab
+                window.location.href = './treatment-plan.html';
+                return;
+            } else if (blockType === 'final-report') {
+                // Navigate to final-report.html in the same tab
+                window.location.href = './final-report.html';
+                return;
             }
-            
-            // Create modal overlay
-            const modalOverlay = document.createElement('div');
-            modalOverlay.id = 'treatmentPlanModal';
-            modalOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-                overflow-y: auto;
-            `;
-            
-            // Create modal content
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: white;
-                border-radius: 12px;
-                max-width: 95vw;
-                max-height: 95vh;
-                overflow-y: auto;
-                position: relative;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            `;
-            
-            modalContent.innerHTML = renderTreatmentPlanContent(treatmentPlan, currentRole);
-            
-            modalOverlay.appendChild(modalContent);
-            document.body.appendChild(modalOverlay);
-            
-            // Close modal when clicking outside or on close button
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) {
-                    closeTreatmentPlanModal();
-                }
-            });
-        }
-        
-        function closeTreatmentPlanModal() {
-            const modal = document.getElementById('treatmentPlanModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-        
-        function renderTreatmentPlanContent(treatmentPlan, userRole) {
-            const isEditable = userRole === 'doctor';
-            const canView = ['doctor', 'clinical-assistant'].includes(userRole);
-            
-            if (!canView) {
-                return `
-                    <div class="p-8">
-                        <div class="text-center">
-                            <i class="fa-solid fa-lock text-6xl text-slate-300 mb-4"></i>
-                            <h3 class="text-xl font-bold text-slate-700 mb-2">Access Restricted</h3>
-                            <p class="text-slate-500 mb-6">Only doctors and clinical assistants can view treatment plans.</p>
-                            <button onclick="closeTreatmentPlanModal()" class="action-button secondary">
-                                <i class="fa-solid fa-times mr-2"></i>Close
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            return `
-                <div style="padding: 32px;">
-                    <!-- Header -->
-                    <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
-                        <div>
-                            <h2 style="font-size: 32px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <i class="fa-solid fa-prescription-bottle-medical" style="color: #3b82f6;"></i>
-                                Treatment Plan
-                                ${isEditable ? '' : '<span style="background: #f59e0b; color: white; font-size: 12px; margin-left: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 600;">VIEW ONLY</span>'}
-                            </h2>
-                            <p style="color: #64748b; font-size: 16px;">Patient: ${treatmentPlan.patientName} • Date: ${treatmentPlan.treatmentDate}</p>
-                        </div>
-                        <button onclick="closeTreatmentPlanModal()" style="color: #94a3b8; font-size: 20px; background: none; border: none; cursor: pointer; padding: 8px;" onmouseover="this.style.color='#64748b'" onmouseout="this.style.color='#94a3b8'">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- Device Configuration Section -->
-                    <div style="margin-bottom: 32px;">
-                        <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-microchip" style="color: #8b5cf6;"></i>
-                            Device Configuration
-                        </h3>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 24px;">
-                            ${treatmentPlan.devices.map((device, idx) => `
-                                <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 24px; border-radius: 12px; border: 1px solid #cbd5e1;">
-                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                                        <h4 style="font-size: 18px; font-weight: 600; color: #0f172a;">
-                                            <i class="fa-solid fa-microchip" style="color: #8b5cf6; margin-right: 8px;"></i>
-                                            Device ${idx + 1}: ${device.name.split(' - ')[0]}
-                                        </h4>
-                                        <span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Configured</span>
-                                    </div>
-                                    
-                                    <!-- Montage Information -->
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                            <h5 style="font-weight: 600; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                                                <i class="fa-solid fa-brain" style="color: #ef4444;"></i>
-                                                Electrode Montage
-                                            </h5>
-                                            <div style="font-size: 14px;">
-                                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
-                                                    <span style="font-weight: 500; color: #dc2626;">Anodes (+):</span>
-                                                    <span style="font-family: 'Courier New', monospace; font-weight: 700;">${device.montage.anodes.join(', ')}</span>
-                                                </div>
-                                                <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6;"></div>
-                                                    <span style="font-weight: 500; color: #2563eb;">Cathode (-):</span>
-                                                    <span style="font-family: 'Courier New', monospace; font-weight: 700;">${device.montage.cathode}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                            <h5 style="font-weight: 600; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                                                <i class="fa-solid fa-sliders" style="color: #3b82f6;"></i>
-                                                Parameters
-                                            </h5>
-                                            <div style="font-size: 14px; line-height: 1.5;">
-                                                <div><span style="font-weight: 500;">Duration:</span> ${device.parameters.duration} min</div>
-                                                <div><span style="font-weight: 500;">Intensity:</span> ${device.parameters.intensity}</div>
-                                                <div><span style="font-weight: 500;">Frequency:</span> ${device.parameters.daysPerWeek}/week</div>
-                                                <div><span style="font-weight: 500;">Time:</span> ${device.parameters.timeOfDay}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Device Details -->
-                                    ${device.details ? `
-                                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                            <h5 style="font-weight: 600; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                                                <i class="fa-solid fa-notes-medical" style="color: #10b981;"></i>
-                                                Clinical Notes
-                                            </h5>
-                                            <p style="font-size: 14px; color: #475569;">${device.details}</p>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <!-- Session Protocols -->
-                    <div style="margin-bottom: 32px;">
-                        <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-calendar-alt" style="color: #10b981;"></i>
-                            Session Protocols
-                        </h3>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 12px; border: 1px solid #bbf7d0;">
-                                <h4 style="font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 16px;">
-                                    <i class="fa-solid fa-play-circle" style="color: #10b981; margin-right: 8px;"></i>
-                                    Session 1 Protocol
-                                </h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; margin-bottom: 12px;">
-                                    <div><span style="font-weight: 500; color: #64748b;">Protocol:</span> ${treatmentPlan.session1.protocol}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Duration:</span> ${treatmentPlan.session1.duration}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Target Area:</span> ${treatmentPlan.session1.targetArea}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Modality:</span> ${treatmentPlan.session1.modality}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Intensity:</span> ${treatmentPlan.session1.intensity}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Outcome:</span> ${treatmentPlan.session1.outcome}</div>
-                                </div>
-                                <div style="padding-top: 12px; border-top: 1px solid #bbf7d0;">
-                                    <span style="font-weight: 500; color: #64748b;">Notes:</span>
-                                    <p style="color: #475569; margin-top: 4px; font-size: 14px;">${treatmentPlan.session1.notes}</p>
-                                </div>
-                            </div>
-                            
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 24px; border-radius: 12px; border: 1px solid #93c5fd;">
-                                <h4 style="font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 16px;">
-                                    <i class="fa-solid fa-play-circle" style="color: #3b82f6; margin-right: 8px;"></i>
-                                    Session 2 Protocol
-                                </h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; margin-bottom: 12px;">
-                                    <div><span style="font-weight: 500; color: #64748b;">Protocol:</span> ${treatmentPlan.session2.protocol}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Duration:</span> ${treatmentPlan.session2.duration}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Target Area:</span> ${treatmentPlan.session2.targetArea}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Modality:</span> ${treatmentPlan.session2.modality}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Intensity:</span> ${treatmentPlan.session2.intensity}</div>
-                                    <div><span style="font-weight: 500; color: #64748b;">Outcome:</span> ${treatmentPlan.session2.outcome}</div>
-                                </div>
-                                <div style="padding-top: 12px; border-top: 1px solid #93c5fd;">
-                                    <span style="font-weight: 500; color: #64748b;">Notes:</span>
-                                    <p style="color: #475569; margin-top: 4px; font-size: 14px;">${treatmentPlan.session2.notes}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Medication Suggestions -->
-                    ${treatmentPlan.medicationSuggestions ? `
-                        <div style="margin-bottom: 32px;">
-                            <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid fa-pills" style="color: #f59e0b;"></i>
-                                Medication Recommendations
-                            </h3>
-                            
-                            <div style="background: linear-gradient(135deg, #fefbf3 0%, #fef3c7 100%); padding: 24px; border-radius: 12px; border: 1px solid #fbbf24;">
-                                <pre style="font-size: 14px; color: #475569; white-space: pre-wrap; font-family: 'Courier New', monospace; background: white; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24; margin: 0;">${treatmentPlan.medicationSuggestions}</pre>
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Action Buttons -->
-                    <div style="display: flex; justify-content: end; gap: 12px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-                        ${isEditable ? `
-                            <button onclick="alert('Edit functionality would redirect to treatment plan editor')" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-                                <i class="fa-solid fa-pen"></i>Edit Treatment Plan
-                            </button>
-                        ` : `
-                            <div style="font-size: 14px; color: #64748b; margin-right: 16px; display: flex; align-items: center;">
-                                <i class="fa-solid fa-info-circle" style="margin-right: 8px;"></i>
-                                Read-only view • Only doctors can edit treatment plans
-                            </div>
-                        `}
-                        <button onclick="closeTreatmentPlanModal()" style="background: #f8fafc; color: #475569; padding: 12px 24px; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
-                            <i class="fa-solid fa-times"></i>Close
-                        </button>
-                    </div>
-                </div>
-            `;
+
+            // Fallback behavior for other block types remains a simple alert
+            alert(`Editing Assessment Data\\n\\nBlock: ${blockNames[blockType] || blockType}\\nRole: ${currentRole}\\n\\nThis would open an edit interface with:\\n- Editable assessment fields\\n- Data validation\\n- Save/Cancel options\\n- Audit trail logging`);
         }
 
         function viewSessionDetails(sessionId) {
@@ -4619,6 +4874,668 @@
             } else {
                 showPaymentPage();
             }
+        }
+
+        // --- FNON renderer and edit handlers (local-only) ---
+        const fnonSpec = {
+            questions: [
+                { id: 'q1', title: 'Motor Network Function', hint: 'How well can you perform coordinated movements and physical tasks?' },
+                { id: 'q2', title: 'Cognitive Processing Speed', hint: 'How quickly can you process information and make decisions?' },
+                { id: 'q3', title: 'Memory & Recall', hint: 'How effectively do you recall recent and past events?' },
+                { id: 'q4', title: 'Attention & Focus', hint: 'How well can you concentrate on a single task?' },
+                { id: 'q5', title: 'Language & Communication', hint: 'How clear and effective is your verbal and written communication?' },
+                { id: 'q6', title: 'Emotional Regulation', hint: 'How well do you manage emotions and respond to stress?' },
+                { id: 'q7', title: 'Sleep & Autonomic Function', hint: 'How satisfied are you with your sleep patterns and autonomic regulation?' }
+            ],
+            sectionA: [
+                { net: 'DMN', signs: 'Rumination, Mind-wandering', tests: ['Gaze fixation', 'Romberg dual-task', 'Clock drawing'] },
+                { net: 'CEN', signs: 'Poor planning, Memory deficits', tests: ['Digit Span', 'Serial subtraction (100-7)', 'Motor sequencing'] },
+                { net: 'SN', signs: 'Anxiety, Hyperarousal', tests: ['Startle response', 'Interoceptive awareness'] },
+                { net: 'SMN', signs: 'Motor/Sensory deficits', tests: ['Finger-to-nose', 'Heel-to-shin', 'Rapid movements'] },
+                { net: 'Limbic', signs: 'Emotional lability, Apathy', tests: ['Facial expression check', 'Emotional reactivity'] },
+                { net: 'Attention', signs: 'Distractibility, Neglect', tests: ['Cancellation test', 'Eye tracking'] }
+            ]
+        };
+
+        // local state for editable values - scores as per user's example
+        const fnonState = {
+            sectionA: [
+                { 'Gaze fixation': 1, 'Romberg dual-task': 1, 'Clock drawing': 1 },
+                { 'Digit Span': 1, 'Serial subtraction (100-7)': 1, 'Motor sequencing': 1 },
+                { 'Startle response': 2, 'Interoceptive awareness': 2 },
+                { 'Finger-to-nose': 0, 'Heel-to-shin': 2, 'Rapid movements': 2 },
+                { 'Facial expression check': 0, 'Emotional reactivity': 0 },
+                { 'Cancellation test': 2, 'Eye tracking': 1 }
+            ],
+            notes: ''
+        };
+
+        function renderScoreBadges(value, namePrefix, editable) {
+            if (editable) {
+                return ['0','1','2'].map(v => `
+                    <label style="margin-right:8px; font-size:13px;">
+                      <input type="radio" name="${namePrefix}" value="${v}" ${value==v? 'checked': ''} onchange="onFnonScoreChange('${namePrefix}', ${v})"> ${v}
+                    </label>
+                `).join('');
+            }
+
+            // read-only badges
+            return ['0','1','2'].map(v => {
+                const is = Number(value) === Number(v);
+                const bg = v==='0'? '#0ea5e9' : (v==='1'? '#f59e0b' : '#ef4444');
+                const opacity = is ? '1' : '0.35';
+                const chk = is ? ' ✓' : '';
+                return `<span style="background:${bg}; color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; opacity:${opacity}; margin-right:6px;">${v}${chk}</span>`;
+            }).join('');
+        }
+
+        function calculateTotalScore() {
+            let total = 0;
+            fnonState.sectionA.forEach(net => {
+                Object.values(net).forEach(val => total += Number(val));
+            });
+            return total;
+        }
+
+        function renderFnonModal(editable) {
+            const body = document.querySelector('#fnonAssessmentModal .assessment-modal-body');
+            if (!body) return;
+
+            let html = '';
+
+            // Compute summary values upfront
+            const totalScore = calculateTotalScore();
+            const maxScore = 30;
+            const percentage = ((totalScore / maxScore) * 100).toFixed(1);
+            let interpretation = 'Excellent - Minimal deficits detected';
+            let interpColor = '#fed7aa';
+            let interpBorder = '#fb923c';
+            let interpTextColor = '#7c2d12';
+            
+            if (percentage <= 20) {
+                interpretation = 'Excellent - Minimal deficits detected';
+            } else if (percentage <= 40) {
+                interpretation = 'Good - Mild concerns in some areas';
+            } else if (percentage <= 60) {
+                interpretation = 'Moderate - Several areas need attention';
+            } else {
+                interpretation = 'Significant - Multiple areas require intervention';
+            }
+
+            // Main title and description
+            html += `<div style="margin-bottom: 24px;">
+                <h2 style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0;">FNON Assessment</h2>
+                <p style="font-size: 14px; color: #64748b; margin: 0;">Functional Network of Neurons - Assessment Overview</p>
+            </div>`;
+
+            // Assessment Summary FIRST
+            html += `<div style="margin-bottom: 24px; padding: 24px; background: linear-gradient(to right, #f8fafc, #eff6ff); border-radius: 8px; border: 2px solid #e2e8f0;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0;">
+                        <i class="fa-solid fa-chart-line" style="margin-right: 8px; color: #ea580c;"></i>
+                        Assessment Summary
+                    </h3>
+                    <div style="text-align: right;">
+                        <p style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; margin: 0;">Assessed by</p>
+                        <p style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 4px 0 0 0;">Dr. James Wilson</p>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                    <div style="background: white; border-radius: 8px; border-left: 4px solid #2563eb; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Total Score</p>
+                        <p style="font-size: 32px; font-weight: 900; color: #0f172a; margin: 0;">${totalScore}</p>
+                        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">out of ${maxScore} points</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 8px; border-left: 4px solid #475569; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Score Percentage</p>
+                        <p style="font-size: 32px; font-weight: 900; color: #0f172a; margin: 0;">${percentage}%</p>
+                        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">deficit index</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 8px; border-left: 4px solid #ea580c; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 0 0 6px 0;">Assessment Date</p>
+                        <p style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0;">Feb 2, 2026</p>
+                        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">completed</p>
+                    </div>
+                </div>
+                
+                <div style="padding: 16px; background: ${interpColor}; border: 2px solid ${interpBorder}; border-radius: 8px;">
+                    <p style="font-weight: 700; margin: 0 0 6px 0; color: ${interpTextColor};">
+                        <i class="fa-solid fa-stethoscope" style="margin-right: 8px;"></i>
+                        Clinical Interpretation
+                    </p>
+                    <p style="font-size: 13px; font-weight: 600; margin: 0; color: ${interpTextColor};">${interpretation}</p>
+                </div>
+            </div>`;
+
+            // Assessment Overview cards
+            html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <div style="background: white; border-radius: 8px; border-left: 4px solid #3b82f6; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin: 0 0 8px 0;">Assessment Status</p>
+                    <p style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0;">Assessment Ready</p>
+                    <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Review the questions below to understand this assessment</p>
+                </div>
+                <div style="background: white; border-radius: 8px; border-left: 4px solid #2563eb; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin: 0 0 8px 0;">Assessment Type</p>
+                    <p style="font-size: 18px; font-weight: 900; color: #2563eb; margin: 0;">Neural Network Evaluation</p>
+                    <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">7 functional networks assessment</p>
+                </div>
+            </div>`;
+
+            // Assessment Questions (read-only guidance, NOT editable)
+            html += `<div style="border-radius: 12px; border: 2px solid #bfdbfe; background: linear-gradient(135deg, #eff6ff 0%, #eff6ff 100%); padding: 24px; margin-bottom: 24px;">
+                <div style="background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px;">
+                    <h4 style="font-weight: 700; color: #0f172a; margin: 0 0 16px 0; font-size: 16px;">Assessment Questions</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0;">`;
+
+            fnonSpec.questions.forEach((q, idx) => {
+                html += `<div style="display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">${idx + 1}</div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 700; color: #0f172a; margin: 0 0 6px 0; font-size: 15px;">${q.title}</p>
+                        <p style="font-size: 13px; color: #475569; margin: 0 0 8px 0; line-height: 1.5;">${q.hint}</p>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 12px; font-weight: 600; color: #475569;">Scoring:</span>
+                            <span style="background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">0=Normal</span>
+                            <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">1=Mild</span>
+                            <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">2=Deficit</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div>
+                <div style="margin-top: 16px; padding: 16px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px;">
+                    <p style="font-size: 12px; color: #1e3a8a; margin: 0;"><strong>ℹ️ Note:</strong> This assessment evaluates functional brain networks. Each question is scored on a scale from 0-2, where 0 indicates normal function, 1 indicates mild concerns, and 2 indicates significant deficits. This assessment helps create a personalized treatment plan.</p>
+                </div>
+            </div>`;
+
+            // Section A: Clinical Checklist (EDITABLE)
+            html += `<div style="border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+                <div style="background: #1e293b; color: white; padding: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 15px; font-weight: 700;">Section A: Clinical Checklist</span>
+                    <span style="font-size: 11px; font-weight: 400; opacity: 0.7;">0=Normal, 1=Mild, 2=Deficit</span>
+                </div>
+                <div style="padding: 24px; background: white;">`;
+
+            fnonSpec.sectionA.forEach((network, si) => {
+                html += `<div style="margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #e2e8f0; last:border-bottom-width: 0;">
+                    <h3 style="font-weight: 700; font-size: 16px; color: #ea580c; margin: 0 0 4px 0;">${network.net}</h3>
+                    <p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 12px 0;"><i class="fa-solid fa-triangle-exclamation"></i> ${network.signs}</p>
+                    <div style="display: grid; gap: 8px;">`;
+
+                network.tests.forEach((testName, ti) => {
+                    const val = fnonState.sectionA[si][testName];
+                    const fieldName = `sectionA_${si}_${ti}_${testName}`;
+                    
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #93c5fd;">
+                        <span style="font-weight: 500; color: #475569;">${testName}</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 11px; font-weight: 600; color: #475569;">Score:</span>`;
+                    
+                    if (editable) {
+                        // Radio buttons for edit mode
+                        html += ['0', '1', '2'].map(score => `
+                            <label style="margin-right: 4px; cursor: pointer;">
+                                <input type="radio" name="${fieldName}" value="${score}" ${Number(val) === Number(score) ? 'checked' : ''} onchange="onFnonScoreChange('${fieldName}', ${score})" style="cursor: pointer;">
+                                <span style="margin-left: 2px; font-size: 11px;">${score}</span>
+                            </label>
+                        `).join('');
+                    } else {
+                        // Read-only badges
+                        html += renderScoreBadges(val, fieldName, false);
+                    }
+
+                    html += `</div></div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            html += `</div></div>`;
+
+            // Notes section
+            html += `<div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 14px;">Clinical Notes</label>
+                <textarea id="fnonNotesField" placeholder="Add any clinical notes or observations..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; ${!editable ? 'background: #f8fafc; opacity: 0.8;' : 'background: white;'}" ${!editable ? 'readonly' : ''}>${fnonState.notes || ''}</textarea>
+            </div>`;
+
+            // Action buttons
+            html += `<div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;">`;
+            if (editable) {
+                html += `<button onclick="saveFnonEdits()" style="background: #0ea5e9; color: white; padding: 10px 16px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer;">Save</button>`;
+                html += `<button onclick="closeAssessmentModal()" style="background: #f3f4f6; color: #0f172a; padding: 10px 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-weight: 700; cursor: pointer;">Cancel</button>`;
+            } else {
+                html += `<button onclick="closeAssessmentModal()" style="background: #f3f4f6; color: #0f172a; padding: 10px 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-weight: 700; cursor: pointer;">Close</button>`;
+            }
+            html += `</div>`;
+
+            body.innerHTML = html;
+        }
+
+        function onFnonScoreChange(fieldName, value) {
+            const parts = fieldName.split('_');
+            if (parts.length >= 3) {
+                const si = Number(parts[1]);
+                const testName = parts.slice(3).join('_');
+                fnonState.sectionA[si][testName] = Number(value);
+            }
+        }
+
+        function saveFnonEdits() {
+            // Capture notes from textarea if it exists
+            const notesField = document.getElementById('fnonNotesField');
+            if (notesField) {
+                fnonState.notes = notesField.value;
+            }
+            // Re-render in read-only mode to show saved changes
+            renderFnonModal(false);
+            // Optionally: You can add console.log to verify saved state
+            console.log('FNON Assessment saved:', fnonState);
+        }
+
+        // --- PRS ASSESSMENT FUNCTIONS ---
+        let prsData = null;
+        let prsState = {
+            currentDisease: 'tinnitus',
+            answers: {},
+            notes: '',
+            isEditable: false  // Track edit mode
+        };
+
+        // Load PRS data from prs.json
+        async function loadPRSData() {
+            if (prsData) return prsData;
+            try {
+                const response = await fetch('prs.json');
+                prsData = await response.json();
+                return prsData;
+            } catch (err) {
+                console.error('Failed to load prs.json:', err);
+                alert('Could not load PRS questionnaire data.');
+                return null;
+            }
+        }
+
+        // Get list of diseases from PRS data
+        function getPRSDiseases() {
+            if (!prsData) return [];
+            return Object.keys(prsData).map(key => ({
+                id: key,
+                title: prsData[key].title
+            }));
+        }
+
+        // Open PRS Modal
+        async function openPrsModal(editable) {
+            const patientNameElement = document.getElementById('patientFullName');
+            const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
+            
+            const prsNameEl = document.getElementById('prsPatientName');
+            if (prsNameEl) prsNameEl.textContent = patientName;
+
+            // Load PRS data if not already loaded
+            if (!prsData) {
+                await loadPRSData();
+            }
+
+            if (!prsData) return;
+
+            // Store edit mode in state
+            prsState.isEditable = editable;
+
+            renderPrsModal(editable);
+
+            const modal = document.getElementById('prsAssessmentModal');
+            if (modal) modal.classList.add('open');
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePrsModal(event) {
+            if (event && event.target !== event.currentTarget && event.target.closest('.assessment-modal-close') === null) {
+                return;
+            }
+
+            const modal = document.getElementById('prsAssessmentModal');
+            if (modal) {
+                modal.classList.remove('open');
+            }
+
+            document.body.style.overflow = 'auto';
+        }
+
+        // Helper function to check if question should be visible based on showIf condition
+        function shouldShowQuestion(q) {
+            if (!q.showIf) return true;
+            const { field, value } = q.showIf;
+            const answerId = `prs_${prsState.currentDisease}_${field}`;
+            return prsState.answers[answerId] === value;
+        }
+
+        function renderPrsModal(editable) {
+            const body = document.getElementById('prsModalBody');
+            if (!body || !prsData) return;
+
+            const config = prsData[prsState.currentDisease];
+            if (!config) return;
+
+            let html = '';
+
+            // Title and description
+            html += `<div style="margin-bottom: 24px;">
+                <h2 style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0;">${config.title}</h2>
+                <p style="font-size: 14px; color: #64748b; margin: 0;">Personalized Response System Assessment</p>
+            </div>`;
+
+            // Disease selector
+            const diseases = getPRSDiseases();
+            html += `<div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Select Disease:</label>
+                <select id="diseaseSelect" onchange="changePrsDisease(this.value)" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                    ${diseases.map(d => `<option value="${d.id}" ${d.id === prsState.currentDisease ? 'selected' : ''}>${d.title}</option>`).join('')}
+                </select>
+            </div>`;
+
+            // Render questions section by section (skip first section "General Data")
+            if (config.sections && Array.isArray(config.sections)) {
+                config.sections.forEach((section, sectionIdx) => {
+                    // Skip first section (General Data)
+                    if (sectionIdx === 0) return;
+
+                    html += `<div style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-weight: 700; font-size: 16px; color: #0f172a; margin: 0 0 16px 0;">${section.title}</h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">`;
+
+                    if (section.questions && Array.isArray(section.questions)) {
+                        section.questions.forEach((q, qIdx) => {
+                            // Check if question should be displayed based on showIf condition
+                            if (!shouldShowQuestion(q)) {
+                                return;
+                            }
+
+                            const answerId = `prs_${prsState.currentDisease}_${q.id}`;
+                            const currentAnswer = prsState.answers[answerId];
+
+                            html += `<div style="padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                                <p style="font-weight: 700; color: #0f172a; margin: 0 0 8px 0; font-size: 14px;">${q.label}</p>`;
+
+                            if ((q.type === 'radio' || q.type === 'likert') && q.options) {
+                                html += `<div style="display: grid; gap: 8px;">`;
+                                q.options.forEach((opt, optIdx) => {
+                                    // Handle both object options {value, label} and string options (for likert)
+                                    const optValue = typeof opt === 'object' ? opt.value : opt;
+                                    const optLabel = typeof opt === 'object' ? opt.label : opt;
+                                    const uniqueId = `${answerId}_opt_${optIdx}`;
+
+                                    if (editable) {
+                                        html += `<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="radio" id="${uniqueId}" name="${answerId}" data-answer-id="${answerId}" data-answer-value="${optValue}" ${currentAnswer === optValue ? 'checked' : ''} style="cursor: pointer;">
+                                            <span style="font-size: 13px; color: #475569;">${optLabel}</span>
+                                        </label>`;
+                                    } else {
+                                        const isSel = currentAnswer === optValue;
+                                        html += `<div style="padding: 8px; background: ${isSel ? '#0ea5e9' : '#e2e8f0'}; color: ${isSel ? 'white' : '#475569'}; border-radius: 4px; font-size: 13px;">${isSel ? '✓ ' : ''}${optLabel}</div>`;
+                                    }
+                                });
+                                html += `</div>`;
+                            } else if (q.type === 'checkbox' && q.options) {
+                                html += `<div style="display: grid; gap: 8px;">`;
+                                q.options.forEach((opt, optIdx) => {
+                                    const optValue = typeof opt === 'object' ? opt.value : opt;
+                                    const optLabel = typeof opt === 'object' ? opt.label : opt;
+                                    const isChecked = (currentAnswer || '').includes(optValue);
+                                    const uniqueId = `${answerId}_chk_${optIdx}`;
+
+                                    if (editable) {
+                                        html += `<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="${uniqueId}" data-answer-id="${answerId}" data-answer-value="${optValue}" ${isChecked ? 'checked' : ''} style="cursor: pointer;">
+                                            <span style="font-size: 13px; color: #475569;">${optLabel}</span>
+                                        </label>`;
+                                    } else {
+                                        html += `<div style="padding: 8px; background: ${isChecked ? '#10b981' : '#e2e8f0'}; color: ${isChecked ? 'white' : '#475569'}; border-radius: 4px; font-size: 13px;">${isChecked ? '✓ ' : ''}${optLabel}</div>`;
+                                    }
+                                });
+                                html += `</div>`;
+                            } else if (q.type === 'slider') {
+                                const val = currentAnswer ? Number(currentAnswer) : (q.min || 0);
+                                if (editable) {
+                                    html += `<div style="display: flex; align-items: center; gap: 12px;">
+                                        <input type="range" id="${answerId}" data-answer-id="${answerId}" min="${q.min || 0}" max="${q.max || 10}" value="${val}" style="flex: 1;">
+                                        <span id="${answerId}_val" style="font-weight: 700; color: #0ea5e9; min-width: 30px; text-align: center;">${val}</span>
+                                    </div>`;
+                                } else {
+                                    html += `<div style="padding: 8px; background: #dbeafe; border-radius: 4px; font-size: 13px; color: #1e3a8a;">Score: <strong>${val}</strong> / ${q.max || 10}</div>`;
+                                }
+                            } else if (q.type === 'text' || q.type === 'email' || q.type === 'date' || q.type === 'number') {
+                                if (editable) {
+                                    html += `<input type="${q.type}" id="${answerId}" data-answer-id="${answerId}" value="${currentAnswer || ''}" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 13px;" />`;
+                                } else {
+                                    html += `<div style="padding: 8px; background: #f1f5f9; border-radius: 4px; font-size: 13px; color: #475569;">${currentAnswer || 'Not provided'}</div>`;
+                                }
+                            }
+
+                            html += `</div>`;
+                        });
+                    }
+
+                    html += `</div></div>`;
+                });
+            }
+
+            // Notes section
+            html += `<div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 14px;">Clinical Notes</label>
+                <textarea id="prsNotesField" placeholder="Add any clinical notes..." style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; ${!editable ? 'background: #f8fafc; opacity: 0.8;' : 'background: white;'}" ${!editable ? 'readonly' : ''}>${prsState.notes || ''}</textarea>
+            </div>`;
+
+            // Action buttons
+            html += `<div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px;">`;
+            if (editable) {
+                html += `<button onclick="savePrsEdits()" style="background: #0ea5e9; color: white; padding: 10px 16px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer;">Save</button>`;
+                html += `<button onclick="closePrsModal()" style="background: #f3f4f6; color: #0f172a; padding: 10px 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-weight: 700; cursor: pointer;">Cancel</button>`;
+            } else {
+                html += `<button onclick="closePrsModal()" style="background: #f3f4f6; color: #0f172a; padding: 10px 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-weight: 700; cursor: pointer;">Close</button>`;
+            }
+            html += `</div>`;
+
+            body.innerHTML = html;
+
+            // Attach event listeners after DOM is updated
+            attachPrsEventListeners();
+        }
+
+        // Attach event listeners to PRS form inputs using event delegation
+        function attachPrsEventListeners() {
+            const body = document.getElementById('prsModalBody');
+            if (!body) return;
+
+            // Remove old listeners by cloning and replacing (cleanup)
+            const oldBody = body;
+            const newBody = oldBody.cloneNode(true);
+            oldBody.parentNode.replaceChild(newBody, oldBody);
+
+            // Get fresh reference
+            const modalBody = document.getElementById('prsModalBody');
+            if (!modalBody) return;
+
+            // Use event delegation on the modal body
+            modalBody.addEventListener('change', function(e) {
+                const target = e.target;
+                
+                // Radio buttons
+                if (target.type === 'radio' && target.getAttribute('data-answer-id')) {
+                    const answerId = target.getAttribute('data-answer-id');
+                    const value = target.getAttribute('data-answer-value');
+                    onPrsAnswerChange(answerId, value);
+                    // Re-render to show/hide dependent questions
+                    renderPrsModal(prsState.isEditable);
+                    return;
+                }
+
+                // Checkboxes
+                if (target.type === 'checkbox' && target.getAttribute('data-answer-id')) {
+                    const answerId = target.getAttribute('data-answer-id');
+                    const value = target.getAttribute('data-answer-value');
+                    const currentValues = prsState.answers[answerId] || '';
+                    if (target.checked && !currentValues.includes(value)) {
+                        prsState.answers[answerId] = currentValues ? currentValues + ',' + value : value;
+                    } else if (!target.checked) {
+                        prsState.answers[answerId] = currentValues.split(',').filter(v => v !== value).join(',');
+                    }
+                    return;
+                }
+
+                // Sliders
+                if (target.type === 'range' && target.getAttribute('data-answer-id')) {
+                    const answerId = target.getAttribute('data-answer-id');
+                    onPrsAnswerChange(answerId, target.value);
+                    // Re-render to show/hide dependent questions
+                    renderPrsModal(prsState.isEditable);
+                    return;
+                }
+
+                // Text/Email/Date/Number inputs
+                if ((target.type === 'text' || target.type === 'email' || target.type === 'date' || target.type === 'number') && target.getAttribute('data-answer-id')) {
+                    const answerId = target.getAttribute('data-answer-id');
+                    onPrsAnswerChange(answerId, target.value);
+                    return;
+                }
+            });
+        }
+
+        function changePrsDisease(diseaseId) {
+            prsState.currentDisease = diseaseId;
+            if (!prsData[diseaseId]) {
+                loadPRSData().then(() => renderPrsModal(prsState.isEditable));
+            } else {
+                renderPrsModal(prsState.isEditable);
+            }
+        }
+
+        function onPrsAnswerChange(answerId, value) {
+            prsState.answers[answerId] = value;
+            // Update slider display
+            const valSpan = document.getElementById(`${answerId}_val`);
+            if (valSpan) valSpan.textContent = value;
+        }
+
+        function savePrsEdits() {
+            const notesField = document.getElementById('prsNotesField');
+            if (notesField) {
+                prsState.notes = notesField.value;
+            }
+            renderPrsModal(false);
+            console.log('PRS Assessment saved:', prsState);
+        }
+
+        // --- DOCTOR'S NOTES FUNCTIONS ---
+        let doctorNotesState = {
+            clinicalObservations: 'Patient demonstrates significant cognitive decline in executive function and working memory. MMSE score: 18/30. Notable difficulties with delayed recall and verbal fluency. Speech output slow but coherent. Mood appears slightly depressed. Shows good compliance with current medication regimen.',
+            recommendations: '1. Continue current medication (Donepezil 10mg daily + Memantine 20mg daily)\n2. Recommend cognitive rehabilitation therapy 2x weekly\n3. Consider referral to neuropsychology for detailed assessment\n4. Family psychoeducation sessions recommended\n5. Monitor for behavioral changes or mood disturbances\n6. Repeat MMSE assessment in 3 months',
+            prescribedMedications: 'Donepezil 10mg - Once daily at night (Cholinesterase inhibitor)\nMemantine 20mg - Once daily in morning (NMDA antagonist)\nSertraline 50mg - Once daily in morning (SSRI for mood)\nMelatonin 5mg - At bedtime as needed (Sleep support)'
+        };
+
+        function openDoctorNotesModal(editable) {
+            renderDoctorNotesModal(editable);
+            const modal = document.getElementById('doctorNotesModal');
+            if (modal) modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDoctorNotesModal(event) {
+            if (event && event.target !== event.currentTarget && event.target.closest('.assessment-modal-close') === null) {
+                return;
+            }
+            const modal = document.getElementById('doctorNotesModal');
+            if (modal) modal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+
+        function renderDoctorNotesModal(editable) {
+            const body = document.getElementById('doctorNotesModalBody');
+            if (!body) return;
+
+            const patientNameElement = document.getElementById('patientFullName');
+            const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
+
+            let html = '';
+
+            // Header with patient info
+            html += `<div style="margin-bottom: 24px; padding: 16px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 48px; height: 48px; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">
+                        ${patientName.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 16px; color: #0f172a;">${patientName}</div>
+                        <div style="font-size: 13px; color: #64748b;">ID: PAT-001 • 34 years old • Depression</div>
+                    </div>
+                </div>
+            </div>`;
+
+            // Clinical Observations Section
+            html += `<div style="margin-bottom: 24px;">
+                <h3 style="font-weight: 700; font-size: 16px; color: #0f172a; margin: 0 0 12px 0;">Clinical Observations</h3>
+                <textarea id="clinicalObservationsField" placeholder="Clinical observations and findings..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: ${!editable ? '#f8fafc' : 'white'}; ${!editable ? 'opacity: 0.8;' : ''}" ${!editable ? 'readonly' : ''}>${doctorNotesState.clinicalObservations || ''}</textarea>
+            </div>`;
+
+            // Recommendations Section
+            html += `<div style="margin-bottom: 24px;">
+                <h3 style="font-weight: 700; font-size: 16px; color: #0f172a; margin: 0 0 12px 0;">Recommendations</h3>
+                <textarea id="recommendationsField" placeholder="Treatment recommendations..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: ${!editable ? '#f8fafc' : 'white'}; ${!editable ? 'opacity: 0.8;' : ''}" ${!editable ? 'readonly' : ''}>${doctorNotesState.recommendations || ''}</textarea>
+            </div>`;
+
+            // Prescribed Medications Section
+            html += `<div style="margin-bottom: 24px;">
+                <h3 style="font-weight: 700; font-size: 16px; color: #0f172a; margin: 0 0 12px 0;">Prescribed Medications</h3>
+                <textarea id="prescribedMedicationsField" placeholder="Current medications..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: ${!editable ? '#f8fafc' : 'white'}; ${!editable ? 'opacity: 0.8;' : ''}" ${!editable ? 'readonly' : ''}>${doctorNotesState.prescribedMedications || ''}</textarea>
+            </div>`;
+
+            // Action buttons
+            html += `<div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0;">`;
+            
+            if (editable) {
+                html += `<button onclick="saveDoctorNotes()" style="background: #0ea5e9; color: white; padding: 10px 16px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-save"></i> Save Notes
+                </button>
+                <button onclick="continueTreatmentPlan()" style="background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i> Continue to Treatment Plan
+                </button>`;
+            }
+            
+            html += `<button onclick="closeDoctorNotesModal()" style="background: #f3f4f6; color: #0f172a; padding: 10px 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-weight: 700; cursor: pointer;">Close</button>`;
+            
+            html += `</div>`;
+
+            body.innerHTML = html;
+        }
+
+        function saveDoctorNotes() {
+            const clinicalField = document.getElementById('clinicalObservationsField');
+            const recommendationsField = document.getElementById('recommendationsField');
+            const medicationsField = document.getElementById('prescribedMedicationsField');
+            
+            if (clinicalField) doctorNotesState.clinicalObservations = clinicalField.value;
+            if (recommendationsField) doctorNotesState.recommendations = recommendationsField.value;
+            if (medicationsField) doctorNotesState.prescribedMedications = medicationsField.value;
+            
+            console.log('Doctor Notes saved:', doctorNotesState);
+            alert('Doctor Notes saved successfully!');
+            renderDoctorNotesModal(false);
+        }
+
+        function continueTreatmentPlan() {
+            // Save current notes first
+            saveDoctorNotes();
+            // Close doctor notes modal
+            closeDoctorNotesModal();
+            // Open treatment plan modal
+            setTimeout(() => {
+                window.location.href = './treatment-plan.html';
+            }, 300);
         }
 
         function showSessionPaymentPage() {
@@ -4760,98 +5677,36 @@
         }
 
         function startNewPatientAssessment(assessmentId, assessmentName) {
-            // Handle specific assessment types
-            if (assessmentId.includes('treatment') || assessmentName === 'Treatment Plan') {
-                // Store current patient data and role in localStorage for treatment plan access
-                const treatmentPlanData = {
-                    patientId: selectedPatientId || 'PAT-001',
-                    patientName: selectedPatientId ? `Patient ${selectedPatientId}` : 'John Smith',
-                    currentRole: currentRole,
-                    assessmentId: assessmentId,
-                    assessmentName: assessmentName,
-                    timestamp: new Date().toISOString(),
-                    returnUrl: window.location.href,
-                    // Pass existing patient state if available
-                    patientState: patientState || null
-                };
+            // Handle FNON assessment
+            if (assessmentId === 'fnon-paid') {
+                const patientNameElement = document.getElementById('patientFullName');
+                const patientName = patientNameElement ? patientNameElement.textContent : 'Sarah Mitchell';
                 
-                // Store in localStorage for treatment-plan.html to access
-                localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanData));
-                localStorage.setItem('currentRole', currentRole);
-                localStorage.setItem('selectedPatient', selectedPatientId || 'PAT-001');
+                const apEl = document.getElementById('assessmentPatientName');
+                if (apEl) apEl.textContent = patientName;
+                const modalNameEl = document.getElementById('modalPatientName');
+                if (modalNameEl) modalNameEl.textContent = patientName;
                 
-                console.log('Redirecting to treatment-plan.html with patient data:', treatmentPlanData);
-                
-                // Redirect to treatment-plan.html
-                window.location.href = 'treatment-plan.html';
+                // Render FNON sections in editable mode for new patient
+                renderFnonModal(true);
+
+                const modal = document.getElementById('fnonAssessmentModal');
+                if (modal) modal.classList.add('open');
+
+                document.body.style.overflow = 'hidden';
                 return;
             }
             
+            // Handle PRS assessment
+            if (assessmentId === 'prs-paid') {
+                openPrsModal(true);
+                return;
+            }
+            
+            // Default fallback for other assessments
             alert(`Starting ${assessmentName}\\n\\nAssessment ID: ${assessmentId}\\nRole: ${currentRole}\\n\\nThis would:\\n- Open ${assessmentName} interface\\n- Load assessment forms\\n- Begin data collection\\n- Save progress automatically\\n\\nNote: This is a new patient's initial assessment.`);
             
-            // In production, this would navigate to the assessment interface
             console.log(`Starting new patient assessment: ${assessmentId} (${assessmentName}) by ${currentRole}`);
-        }
-
-        // Function to load saved treatment plan data for a patient
-        function loadPatientTreatmentPlan(patientId) {
-            try {
-                const treatmentKey = `treatmentPlan_${patientId}`;
-                const treatmentData = localStorage.getItem(treatmentKey);
-                
-                if (treatmentData) {
-                    const parsedData = JSON.parse(treatmentData);
-                    console.log('Loaded treatment plan for patient:', patientId, parsedData);
-                    return parsedData;
-                }
-                
-                return null;
-            } catch (e) {
-                console.error('Error loading patient treatment plan:', e);
-                return null;
-            }
-        }
-
-        // Function to get treatment plans index for all patients
-        function getTreatmentPlansIndex() {
-            try {
-                const indexData = localStorage.getItem('treatmentPlansIndex');
-                return indexData ? JSON.parse(indexData) : {};
-            } catch (e) {
-                console.error('Error loading treatment plans index:', e);
-                return {};
-            }
-        }
-
-        // Function to check if a patient has a saved treatment plan
-        function patientHasTreatmentPlan(patientId) {
-            const treatmentData = loadPatientTreatmentPlan(patientId);
-            return treatmentData && treatmentData.devices && treatmentData.devices.length > 0;
-        }
-
-        // Function to create new treatment plan
-        function createNewTreatmentPlan(patientId) {
-            closeTreatmentPlanModal();
-            
-            // Store session data for creating new treatment plan
-            const treatmentPlanData = {
-                patientId: patientId,
-                patientName: patientId === 'PAT-001' ? 'John Smith' : `Patient ${patientId}`,
-                currentRole: currentRole,
-                assessmentId: 'treatment-new',
-                assessmentName: 'Treatment Plan',
-                viewMode: 'create',
-                timestamp: new Date().toISOString(),
-                returnUrl: window.location.href,
-                patientState: patientState || null
-            };
-            
-            localStorage.setItem('treatmentPlanSession', JSON.stringify(treatmentPlanData));
-            localStorage.setItem('currentRole', currentRole);
-            localStorage.setItem('selectedPatient', patientId);
-            
-            console.log('Redirecting to create new treatment plan for patient:', patientId);
-            window.location.href = 'treatment-plan.html';
         }
 
         function proceedToPayment() {
@@ -5200,7 +6055,6 @@
         // Select patient from dropdown
         function selectPatientFromDropdown(patient) {
             selectedPatientData = patient;
-            selectedPatientId = patient.id || patient.patientId || 'PAT-001'; // Update the patient ID
             
             // Update selected patient display
             document.getElementById('selectedPatientInitials').textContent = `${patient.firstName[0]}${patient.lastName[0]}`;
@@ -5371,6 +6225,16 @@
                 }
             }
         }
+
+        // KEYBOARD EVENT LISTENER FOR MODAL
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('fnonAssessmentModal');
+                if (modal && modal.classList.contains('open')) {
+                    closeAssessmentModal();
+                }
+            }
+        });
 
         // INITIALIZE
         renderAssessments();

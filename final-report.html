@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Report - Neuromodulation System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        
+        .input-royal {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .input-royal:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-sozo {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            .print\:hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="contentArea" class="container mx-auto"></div>
+    
+    <script>
+        // Global variables
+        let globalSelectedPatientId = 'PAT-001';
+        let currentRole = 'clinical-assistant';
+        
+        // Sample data
+        const sampleData = {
+            patients: [
+                { id: 'P-001', name: 'Sarah Mitchell', dob: '1990-05-15', condition: 'Depression', age: 34 },
+                { id: 'P-002', name: 'John Smith', dob: '1985-08-20', condition: 'Anxiety Disorder', age: 39 }
+            ],
+            doctors: [
+                { name: 'Dr. James Wilson', specialty: 'Neurology' },
+                { name: 'Dr. Sarah Smith', specialty: 'Psychiatry' }
+            ]
+        };
+
+        function getActivePatient() {
+            return sampleData.patients.find(p => p.id === globalSelectedPatientId) || sampleData.patients[0];
+        }
+
+        const PRS_CONDITIONS = [
+            { id: 'dementia', name: 'DEMENTIA' },
+            { id: 'depression', name: 'DEPRESSION' },
+            { id: 'anxiety', name: 'ANXIETY DISORDER' }
+        ];
+
+        let prsState = { conditionId: 'depression' };
+        let fnonState = { scores: {} };
+
+        function renderFinalReport() {
+            const area = document.getElementById('contentArea');
+            
+            try {
+                if(!globalSelectedPatientId && sampleData.patients.length > 0) {
+                    globalSelectedPatientId = sampleData.patients[0].id;
+                }
+                
+                const p = getActivePatient();
+                if (!p) {
+                    area.innerHTML = '<div class="p-8"><div class="bg-slate-50 border border-slate-300 rounded-lg p-6"><p class="text-slate-900 font-bold">No Patient Selected</p><p class="text-sm text-slate-600 mt-2">Please select a patient first.</p></div></div>';
+                    return;
+                }
+                
+                const fnonScores = fnonState.scores || {};
+                const prsCondition = PRS_CONDITIONS.find(c => c.id === prsState.conditionId);
+                const prsLabel = prsCondition ? prsCondition.name : 'DEMENTIA';
+
+                const randomData = currentRole === 'patient' ? {
+                    qolMobility: Math.floor(Math.random() * 5) + 1,
+                    qolSelfCare: Math.floor(Math.random() * 5) + 1,
+                    qolUsualActivities: Math.floor(Math.random() * 5) + 1,
+                    qolPainDiscomfort: Math.floor(Math.random() * 5) + 1,
+                    qolDepressionAnxiety: Math.floor(Math.random() * 5) + 1,
+                    qolVAS: Math.floor(Math.random() * 10) + 1,
+                    compassOrthostatic: Math.floor(Math.random() * 41),
+                    compassVasomotor: Math.floor(Math.random() * 41),
+                    compassSecretomotor: Math.floor(Math.random() * 41),
+                    compassGastrointestinal: Math.floor(Math.random() * 41),
+                    compassBladder: Math.floor(Math.random() * 41),
+                    compassPupillomotor: Math.floor(Math.random() * 41),
+                    amtsScore: Math.floor(Math.random() * 11),
+                    mocaScore: Math.floor(Math.random() * 31),
+                    dsrsScore: Math.floor(Math.random() * 55),
+                    gdsStage: `Stage ${Math.floor(Math.random() * 5) + 1}`,
+                    iadlScore: Math.floor(Math.random() * 9),
+                    dassDepression: Math.floor(Math.random() * 29),
+                    dassAnxiety: Math.floor(Math.random() * 21),
+                    dassStress: Math.floor(Math.random() * 35),
+                } : null;
+
+                area.innerHTML = `
+                    <div class="p-8">
+                        <div id="finalReportContent" class="p-8 bg-white w-full">
+                        
+                        <!-- Header with Logo and Contact -->
+                        <div class="text-center border-b-4 border-sozo-600 pb-4 mb-6">
+                            <h1 class="text-4xl font-black text-sozo-600 mb-2">SOZ&#937; BRAIN CENTER</h1>
+                            <p class="text-sm text-slate-600">
+                                <i class="fa-solid fa-phone mr-1"></i> +357 25 864013 | 
+                                <i class="fa-solid fa-envelope mr-1"></i> info@sozobraincenter.com | 
+                                <i class="fa-solid fa-globe mr-1"></i> www.sozobraincenter.com
+                            </p>
+                            <p class="text-xs text-slate-500 mt-3">Privacy Notice available at www.sozobraincenter.com</p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 justify-end mb-6 print:hidden">
+                            <button onclick="window.print()" class="bg-white border border-slate-300 px-4 py-2 rounded font-bold text-slate-700 hover:bg-slate-50">
+                                <i class="fa-solid fa-print mr-2"></i>Print
+                            </button>
+                            <button onclick="window.history.back()" class="bg-slate-600 text-white px-4 py-2 rounded font-bold hover:bg-slate-700">
+                                <i class="fa-solid fa-arrow-left mr-2"></i>Back to Patient Journey
+                            </button>
+                        </div>
+
+                        <!-- Report Title -->
+                        <div class="bg-sozo-600 text-white p-4 rounded mb-6 text-center">
+                            <h2 class="text-2xl font-bold">ASSESSMENT FINDINGS REPORT</h2>
+                            <p class="text-sm mt-1 opacity-90">${prsLabel}</p>
+                        </div>
+
+                        <!-- Patient Information Section -->
+                        <div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-200 mb-6">
+                            <h3 class="text-xl font-bold text-slate-900 mb-4">Patient Information</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-white p-3 rounded-lg">
+                                    <p class="text-xs font-bold text-slate-600 uppercase">Name/Surname</p>
+                                    <p class="text-sm sm:text-base font-bold text-slate-900">${p.name}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg">
+                                    <p class="text-xs font-bold text-slate-600 uppercase">Date</p>
+                                    <p class="text-sm sm:text-base font-bold text-slate-900">${new Date().toLocaleDateString()}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg">
+                                    <p class="text-xs font-bold text-slate-600 uppercase">Date of Birth</p>
+                                    <p class="text-sm sm:text-base font-bold text-slate-900">${p.dob || 'N/A'}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg">
+                                    <p class="text-xs font-bold text-slate-600 uppercase">Patient ID</p>
+                                    <p class="text-sm sm:text-base font-bold text-slate-900">${p.id}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Multifactorial Assessment Report Header -->
+                        <div class="bg-gradient-to-r from-sozo-100 to-orange-50 p-3 sm:p-4 rounded-lg mb-4 border-l-4 border-sozo-600">
+                            <h3 class="text-lg sm:text-xl font-bold text-sozo-700 flex items-center"><i class="fa-solid fa-clipboard-list mr-2"></i>Multifactorial Assessment Report</h3>
+                        </div>
+
+                        <!-- Quality of Life Section -->
+                        <div class="mb-6">
+                            <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2 flex items-center"><i class="fa-solid fa-heart mr-2 text-slate-600"></i>Quality of Life</h4>
+                            <p class="text-xs sm:text-sm font-bold text-slate-700 mb-2">General Health (EQ-5D-5L)</p>
+                            <div class="overflow-x-auto mb-3">
+                                <table class="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
+                                    <thead class="bg-gradient-to-r from-slate-200 to-slate-100">
+                                        <tr>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Mobility</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Self-Care</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Activities</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Pain</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Mood</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">VAS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-blue-50">
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2">${new Date().toLocaleDateString()}</td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolMobility" class="input-royal w-24 text-center text-sm" min="1" max="5" value="${randomData ? randomData.qolMobility : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolSelfCare" class="input-royal w-24 text-center text-sm" min="1" max="5" value="${randomData ? randomData.qolSelfCare : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolUsualActivities" class="input-royal w-24 text-center text-sm" min="1" max="5" value="${randomData ? randomData.qolUsualActivities : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolPainDiscomfort" class="input-royal w-24 text-center text-sm" min="1" max="5" value="${randomData ? randomData.qolPainDiscomfort : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolDepressionAnxiety" class="input-royal w-24 text-center text-sm" min="1" max="5" value="${randomData ? randomData.qolDepressionAnxiety : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="qolVAS" class="input-royal w-24 text-center text-sm" min="1" max="10" value="${randomData ? randomData.qolVAS : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-xs text-slate-600 italic">Scale: 1=No problem, 2=Slight, 3=Moderate, 4=Severe, 5=Unable/Extreme</p>
+                        </div>
+
+                        <!-- Autonomic Nervous System Assessment -->
+                        <div class="mb-6">
+                            <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2 flex items-center"><i class="fa-solid fa-wave-square mr-2 text-slate-600"></i>Autonomic Nervous System (COMPASS-31)</h4>
+                            <div class="overflow-x-auto mb-3">
+                                <table class="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
+                                    <thead class="bg-gradient-to-r from-slate-200 to-slate-100">
+                                        <tr>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Orthostatic</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Vasomotor</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Secretomotor</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">GI</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Bladder</th>
+                                            <th class="border border-slate-300 px-2 sm:px-3 py-2 text-center">Pupil</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-slate-50">
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2">${new Date().toLocaleDateString()}</td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassOrthostatic" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassOrthostatic : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassVasomotor" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassVasomotor : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassSecretomotor" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassSecretomotor : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassGastrointestinal" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassGastrointestinal : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassBladder" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassBladder : ''}" /></td>
+                                            <td class="border border-slate-300 px-2 sm:px-3 py-2 text-center"><input type="number" id="compassPupillomotor" class="input-royal w-24 text-center text-sm" value="${randomData ? randomData.compassPupillomotor : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Cognitive Assessments -->
+                        <div class="mb-6">
+                            <!-- AMTS -->
+                            <div class="mb-4">
+                                <p class="text-sm font-bold text-slate-800 mb-2">AMTS – Abbreviated Mental Test Score</p>
+                                <table class="w-full border-collapse border border-slate-300 mb-2">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">AMTS Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="amtsScore" class="input-royal w-28 text-center text-base" min="0" max="10" value="${randomData ? randomData.amtsScore : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-xs text-slate-600 italic">A score of 6 or less suggests delirium or dementia, although further tests are necessary to confirm the diagnosis.</p>
+                            </div>
+
+                            <!-- MoCA -->
+                            <div class="mb-4">
+                                <p class="text-sm font-bold text-slate-800 mb-2">MoCA – Montreal Cognitive Assessment</p>
+                                <table class="w-full border-collapse border border-slate-300">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">MoCA Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="mocaScore" class="input-royal w-28 text-center text-base" min="0" max="30" value="${randomData ? randomData.mocaScore : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- DSRS -->
+                            <div class="mb-4">
+                                <p class="text-sm font-bold text-slate-800 mb-2">DSRS – Dementia Severity Rating Scale</p>
+                                <table class="w-full border-collapse border border-slate-300 mb-2">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">DSRS Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="dsrsScore" class="input-royal w-28 text-center text-base" min="0" max="54" value="${randomData ? randomData.dsrsScore : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-xs text-slate-600 italic">0-18: Mild, 19-36: Moderate, 37-54: Severe</p>
+                            </div>
+
+                            <!-- GDS -->
+                            <div class="mb-4">
+                                <p class="text-sm font-bold text-slate-800 mb-2">GDS – Global Deterioration Scale</p>
+                                <table class="w-full border-collapse border border-slate-300">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">GDS Stage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="text" id="gdsStage" class="input-royal w-48 text-center text-base" placeholder="e.g., Stage 3 (Mild)" value="${randomData ? randomData.gdsStage : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- IADL -->
+                            <div class="mb-4">
+                                <p class="text-sm font-bold text-slate-800 mb-2">IADL – Lawton Instrumental Activities of Daily Living Scale</p>
+                                <table class="w-full border-collapse border border-slate-300 mb-2">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">IADL Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="iadlScore" class="input-royal w-28 text-center text-base" min="0" max="8" value="${randomData ? randomData.iadlScore : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-xs text-slate-600 italic">Score ranges from 0 (low function, dependent) to 8 (high function, independent).</p>
+                            </div>
+                        </div>
+
+                        <!-- Mental Health Section -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-bold text-slate-900 mb-3 border-b-2 border-sozo-600 pb-2">Mental Health</h4>
+                            <p class="text-sm font-bold text-slate-700 mb-2">Assessment of Psychological Distress</p>
+                            <p class="text-sm font-bold text-slate-800 mb-3">DASS-21</p>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse border border-slate-300">
+                                    <thead class="bg-slate-200">
+                                        <tr>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-left">Date Visit</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Depression<br/>(0-28)</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Anxiety<br/>(0-20)</th>
+                                            <th class="border border-slate-300 px-3 py-2 text-sm font-bold text-center">Stress<br/>(0-34)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm">${new Date().toLocaleDateString()} First visit</td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="dassDepression" class="input-royal w-20 text-center" min="0" max="28" value="${randomData ? randomData.dassDepression : ''}" /></td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="dassAnxiety" class="input-royal w-20 text-center" min="0" max="20" value="${randomData ? randomData.dassAnxiety : ''}" /></td>
+                                            <td class="border border-slate-300 px-3 py-2 text-sm text-center"><input type="number" id="dassStress" class="input-royal w-20 text-center" min="0" max="34" value="${randomData ? randomData.dassStress : ''}" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Conclusion and Recommendations -->
+                        <div class="space-y-4 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Multifactorial Assessment Conclusion</h4>
+                                <textarea id="finalReportConclusion" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter assessment conclusion...">The comprehensive analysis reveals significant hypoactivity in the left dorsolateral prefrontal cortex, consistent with the patient's reported low mood and lack of motivation. Concurrent elevated Beta wave activity suggests underlying anxiety and hyperarousal, contributing to sleep disturbances.</textarea>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Recommendation</h4>
+                                <textarea id="finalReportRecommendation" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter recommendations...">We recommend a non-invasive neuromodulation protocol to regulate cortical excitability, paired with cognitive behavioral strategies to reinforce neural changes. Lifestyle modifications focusing on sleep hygiene and reduced stimulant intake are advised to support the biological intervention.</textarea>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Neuromodulation Protocol</h4>
+                                <textarea id="finalReportNeuromodulation" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter neuromodulation protocol...">The selected modality is Repetitive Transcranial Magnetic Stimulation (rTMS) targeting the left DLPFC to enhance neuronal firing rates. An inhibitory protocol may be applied to the right hemisphere subsequently to dampen anxiety-related overactivity.</textarea>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Primary Neuromodulation Goals</h4>
+                                <textarea id="finalReportPrimaryGoals" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter primary goals...">The primary objective is to achieve a clinically significant reduction in depressive symptoms (aiming for >50% reduction in standardized depression scores). We focus on restoring emotional regulation and increasing the patient's drive and motivation for daily activities.</textarea>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Additional Goals</h4>
+                                <textarea id="finalReportAdditionalGoals" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter additional goals...">Secondary goals include stabilizing sleep architecture to ensure restorative rest and reducing subjective feelings of brain fog. We also aim to improve executive functions, specifically attention span and working memory, which have been impacted by the mood disorder.</textarea>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Schedule of Neuromodulation Sessions</h4>
+                                <textarea id="finalReportSchedule" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter session schedule...">The initial acute phase consists of 5 sessions per week for a duration of 4 to 6 weeks, totaling 20-30 sessions. Each session will last approximately 20 minutes and should ideally be scheduled at the same time each day to establish a routine.</textarea>
+                                <p class="text-xs text-slate-600 mt-2 italic">Note: Manufacturers propose limiting the use of tDCS products to a maximum of 30 mins per day and recommend against their use with children below the age of 18.</p>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="text-sm font-bold text-slate-800 mb-2">Follow-up Assessment Plan</h4>
+                                <textarea id="finalReportFollowUp" class="input-royal w-full border border-slate-300 rounded px-3 py-2" rows="3" placeholder="Enter follow-up assessment plan...">A clinical review will be conducted after session 10 to evaluate tolerance and early symptomatic improvement. A full repeat of the Multifactorial Assessment, including Brain Mapping, is required after session 20 to quantify physiological progress. Based on these results, the treatment plan will be adjusted or transitioned to a maintenance schedule.</textarea>
+                            </div>
+                        </div>
+
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error rendering final report:', error);
+                area.innerHTML = '<div class="p-8"><div class="bg-red-50 border border-red-300 rounded-lg p-6"><p class="text-red-900 font-bold">Error loading Final Report</p><p class="text-sm text-red-600 mt-2">' + error.message + '</p></div></div>';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', renderFinalReport);
+    </script>
+</body>
+</html>
