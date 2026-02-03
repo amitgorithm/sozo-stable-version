@@ -1663,6 +1663,145 @@ function getPatientMenuForVisit(visit) {
   }
 }
 
+// Sub-tab switching and Parameters rendering
+function switchTreatmentSubTab(subTab) {
+  if (!['devices','parameters'].includes(subTab)) return;
+  treatmentPlanState.activeTreatmentSubTab = subTab;
+  // Re-render the treatment plan area to reflect the sub-tab change
+  renderTreatmentPlan();
+}
+
+function renderParametersContent(device, deviceIndex) {
+  if (!device) return '<p class="text-slate-500">No device selected</p>';
+
+  // Ensure parameters object exists
+  if (!device.parameters) device.parameters = { duration: '', intensity: '', ramp: '', daysPerWeek: '', selectedDays: '', timeOfDay: '' };
+
+  const params = device.parameters;
+
+  return `
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <h5 class="text-sm font-bold text-slate-900 mb-3">Device Parameters - Device ${deviceIndex + 1}: ${device.name}</h5>
+
+      <!-- Top row: Duration / Intensity / Ramp -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Duration</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'duration', this.value)" class="input-royal w-full">
+            <option value="">Duration</option>
+            <option value="10" ${params.duration === '10' ? 'selected' : ''}>10 min</option>
+            <option value="15" ${params.duration === '15' ? 'selected' : ''}>15 min</option>
+            <option value="20" ${params.duration === '20' ? 'selected' : ''}>20 min</option>
+            <option value="30" ${params.duration === '30' ? 'selected' : ''}>30 min</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Intensity</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'intensity', this.value)" class="input-royal w-full">
+            <option value="">Intensity</option>
+            <option value="low" ${params.intensity === 'low' ? 'selected' : ''}>Low</option>
+            <option value="medium" ${params.intensity === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="high" ${params.intensity === 'high' ? 'selected' : ''}>High</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Ramp</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'ramp', this.value)" class="input-royal w-full">
+            <option value="">Ramp</option>
+            <option value="slow" ${params.ramp === 'slow' ? 'selected' : ''}>Slow</option>
+            <option value="medium" ${params.ramp === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="fast" ${params.ramp === 'fast' ? 'selected' : ''}>Fast</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bottom row: Number of days/week / Select days / Time of day -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Number of days/week</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'daysPerWeek', this.value)" class="input-royal w-full">
+            <option value="">Number of days/week</option>
+            <option value="1" ${params.daysPerWeek === '1' ? 'selected' : ''}>1</option>
+            <option value="2" ${params.daysPerWeek === '2' ? 'selected' : ''}>2</option>
+            <option value="3" ${params.daysPerWeek === '3' ? 'selected' : ''}>3</option>
+            <option value="4" ${params.daysPerWeek === '4' ? 'selected' : ''}>4</option>
+            <option value="5" ${params.daysPerWeek === '5' ? 'selected' : ''}>5</option>
+            <option value="6" ${params.daysPerWeek === '6' ? 'selected' : ''}>6</option>
+            <option value="7" ${params.daysPerWeek === '7' ? 'selected' : ''}>7</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Select days</label>
+          <select multiple onchange="updateDeviceParameter(${deviceIndex}, 'selectedDays', Array.from(this.selectedOptions).map(o=>o.value).join(', '))" class="input-royal w-full h-28">
+            <option value="Mon" ${params.selectedDays?.includes('Mon') ? 'selected' : ''}>Mon</option>
+            <option value="Tue" ${params.selectedDays?.includes('Tue') ? 'selected' : ''}>Tue</option>
+            <option value="Wed" ${params.selectedDays?.includes('Wed') ? 'selected' : ''}>Wed</option>
+            <option value="Thu" ${params.selectedDays?.includes('Thu') ? 'selected' : ''}>Thu</option>
+            <option value="Fri" ${params.selectedDays?.includes('Fri') ? 'selected' : ''}>Fri</option>
+            <option value="Sat" ${params.selectedDays?.includes('Sat') ? 'selected' : ''}>Sat</option>
+            <option value="Sun" ${params.selectedDays?.includes('Sun') ? 'selected' : ''}>Sun</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700">Time of day</label>
+          <select onchange="updateDeviceParameter(${deviceIndex}, 'timeOfDay', this.value)" class="input-royal w-full">
+            <option value="">time of day</option>
+            <option value="morning" ${params.timeOfDay === 'morning' ? 'selected' : ''}>Morning</option>
+            <option value="midday" ${params.timeOfDay === 'midday' ? 'selected' : ''}>Midday</option>
+            <option value="afternoon" ${params.timeOfDay === 'afternoon' ? 'selected' : ''}>Afternoon</option>
+            <option value="evening" ${params.timeOfDay === 'evening' ? 'selected' : ''}>Evening</option>
+            <option value="night" ${params.timeOfDay === 'night' ? 'selected' : ''}>Night</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateDeviceParameter(deviceIndex, key, value) {
+  if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
+  if (!treatmentPlanState.devices[deviceIndex].parameters) treatmentPlanState.devices[deviceIndex].parameters = {};
+  treatmentPlanState.devices[deviceIndex].parameters[key] = value;
+  saveTreatmentPlanState();
+  // Update the deviceTabContent only to reflect changes
+  const contentEl = document.getElementById('deviceTabContent');
+  if (contentEl) {
+    contentEl.innerHTML = treatmentPlanState.activeTreatmentSubTab === 'parameters' ? renderParametersContent(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab) : renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab);
+  }
+}
+
+// Expose to global scope for inline handlers
+window.switchTreatmentSubTab = switchTreatmentSubTab;
+window.updateDeviceParameter = updateDeviceParameter;
+
+function switchTreatmentMainTab(tab) {
+  if (!['devices','parameters','details'].includes(tab)) return;
+  treatmentPlanState.activeTreatmentMainTab = tab;
+  // Re-render the whole treatment plan view to load the selected main tab
+  renderTreatmentPlan();
+}
+
+function renderTreatmentPlanParameters() {
+  // Render a full-viewport Parameters tab for the treatment plan showing per-device parameters
+  return `
+    <div class="card p-8">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Treatment Plan Parameters</h3>
+      <p class="text-sm text-slate-600 mb-4">Configure and review parameters for all devices in a single view.</p>
+      <div class="space-y-4">
+        ${treatmentPlanState.devices.length === 0 ? '<p class="text-slate-500 italic">No devices added yet</p>' : treatmentPlanState.devices.map((device, idx) => `
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <h5 class="font-semibold text-slate-800 mb-2">Device ${idx + 1}: ${device.name}</h5>
+            ${renderParametersContent(device, idx)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+window.switchTreatmentMainTab = switchTreatmentMainTab;
+window.renderTreatmentPlanParameters = renderTreatmentPlanParameters;
+
 const MENU = {
   patient: [
     {key:'home', label:'Home', icon:'fa-home'},
@@ -1734,6 +1873,7 @@ const MENU = {
       {key:'createvisit', label:'Create Visit'}
     ]},
     {key:'devices', label:'Device Inventory', icon:'fa-boxes-stacked'},
+    {key:'workshops', label:'Workshops', icon:'fa-chalkboard-user'},
     {key:'workshops', label:'Workshops', icon:'fa-chalkboard-user'},
     {key:'settings', label:'System Settings', icon:'fa-gear'},
     {key:'wellness', label:'Medical Assessment', icon:'fa-spa', children: [
@@ -22129,7 +22269,11 @@ let treatmentPlanState = {
   devices: [], // Array of up to 3 devices
   activeDeviceTab: 0,
   maxDevices: 3,
-  networkTabs: {} // Track network tabs per device: {deviceIndex: [{networkId, networkName, isActive}]}
+  networkTabs: {}, // Track network tabs per device: {deviceIndex: [{networkId, networkName, isActive}]}
+  // Sub-tab inside Treatment Plan (either 'devices' or 'parameters')
+  activeTreatmentSubTab: 'devices',
+  // Main tabs for the Treatment Plan page: 'devices' or 'parameters' (full tab)
+  activeTreatmentMainTab: 'devices'
 };
 
 // Persistence Logic
@@ -22458,7 +22602,14 @@ function renderTreatmentPlan() {
     </div>
     ` : ''}
 
-    <!-- Treatment Plan Content -->
+    <!-- Treatment Plan Main Tabs -->
+      <div class="mb-4 flex gap-2 items-center">
+      <button id="tpMain_devices" onclick="switchTreatmentMainTab('devices')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'devices' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Devices</button>
+      <button id="tpMain_parameters" onclick="switchTreatmentMainTab('parameters')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'parameters' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Parameters</button>
+      <button id="tpMain_details" onclick="switchTreatmentMainTab('details')" class="px-4 py-2 rounded-t-lg font-semibold ${treatmentPlanState.activeTreatmentMainTab === 'details' ? 'bg-white border-t border-l border-r border-slate-200' : 'bg-slate-100 text-slate-700'}">Details</button>
+    </div>
+
+    <div id="treatmentMainContent">
     <div class="card p-8">
       
       <!-- Step 1: Device Selection (Max 3) -->
@@ -22490,8 +22641,6 @@ function renderTreatmentPlan() {
             <optgroup label="tDCS/tACS Devices">
               <option value="plato">Plato Neurostimulation - 4 specialized electrode blocks</option>
               <option value="newronika">Newronika - 10-20 system placement</option>
-              <option value="device1">TMS (Transcranial Magnetic Stimulation)</option>
-              <option value="device2">tDCS (Transcranial Direct Current)</option>
             </optgroup>
             <optgroup label="Alpha Stim Devices">
               <option value="alpha_stim_aid">Alpha Stim AID - Earlobe clips</option>
@@ -22538,8 +22687,10 @@ function renderTreatmentPlan() {
         </div>
         
         <!-- Active Device Tab Content -->
-        <div id="deviceTabContent">
-          ${renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab)}
+        <div>
+          <div id="deviceTabContent">
+            ${renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab)}
+          </div>
         </div>
       </div>
       ` : ''}
@@ -22591,6 +22742,7 @@ function renderTreatmentPlan() {
       ` : ''}
     </div>
     </div>
+    </div>
   `;
   
   // Attach event listeners
@@ -22615,6 +22767,22 @@ function renderTreatmentPlan() {
         renderNetworkTabs(index);
       }
     });
+
+    // Render main treatment content according to selected main tab
+    const mainContentEl = document.getElementById('treatmentMainContent');
+    if (mainContentEl) {
+      if (treatmentPlanState.activeTreatmentMainTab === 'parameters') {
+        mainContentEl.innerHTML = renderTreatmentPlanParameters();
+      } else if (treatmentPlanState.activeTreatmentMainTab === 'details') {
+        mainContentEl.innerHTML = renderTreatmentPlanDetails();
+      } else {
+        // Ensure device tab content is up-to-date for devices main tab
+        const deviceTabContent = document.getElementById('deviceTabContent');
+        if (deviceTabContent) {
+          deviceTabContent.innerHTML = treatmentPlanState.activeTreatmentSubTab === 'parameters' ? renderParametersContent(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab) : renderDeviceJourney(treatmentPlanState.devices[treatmentPlanState.activeDeviceTab], treatmentPlanState.activeDeviceTab);
+        }
+      }
+    }
 
     // Clinical Indication Dropdown - trigger initial update if needed
     const clinicalSelect = document.getElementById('clinicalIndicationSelect');
@@ -22822,6 +22990,66 @@ function updateMontageMapping() {
     resetBrainVisualization();
   }
 }
+
+// Render the Treatment Plan 'Details' main tab — per-device freeform notes entered by doctor
+function renderTreatmentPlanDetails() {
+  const devices = treatmentPlanState.devices || [];
+
+  if (devices.length === 0) {
+    return `
+      <div class="card p-6 text-sm text-slate-600">
+        <p>No devices added yet. Add devices first to add details.</p>
+      </div>
+    `;
+  }
+
+  // Ensure we have an activeDetailsDevice index
+  if (treatmentPlanState.activeDetailsDevice === undefined || treatmentPlanState.activeDetailsDevice === null) {
+    treatmentPlanState.activeDetailsDevice = treatmentPlanState.activeDeviceTab || 0;
+  }
+  const selIndex = Math.min(Math.max(0, parseInt(treatmentPlanState.activeDetailsDevice || 0)), devices.length - 1);
+  const device = devices[selIndex];
+
+  return `
+    <div class="card p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold">Device Details</h3>
+        <div class="">
+          <label class="text-xs text-slate-600 mr-2">Select device</label>
+          <select onchange="switchDetailsDevice(this.value)" class="input-royal">
+            ${devices.map((d, i) => `<option value="${i}" ${i === selIndex ? 'selected' : ''}>Device ${i+1}: ${d.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="border rounded-lg p-4 bg-white">
+        <div class="mb-2 font-semibold text-slate-800">Selected: Device ${selIndex + 1} — ${device.name}</div>
+        <textarea id="deviceDetails_${selIndex}" class="input-royal w-full text-sm" rows="8" placeholder="Enter notes or device-specific details for the doctor..." oninput="updateDeviceDetails(${selIndex}, this.value)">${(device.details || '')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function switchDetailsDevice(index) {
+  const idx = parseInt(index);
+  if (isNaN(idx)) return;
+  treatmentPlanState.activeDetailsDevice = idx;
+  saveTreatmentPlanState();
+  const mainContentEl = document.getElementById('treatmentMainContent');
+  if (mainContentEl) mainContentEl.innerHTML = renderTreatmentPlanDetails();
+}
+
+window.switchDetailsDevice = switchDetailsDevice;
+
+function updateDeviceDetails(deviceIndex, value) {
+  if (!treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) return;
+  treatmentPlanState.devices[deviceIndex].details = value;
+  saveTreatmentPlanState();
+}
+
+// Expose details update to global scope for inline handlers
+window.renderTreatmentPlanDetails = renderTreatmentPlanDetails;
+window.updateDeviceDetails = updateDeviceDetails;
 
 // Update brain diagram visualization with electrode highlights
 function updateBrainVisualization(config) {
@@ -23738,43 +23966,22 @@ function getDummyNetworks(deviceValue) {
     // Flow - Standard placement device
     'flow': [
       {
-        name: 'Standard L-DLPFC Protocol',
-        description: 'Fixed left DLPFC placement - no customization',
+        name: 'Standard Placement',
+        description: 'Fixed standard placement for Flow device (non-customizable)',
         anodes: ['F3', 'F7'],
         cathode: 'Fp2',
-        indication: 'Depression - Standard Protocol'
-      },
-      {
-        name: 'Alternative Frontal',
-        description: 'Secondary frontal placement option',
-        anodes: ['F4', 'F8'],
-        cathode: 'Fp1',
-        indication: 'Depression - Alternative Protocol'
+        indication: 'Standard therapeutic placement'
       }
     ],
     
     // Robotic Arm - Automated precision
     'robotic_arm': [
       {
-        name: 'Automated DLPFC Target',
-        description: 'Robotic precision left DLPFC targeting',
+        name: 'Standard Robotic Placement',
+        description: 'Single standard robotic placement option (non-customizable)',
         anodes: ['F3', 'F7'],
         cathode: 'Cz',
-        indication: 'Precision Depression Treatment'
-      },
-      {
-        name: 'Motor Cortex Precision',
-        description: 'Automated motor cortex targeting',
-        anodes: ['C3', 'C4'],
-        cathode: 'Pz',
-        indication: 'Movement Disorders, Stroke Recovery'
-      },
-      {
-        name: 'Multi-Point Automation',
-        description: 'Sequential automated targeting',
-        anodes: ['F3', 'P3'],
-        cathode: 'Fz',
-        indication: 'Complex Multi-Target Protocol'
+        indication: 'Standard robotic placement'
       }
     ]
   };
@@ -24261,6 +24468,10 @@ function renderDeviceJourney(device, deviceIndex) {
   // Get dummy networks for this device
   const networks = getDummyNetworks(device.value);
   const showBrainMontage = usesBrainMontage(device.value);
+  // For some standard-placement devices we do not allow custom montage editing
+  const disallowCustomMontageDevices = ['flow', 'robotic_arm'];
+  const allowCustomMontage = !disallowCustomMontageDevices.includes(device.value);
+  const showCustomMontageTab = showBrainMontage && allowCustomMontage;
   const deviceViz = getDeviceVisualization(device.value, deviceIndex);
   
   // Debug logging
@@ -24347,7 +24558,7 @@ function renderDeviceJourney(device, deviceIndex) {
       <!-- RIGHT PANEL: Tabbed Interface for Network Selection & Custom Montages -->
       <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl border-2 border-green-300 shadow-lg">
         <!-- Tab Headers -->
-        <div class="flex border-b-2 border-green-300 mb-4">
+          <div class="flex border-b-2 border-green-300 mb-4">
           <button 
             id="networkTab_${deviceIndex}" 
             onclick="switchMontageTab(${deviceIndex}, 'network')" 
@@ -24355,7 +24566,7 @@ function renderDeviceJourney(device, deviceIndex) {
           >
             <i class="fa-solid fa-network-wired mr-2"></i>Network Selection
           </button>
-          ${showBrainMontage ? `
+          ${showCustomMontageTab ? `
           <button 
             id="customTab_${deviceIndex}" 
             onclick="switchMontageTab(${deviceIndex}, 'custom')" 
@@ -24469,8 +24680,8 @@ function renderDeviceJourney(device, deviceIndex) {
           </div>
         </div>
         
-        <!-- Custom Montage Tab Content (Only for brain devices) -->
-        ${showBrainMontage ? `
+        <!-- Custom Montage Tab Content (Only for brain devices that allow custom montages) -->
+        ${showCustomMontageTab ? `
         <div id="customTabContent_${deviceIndex}" class="hidden space-y-4">
           <!-- Load Saved Custom Montages Section -->
           <div class="bg-white p-4 rounded-lg border border-purple-200">
@@ -24579,6 +24790,7 @@ function renderDeviceJourney(device, deviceIndex) {
     </div>
     
     <!-- Custom Montage Section (Hidden by default) -->
+    ${showCustomMontageTab ? `
     <div id="customMontageSection_${deviceIndex}" class="mt-6 bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-300 hidden">
       <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
         <span class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
@@ -24643,6 +24855,7 @@ function renderDeviceJourney(device, deviceIndex) {
         </div>
       </div>
     </div>
+    ` : ''}
   `;
 }
 
