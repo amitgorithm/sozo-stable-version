@@ -2376,6 +2376,16 @@
                             <option value="clinical-assistant">Clinical Assistant</option>
                         </select>
                     </div>
+                    <!-- Clarity Wireframes Dropdown -->
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">CLARITY WIREFRAMES:</label>
+                        <select id="clarityWireframesSelector" onchange="handleClarityWireframeChange()"
+                            style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
+                            <option value="none" selected>-- Select Wireframe --</option>
+                            <option value="working">Working Active Journey</option>
+                            <option value="device">Device Locking</option>
+                        </select>
+                    </div>
                     <button onclick="backToPatientList()"
                         style="padding: 10px 20px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                         <i class="fa-solid fa-arrow-left"></i> Back to List
@@ -2391,9 +2401,6 @@
             <div class="tabs-container">
                 <button class="tab-button active" id="todayTab" onclick="switchTab('today')">Today's Journey</button>
                 <button class="tab-button" id="overallTab" onclick="switchTab('overall')">Overall Journey</button>
-                <button class="tab-button" id="workingTab" onclick="switchTab('working')">Working Active
-                    Journey</button>
-                <button class="tab-button" id="deviceTab" onclick="switchTab('device')">Device Locking</button>
             </div>
 
             <!-- OVERALL JOURNEY TAB -->
@@ -3447,6 +3454,10 @@
 
         // TAB SWITCHING
         function switchTab(tab) {
+            // Reset clarity wireframes dropdown
+            const clarityDropdown = document.getElementById('clarityWireframesSelector');
+            if (clarityDropdown) clarityDropdown.value = 'none';
+
             // Update tab buttons
             const buttons = document.querySelectorAll('.tab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -3454,8 +3465,6 @@
             // Find and activate the clicked button
             if (tab === 'today') document.getElementById('todayTab').classList.add('active');
             else if (tab === 'overall') document.getElementById('overallTab').classList.add('active');
-            else if (tab === 'working') document.getElementById('workingTab').classList.add('active');
-            else if (tab === 'device') document.getElementById('deviceTab').classList.add('active');
 
             // Update tab content visibility
             document.getElementById('todayTabContent').style.display = 'none';
@@ -3472,6 +3481,34 @@
                 document.getElementById('workingTabContent').style.display = 'block';
                 renderWorkingView();
             } else if (tab === 'device') {
+                document.getElementById('deviceTabContent').style.display = 'block';
+                renderDeviceView();
+            }
+        }
+
+        // CLARITY WIREFRAMES DROPDOWN HANDLER
+        function handleClarityWireframeChange() {
+            const selectedWireframe = document.getElementById('clarityWireframesSelector').value;
+            
+            if (selectedWireframe === 'none') {
+                return;
+            }
+
+            // Deactivate all tab buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Hide all tab content
+            document.getElementById('todayTabContent').style.display = 'none';
+            document.getElementById('overallTabContent').style.display = 'none';
+            document.getElementById('workingTabContent').style.display = 'none';
+            document.getElementById('deviceTabContent').style.display = 'none';
+
+            // Show selected wireframe content
+            if (selectedWireframe === 'working') {
+                document.getElementById('workingTabContent').style.display = 'block';
+                renderWorkingView();
+            } else if (selectedWireframe === 'device') {
                 document.getElementById('deviceTabContent').style.display = 'block';
                 renderDeviceView();
             }
@@ -6704,6 +6741,13 @@
             // Reset onboarding state
             currentOnboardingPatient = null;
             hasSignature = false;
+
+            // Reset clarity wireframes dropdown
+            const clarityDropdown = document.getElementById('clarityWireframesSelector');
+            if (clarityDropdown) clarityDropdown.value = 'none';
+
+            // Reset to Today's Journey tab
+            switchTab('today');
         }
 
         function showAddNewPatient() {
