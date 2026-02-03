@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEG Brain Mapping - Sozo Clinical Operating System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --sozo-600: #f47520;
+            --blue-primary: #0ea5e9;
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --slate-border: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #1e293b;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--slate-border);
+        }
+        
+        .input-royal {
+            border: 1px solid var(--slate-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .input-royal:focus {
+            outline: none;
+            border-color: var(--sozo-600);
+            box-shadow: 0 0 0 3px rgba(244, 117, 32, 0.1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-sozo {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .upload-success {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid var(--slate-border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        
+        #eegDropZone {
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        
+        #eegDropZone:hover {
+            background-color: #f0f9ff !important;
+            border-color: var(--sozo-600) !important;
+        }
+        
+        #eegFileInput {
+            display: none !important;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="p-8">
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900"><i class="fa-solid fa-brain mr-2 text-sozo-600"></i>EEG Brain Mapping Assessment</h2>
+                <p class="text-slate-600">Upload .easy or .nedf files for quantitative EEG analysis</p>
+            </div>
+            <button onclick="window.history.back()" class="btn-secondary text-sm" title="Go Back">
+                <i class="fa-solid fa-arrow-left mr-2"></i>Go Back
+            </button>
+        </div>
+        
+        <!-- EEG Data & Analysis Section -->
+        <div class="card p-6 mb-6 bg-gradient-to-r from-blue-50 to-slate-50 border-l-4 border-l-blue-600">
+            <h3 class="font-bold text-lg text-slate-900"><i class="fa-solid fa-wave-square mr-2"></i>Upload the Pdf or eeg file</h3>
+        </div>
+        
+        <div class="card p-6 space-y-4">
+            <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center bg-slate-50" id="eegDropZone" onclick="document.getElementById('eegFileInput').click();">
+                <p class="font-bold text-slate-800 mb-2">Drop .easy / .nedf / .pdf files here or click to select</p>
+                <p class="text-xs text-slate-500">Other formats are not accepted.</p>
+                <p id="selectedFileName" class="text-sm text-sozo-600 font-semibold mt-2 hidden"></p>
+                <input type="file" id="eegFileInput" accept=".easy,.nedf,.pdf" class="hidden" />
+            </div>
+
+            <div class="flex gap-3 flex-wrap items-center justify-between">
+                <div class="flex gap-3 items-center">
+                    <button id="eegUploadBtn" class="bg-sozo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-sozo-700 transition">
+                        <i class="fa-solid fa-upload mr-2"></i>Upload
+                    </button>
+                    <span id="eegError" class="text-sm text-slate-600"></span>
+                    <span id="eegSuccess" class="text-sm text-sozo-600"></span>
+                </div>
+                <button onclick="generateEEGReport()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                    Generate EEG Report <i class="fa-solid fa-file-pdf ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Upload History Section -->
+            <div class="mt-6 border-t border-slate-200 pt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg text-slate-900">Upload History</h3>
+                    <span class="badge badge-sozo">Files Uploaded: <span id="uploadCount">0</span></span>
+                </div>
+                <div id="uploadHistoryList" class="space-y-2">
+                    <p class="text-sm text-slate-500 italic">No files uploaded yet</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="bottomMsg" class="fixed bottom-3 right-3 hidden bg-sozo-600 text-white px-4 py-2 rounded-lg shadow-lg">Files uploaded successfully</div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdfViewerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2">
+        <div class="bg-white rounded-lg shadow-2xl w-full h-full flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <h3 class="text-lg font-bold text-slate-900">EEG Report - PDF Viewer</h3>
+                <button onclick="closePDFViewer()" class="text-slate-600 hover:text-slate-900 text-2xl">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto bg-slate-100 p-4">
+                <iframe id="pdfFrame" src="" class="w-full h-full border-0 rounded-lg"></iframe>
+            </div>
+            <div class="p-4 border-t border-slate-200 flex gap-3">
+                <button onclick="closePDFViewer()" class="bg-slate-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Back
+                </button>
+                <a id="pdfDownloadLink" href="#" download="eeg_report.pdf" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                    <i class="fa-solid fa-download mr-2"></i>Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadHistory = [];
+
+        // Load upload history from localStorage
+        function loadUploadHistory() {
+            const saved = localStorage.getItem('eegUploadHistory');
+            if (saved) {
+                uploadHistory = JSON.parse(saved);
+                updateUploadHistory();
+            }
+        }
+        
+        // Save upload history to localStorage
+        function saveUploadHistory() {
+            localStorage.setItem('eegUploadHistory', JSON.stringify(uploadHistory));
+        }
+
+        // Load session data if available
+        function loadSessionData() {
+            const sessionData = localStorage.getItem('eegSession');
+            if (sessionData) {
+                const data = JSON.parse(sessionData);
+                if (data.patientName) document.getElementById('patientName').value = data.patientName;
+                if (data.patientEmail) document.getElementById('patientEmail').value = data.patientEmail;
+                if (data.patientCountry) document.getElementById('patientCountry').value = data.patientCountry;
+                if (data.patientId) document.getElementById('patientId').value = data.patientId;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessionData();
+            loadUploadHistory();
+            setupFileHandlers();
+            setupEditButtons();
+        });
+
+        // Setup file handlers
+        function setupFileHandlers() {
+            const drop = document.getElementById('eegDropZone');
+            const fileInput = document.getElementById('eegFileInput');
+            const uploadBtn = document.getElementById('eegUploadBtn');
+            const errEl = document.getElementById('eegError');
+            const okEl = document.getElementById('eegSuccess');
+            const bottomMsg = document.getElementById('bottomMsg');
+
+            // Direct click handler
+            drop.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.click();
+            }, false);
+            
+            drop.addEventListener('dragover', (e) => { 
+                e.preventDefault(); 
+                drop.classList.add('bg-orange-50', 'border-sozo-600'); 
+            });
+            drop.addEventListener('dragleave', () => {
+                drop.classList.remove('bg-orange-50', 'border-sozo-600');
+            });
+            drop.addEventListener('drop', (e) => {
+                e.preventDefault();
+                drop.classList.remove('bg-orange-50', 'border-sozo-600');
+                // Handle dropped files directly
+                if (e.dataTransfer.files?.length) {
+                    processFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Handle file input change (when files are selected from file picker)
+            fileInput.addEventListener('change', function() {
+                if (this.files?.length > 0) {
+                    processFile(this.files[0]);
+                }
+            });
+
+            // Function to process uploaded file
+            function processFile(file) {
+                const ext = file.name.split('.').pop().toLowerCase();
+                
+                if (!['easy', 'nedf', 'pdf'].includes(ext)) {
+                    errEl.textContent = 'Only .easy, .nedf or .pdf files are allowed.';
+                    return;
+                }
+                
+                // Add to upload history immediately
+                const uploadEntry = {
+                    name: file.name,
+                    type: ext.toUpperCase(),
+                    date: new Date().toLocaleDateString(),
+                    time: new Date().toLocaleTimeString()
+                };
+                uploadHistory.push(uploadEntry);
+                updateUploadHistory();
+                saveUploadHistory();
+                
+                errEl.textContent = '';
+                okEl.textContent = `✓ ${file.name} uploaded`;
+                document.getElementById('selectedFileName').classList.add('hidden');
+                bottomMsg.classList.remove('hidden');
+                setTimeout(() => bottomMsg.classList.add('hidden'), 3000);
+                fileInput.value = '';
+            }
+
+            uploadBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+        }
+
+        // Update upload history display
+        function updateUploadHistory() {
+            const uploadHistoryList = document.getElementById('uploadHistoryList');
+            const uploadCount = document.getElementById('uploadCount');
+            
+            if (uploadCount) uploadCount.textContent = uploadHistory.length;
+            
+            if (uploadHistory.length === 0) {
+                uploadHistoryList.innerHTML = '<p class="text-sm text-slate-500 italic">No files uploaded yet</p>';
+            } else {
+                uploadHistoryList.innerHTML = uploadHistory.map((entry, idx) => `
+                    <div class="upload-success">
+                        <i class="fa-solid fa-circle-check text-sozo-600"></i>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">${entry.name}</p>
+                            <p class="text-xs text-slate-600">${entry.date} at ${entry.time}</p>
+                        </div>
+                        <button class="deleteUploadBtn text-slate-600 hover:text-slate-700 font-bold" data-index="${idx}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        <span class="badge badge-success">Processed</span>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.deleteUploadBtn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (confirm(`Delete "${uploadHistory[idx].name}" from upload history?`)) {
+                            uploadHistory.splice(idx, 1);
+                            updateUploadHistory();
+                            saveUploadHistory();
+                        }
+                    });
+                });
+            }
+        }
+
+        // Setup edit buttons
+        function setupEditButtons() {
+            document.querySelectorAll('.editPatientField').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const fieldId = this.dataset.field;
+                    const inputField = document.getElementById(fieldId);
+                    const isReadonly = inputField.hasAttribute('readonly');
+                    
+                    if (isReadonly) {
+                        // Enable edit mode
+                        inputField.removeAttribute('readonly');
+                        inputField.classList.remove('bg-slate-100');
+                        inputField.classList.add('bg-white', 'border-sozo-600', 'border-2');
+                        this.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                        this.classList.add('bg-orange-500', 'hover:bg-sozo-600');
+                        this.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Save';
+                        inputField.focus();
+                    } else {
+                        // Disable edit mode (Save)
+                        inputField.setAttribute('readonly', '');
+                        inputField.classList.remove('bg-white', 'border-sozo-600', 'border-2');
+                        inputField.classList.add('bg-slate-100');
+                        this.classList.remove('bg-orange-500', 'hover:bg-sozo-600');
+                        this.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                        this.innerHTML = '<i class="fa-solid fa-edit mr-1"></i>Edit';
+                    }
+                });
+            });
+        }
+
+        // Save EEG Assessment
+        function saveEEGAssessment() {
+            const sessionData = {
+                patientName: document.getElementById('patientName').value,
+                patientEmail: document.getElementById('patientEmail').value,
+                patientCountry: document.getElementById('patientCountry').value,
+                patientId: document.getElementById('patientId').value,
+                uploadedFiles: uploadHistory,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('eegSession', JSON.stringify(sessionData));
+            alert('EEG Assessment saved successfully!');
+            window.history.back();
+        }
+
+        // Generate EEG Report and display PDF
+        function generateEEGReport() {
+            // Show PDF viewer with sample EEG report
+            const pdfModal = document.getElementById('pdfViewerModal');
+            const pdfFrame = document.getElementById('pdfFrame');
+            
+            // Display eeg.pdf
+            const pdfUrl = 'eeg.pdf';
+            
+            pdfFrame.src = pdfUrl;
+            pdfModal.classList.remove('hidden');
+            
+            // Save the session data
+            const sessionData = {
+                patientName: document.getElementById('patientName').value,
+                patientEmail: document.getElementById('patientEmail').value,
+                patientCountry: document.getElementById('patientCountry').value,
+                patientId: document.getElementById('patientId').value,
+                uploadedFiles: uploadHistory,
+                reportGeneratedAt: new Date().toISOString()
+            };
+            localStorage.setItem('eegSession', JSON.stringify(sessionData));
+        }
+
+        // Close PDF viewer
+        function closePDFViewer() {
+            const pdfModal = document.getElementById('pdfViewerModal');
+            pdfModal.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

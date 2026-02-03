@@ -30,8 +30,7 @@
 
         .container-journey {
             padding: 24px;
-            width: 85%;
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -160,18 +159,17 @@
         /* BLOCKS HORIZONTAL GRID */
         .blocks-container {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 16px;
             position: relative;
             overflow: visible;
-            align-items: start;
         }
 
         .block-card {
             background: white;
             border-radius: 12px;
             border: 1px solid var(--slate-border);
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -182,8 +180,6 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             overflow: visible;
             min-height: fit-content;
-            align-self: start;
-            height: auto;
         }
 
         .block-card.expanded {
@@ -766,19 +762,6 @@
             margin-right: auto;
         }
 
-        /* Always show details for pending and locked blocks */
-        .block-card.pending .block-expanded-details,
-        .block-card.locked .block-expanded-details {
-            max-height: 1000px;
-            overflow: visible;
-            opacity: 1;
-            padding: 8px 12px 16px 12px;
-            margin-bottom: 8px;
-            width: calc(100% - 24px);
-            margin-left: auto;
-            margin-right: auto;
-        }
-
         .block-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -955,47 +938,21 @@
             flex-wrap: wrap;
             box-sizing: border-box;
             padding: 0;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
         }
 
-        /* Single button - centered and full width */
-        .block-action-buttons:has(:only-child) {
-            justify-content: center;
-        }
-
-        .block-action-buttons:has(:only-child) .block-action-btn {
-            min-width: 140px;
-            max-width: 180px;
-        }
-
-        /* Two buttons - side by side */
-        .block-action-buttons:has(:nth-child(2):last-child) {
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .block-action-buttons:has(:nth-child(2):last-child) .block-action-btn {
-            flex: 1;
-            max-width: 120px;
-        }
-
-        /* Three or more buttons - flexible grid */
-        .block-action-buttons:has(:nth-child(3)) {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-        }
-
         .block-action-btn {
-            padding: 10px 16px;
+            flex: 1;
+            min-width: 100px;
+            max-width: 140px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 2px solid;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            white-space: nowrap;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1037,17 +994,6 @@
             border-color: #cbd5e1;
             color: #94a3b8;
             cursor: not-allowed;
-        }
-
-        .block-action-btn.start {
-            background: var(--orange-primary);
-            border-color: var(--orange-primary);
-            color: white;
-        }
-
-        .block-action-btn.start:hover {
-            background: #dc6027;
-            transform: translateY(-1px);
         }
 
         .accordion-indicator {
@@ -1598,201 +1544,6 @@
             color: #0f172a;
             margin: 0;
             line-height: 1.6;
-        }
-
-        /* ========================================
-           MOBILE RESPONSIVE STYLES
-           ======================================== */
-        @media (max-width: 768px) {
-            /* Container & Layout */
-            .container-journey {
-                padding: 12px;
-            }
-
-            /* Header & Title */
-            .assessment-header {
-                padding: 16px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .assessment-title {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-                width: 100%;
-            }
-
-            .assessment-title h2 {
-                font-size: 18px;
-            }
-
-            .expand-icon {
-                align-self: flex-end;
-                position: absolute;
-                right: 16px;
-                top: 16px;
-            }
-
-            .assessment-meta {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .assessment-content-inner {
-                padding: 0 12px 16px 12px;
-            }
-
-            /* Tabs */
-            .tabs-container {
-                padding: 6px;
-                gap: 6px;
-                flex-wrap: wrap;
-            }
-
-            .tab-button {
-                padding: 10px 16px;
-                font-size: 14px;
-                flex: 1 1 45%;
-            }
-
-            /* Role Selector */
-            .role-selector-container {
-                padding: 12px 16px;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-
-            .role-select {
-                width: 100%;
-                padding: 10px 12px;
-            }
-
-            /* Blocks Grid */
-            .blocks-container {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .block-card {
-                padding: 16px;
-                min-height: auto;
-            }
-
-            .block-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 20px;
-                margin-bottom: 12px;
-            }
-
-            .block-name {
-                font-size: 15px;
-                margin-bottom: 6px;
-            }
-
-            .block-desc {
-                font-size: 12px;
-                margin-bottom: 12px;
-            }
-
-            .block-status {
-                padding: 4px 10px;
-                font-size: 11px;
-            }
-
-            /* Block Info Grid */
-            .block-info-grid {
-                grid-template-columns: 1fr;
-                gap: 8px;
-                padding: 12px;
-            }
-
-            .block-info-item {
-                padding: 8px;
-            }
-
-            /* Action Buttons - Mobile stacked but centered */
-            .block-action-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-
-            .block-action-buttons:has(:only-child) .block-action-btn,
-            .block-action-buttons:has(:nth-child(2):last-child) .block-action-btn,
-            .block-action-btn {
-                width: 100%;
-                max-width: 100%;
-                padding: 12px 16px;
-                font-size: 14px;
-            }
-
-            /* Expanded Details */
-            .block-expanded-details {
-                width: 100%;
-                padding: 12px;
-            }
-
-            /* Next Up Banner */
-            .next-up-banner {
-                padding: 12px 16px;
-                font-size: 13px;
-            }
-
-            /* Progress Bar */
-            .progress-fill {
-                height: 3px;
-            }
-
-            /* Assessment Badges */
-            .assessment-badge {
-                padding: 4px 8px;
-                font-size: 11px;
-            }
-
-            /* Meta Items */
-            .meta-item {
-                font-size: 11px;
-            }
-
-            /* Conclusion Box */
-            .assessment-conclusion-box {
-                padding: 12px;
-            }
-
-            .assessment-conclusion-box h4 {
-                font-size: 12px;
-            }
-
-            .assessment-conclusion-box p {
-                font-size: 12px;
-            }
-
-            /* Block Meta */
-            .block-meta {
-                font-size: 12px;
-            }
-        }
-
-        /* Tablet Responsive (769px - 1024px) */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .container-journey {
-                padding: 20px;
-            }
-
-            .blocks-container {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 16px;
-            }
-
-            .tab-button {
-                padding: 10px 18px;
-                font-size: 14px;
-            }
         }
     </style>
 </head>
@@ -3845,7 +3596,7 @@
         let currentRole = 'receptionist';
 
         // TAB SWITCHING
-        function switchTab(tab, skipURLUpdate = false) {
+        function switchTab(tab) {
             // Reset clarity wireframes dropdown
             const clarityDropdown = document.getElementById('clarityWireframesSelector');
             if (clarityDropdown) clarityDropdown.value = 'none';
@@ -3855,24 +3606,14 @@
             buttons.forEach(btn => btn.classList.remove('active'));
 
             // Find and activate the clicked button
-            if (tab === 'today') {
-                const todayTab = document.getElementById('todayTab');
-                if (todayTab) todayTab.classList.add('active');
-            } else if (tab === 'overall') {
-                const overallTab = document.getElementById('overallTab');
-                if (overallTab) overallTab.classList.add('active');
-            }
+            if (tab === 'today') document.getElementById('todayTab').classList.add('active');
+            else if (tab === 'overall') document.getElementById('overallTab').classList.add('active');
 
             // Update tab content visibility
             document.getElementById('todayTabContent').style.display = 'none';
             document.getElementById('overallTabContent').style.display = 'none';
             document.getElementById('workingTabContent').style.display = 'none';
             document.getElementById('deviceTabContent').style.display = 'none';
-
-            // Update URL with current tab (only if not being restored from URL)
-            if (!skipURLUpdate && selectedPatientData) {
-                updateURL(selectedPatientData.id, currentRole, tab);
-            }
 
             if (tab === 'today') {
                 document.getElementById('todayTabContent').style.display = 'block';
@@ -3919,20 +3660,11 @@
         // ROLE CHANGE HANDLER
         function handleRoleChange() {
             currentRole = document.getElementById('roleSelector').value;
-            
-            if (selectedPatientData) {
-                let currentTab = 'today';
-                if (document.getElementById('todayTabContent').style.display === 'block') {
-                    currentTab = 'today';
-                } else if (document.getElementById('overallTabContent').style.display === 'block') {
-                    currentTab = 'overall';
-                }
-                updateURL(selectedPatientData.id, currentRole, currentTab);
-            }
-            
+            // Re-render today's view if active
             if (document.getElementById('todayTabContent').style.display === 'block') {
                 renderTodayView();
             }
+            // Re-render working view if active
             if (document.getElementById('workingTabContent').style.display === 'block') {
                 renderWorkingView();
             }
@@ -3986,33 +3718,6 @@
 
         // PATIENT STATE DATA - Define block states for each patient
         const patientStateData = {
-            'P-NEW-1': { // Alex Martinez - Just paid, all 4 initial pending
-                assessmentNumber: 1,
-                startDate: '2026-02-03',
-                blocks: [
-                    { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
-                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
-                    { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending' },
-                    { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending' },
-                    { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
-                    { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
-                    { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
-                ]
-            },
-            'P-NEW-2': { // Rachel Kim - Payment pending, some assessments can start
-                assessmentNumber: 1,
-                startDate: '2026-02-03',
-                paymentPending: true,
-                blocks: [
-                    { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
-                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
-                    { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', lockReason: 'payment' },
-                    { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', lockReason: 'payment' },
-                    { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
-                    { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
-                    { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
-                ]
-            },
             'P001': { // Sarah Johnson - Assessments 2/4 complete
                 assessmentNumber: 2,
                 startDate: '2026-01-15',
@@ -4052,7 +3757,7 @@
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'pending', performer: null }
                 ]
             },
-            'P004': { // David Park - Session 1 today
+            'P004': { // David Park - Session 1 active
                 assessmentNumber: 2,
                 startDate: '2026-01-01',
                 blocks: [
@@ -4063,11 +3768,6 @@
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-06' },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-08' },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-10' }
-                ],
-                sessions: [
-                    { id: 'session-1', name: 'Session 1', desc: 'Initial therapy session', status: 'pending', scheduledDate: '2026-02-03' },
-                    { id: 'session-2', name: 'Session 2', desc: 'Follow-up therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
-                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'locked', lockReason: 'Complete Session 1 first' }
                 ]
             },
             'P005': { // Lisa Thompson - 3 sessions complete
@@ -4081,12 +3781,6 @@
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-26' },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-28' },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-30' }
-                ],
-                sessions: [
-                    { id: 'session-1', name: 'Session 1', desc: 'Initial therapy session', status: 'completed', completedAt: '2026-01-15', duration: '60 min', completedBy: 'Dr. James' },
-                    { id: 'session-2', name: 'Session 2', desc: 'Follow-up therapy', status: 'completed', completedAt: '2026-01-22', duration: '60 min', completedBy: 'Clinical Assistant Maria' },
-                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'completed', completedAt: '2026-01-29', duration: '60 min', completedBy: 'Dr. James' },
-                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'pending', scheduledDate: '2026-02-05' }
                 ]
             }
         };
@@ -4094,51 +3788,34 @@
         // RENDER TODAY'S JOURNEY VIEW
         function renderTodayView() {
             const container = document.getElementById('todayContent');
-            if (!container) return;
-            
             const permissions = getRolePermissions(currentRole);
             container.innerHTML = '';
 
-            if (!selectedPatientData) return;
-
-            const patientId = selectedPatientData.id;
+            // Determine which wireframe to show based on selected patient
+            const patientId = selectedPatientData?.id;
             const wireframeToShow = patientWireframeMapping[patientId] || 'assessment-blocks';
 
             // WIREFRAME: ASSESSMENT BLOCKS (Used for ALL patients with different states)
             if (wireframeToShow === 'assessment-blocks') {
-                const patientData = patientStateData[patientId];
+                // Get patient-specific state
+                const patientData = patientStateData[patientId] || patientStateData['P001'];
                 const activeAssessment = {
                     number: patientData.assessmentNumber,
                     startDate: patientData.startDate,
                     blocks: patientData.blocks
                 };
 
-            // Determine if showing sessions only or assessments
-            const hasSessions = patientData.sessions && patientData.sessions.length > 0;
-            
-            // Add Header - different for sessions vs assessments
+            // Add Today's Assessment Header
             const headerDiv = document.createElement('div');
             headerDiv.style.cssText = 'margin-bottom: 24px;';
-            if (hasSessions) {
-                headerDiv.innerHTML = `
-                    <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-                        <i class="fa-solid fa-calendar-check" style="color: #10b981;"></i> Today's Session
-                    </h3>
-                    <p style="font-size: 14px; color: #64748b;">Treatment sessions based on completed assessment plan</p>
-                `;
-            } else {
-                headerDiv.innerHTML = `
-                    <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-                        <i class="fa-solid fa-calendar-day" style="color: #10b981;"></i> Today's Active Assessment
-                    </h3>
-                    <p style="font-size: 14px; color: #64748b;">Clinical Assessment ${activeAssessment.number} - Started ${activeAssessment.startDate}</p>
-                `;
-            }
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-calendar-day" style="color: #10b981;"></i> Today's Active Assessment
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Clinical Assessment ${activeAssessment.number} - Started ${activeAssessment.startDate}</p>
+            `;
             container.appendChild(headerDiv);
 
-            // Only show assessment blocks if patient doesn't have sessions yet
-            // Once sessions start, show ONLY sessions (not assessments)
-            if (!hasSessions) {
             // Create blocks grid (reuse same design)
             const blocksGrid = document.createElement('div');
             blocksGrid.className = 'blocks-container';
@@ -4355,64 +4032,11 @@
                                 detailsContent += '<button class="action-button primary" style="margin-top: 12px; width: 100%;" onclick="continueBlock(\'' + block.id + '\')"><i class="fa-solid fa-play"></i> Continue</button>';
                             }
                         }
-                    } else if (block.status === 'pending') {
-                        // Check if current role can start this block type
-                        let canStart = false;
-                        let waitingMessage = '';
-                        
-                        if (currentRole === 'doctor') {
-                            canStart = true;
-                        } else if (currentRole === 'clinical-assistant') {
-                            canStart = ['anamnesis', 'fnon', 'prs', 'brain-mapping'].includes(block.type);
-                            if (!canStart) {
-                                waitingMessage = 'Waiting for doctor';
-                            }
-                        } else if (currentRole === 'receptionist') {
-                            waitingMessage = block.type === 'doctor-notes' || block.type === 'treatment-plan' || block.type === 'final-report' 
-                                ? 'Waiting for doctor' 
-                                : 'Waiting for clinical assistant';
-                        } else {
-                            waitingMessage = block.type === 'doctor-notes' || block.type === 'treatment-plan' || block.type === 'final-report'
-                                ? 'Waiting for doctor'
-                                : 'Waiting for clinical team';
-                        }
-
-                        // For pending blocks, show info ALWAYS VISIBLE (not in accordion)
-                        if (canStart && permissions.canEditData) {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
-                                </div>
-                                <div class="block-action-buttons" style="margin-top: 12px;">
-                                    <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
-                                        <i class="fa-solid fa-play"></i> Start ${block.name}
-                                    </button>
-                                </div>
-                            `;
-                        } else if (waitingMessage) {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #64748b;"><i class="fa-solid fa-clock"></i> ${waitingMessage}</span>
-                                </div>
-                            `;
-                        }
-                    } else if (block.status === 'locked') {
-                        // Determine lock message based on lock reason
-                        let lockMessage = 'Complete 4 initial assessments';
-                        let lockIcon = 'fa-lock';
-                        
-                        if (block.lockReason === 'payment') {
-                            lockMessage = 'Payment required';
-                            lockIcon = 'fa-credit-card';
-                        } else if (block.lockReason === 'assessment') {
-                            lockMessage = 'Complete 4 initial assessments';
-                            lockIcon = 'fa-lock';
-                        }
-                        
-                        // For locked blocks, show info ALWAYS VISIBLE
-                        expandedDetailsHTML = `
-                            <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                <span style="color: #94a3b8;"><i class="fa-solid ${lockIcon}"></i> ${lockMessage}</span>
+                    } else if (block.status === 'pending' && permissions.showPendingItems) {
+                        detailsContent = `
+                            <div style="text-align: center; padding: 16px; color: #64748b;">
+                                <i class="fa-solid fa-clock" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                                <p style="font-size: 13px; margin: 0;">Waiting for previous steps</p>
                             </div>
                         `;
                     }
@@ -4433,13 +4057,14 @@
                     <div class="block-name">${block.name}</div>
                     <div class="block-desc">${block.desc}</div>
                     ${expandedDetailsHTML}
-                    ${expandedDetailsHTML && block.status === 'completed' && (permissions.canViewScores || permissions.canViewReports) ? '<div class="accordion-indicator"><i class="fa-solid fa-chevron-down"></i></div>' : ''}
+                    ${expandedDetailsHTML ? '<div class="accordion-indicator"><i class="fa-solid fa-chevron-down"></i></div>' : ''}
                 `;
 
-                // Add click handler ONLY for completed blocks with details
-                if (expandedDetailsHTML && block.status === 'completed' && (permissions.canViewScores || permissions.canViewReports || permissions.canEditData)) {
+                // Add click handler if there are details to show
+                if (expandedDetailsHTML && (permissions.canViewScores || permissions.canViewReports || permissions.canEditData)) {
                     blockDiv.style.cursor = 'pointer';
                     blockDiv.onclick = function (event) {
+                        // Don't toggle if clicking on a button or link
                         if (event.target.tagName === 'BUTTON' || event.target.closest('button') || event.target.closest('.block-action-btn')) {
                             return;
                         }
@@ -4451,129 +4076,1261 @@
             });
 
             container.appendChild(blocksGrid);
-            } // END if (!hasSessions)
+            return; // END OF ASSESSMENT BLOCKS WIREFRAME
+            }
+        }
+
+        // WORKING JOURNEY - BLOCKS DEFINITION
+        const workingBlocks = [
+            {
+                id: 'working-block-0',
+                type: 'anamnesis',
+                    number: patientData.assessmentNumber,
+                    startDate: patientData.startDate,
+                    blocks: patientData.blocks
+                };
+
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-calendar-day" style="color: #10b981;"></i> Today's Active Assessment
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Clinical Assessment ${activeAssessment.number} - Started ${activeAssessment.startDate} | 4/4 Initial Assessments Complete</p>
+            `;
+            container.appendChild(headerDiv);
+
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
+            const activeBlocks = activeAssessment.blocks;
+
+            activeBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} ${block.status}`;
+
+                let statusIcon, statusText;
+                if (block.status === 'completed') {
+                    statusIcon = '✓';
+                    statusText = 'Done';
+                } else if (block.status === 'pending') {
+                    statusIcon = '○';
+                    statusText = 'Pending';
+                } else {
+                    statusIcon = '🔒';
+                    statusText = 'Locked';
+                }
+
+                const iconClass = iconMap[block.type] || 'fa-cube';
+
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="block-title">
+                            <h4>${block.name}</h4>
+                            <p>${block.desc}</p>
+                        </div>
+                        <div class="block-status ${block.status}">
+                            <span class="status-icon">${statusIcon}</span>
+                            <span class="status-text">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+
+                if (block.status === 'completed' && block.completedBy) {
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'block-meta';
+                    metaDiv.innerHTML = `
+                        <span><i class="fa-solid fa-user"></i> ${block.completedBy}</span>
+                        <span><i class="fa-solid fa-clock"></i> ${block.completedAt}</span>
+                    `;
+                    blockDiv.appendChild(metaDiv);
+                }
+
+                if (block.status === 'pending' && permissions.canEditData) {
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'block-actions';
+                    actionDiv.innerHTML = `<button class="block-action-btn start" onclick="startBlock('${block.id}')"><i class="fa-solid fa-play"></i> Start ${block.name}</button>`;
+                    blockDiv.appendChild(actionDiv);
+                }
+
+                blocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(blocksGrid);
+            return; // END OF 4/4 COMPLETE WIREFRAME
+            }
+
+            // WIREFRAME: TREATMENT PLAN READY (All assessment blocks complete, ready for sessions)
+            if (wireframeToShow === 'treatment-plan-ready') {
+                const patientData = patientStateData[patientId] || patientStateData['P003'];
+                const activeAssessment = {
+                    number: patientData.assessmentNumber,
+                    startDate: patientData.startDate,
+                    blocks: patientData.blocks
+                };
+
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-calendar-check" style="color: #10b981;"></i> Assessment Complete - Ready for Treatment
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Clinical Assessment ${activeAssessment.number} - Treatment Plan Created</p>
+            `;
+            container.appendChild(headerDiv);
+
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
+            const activeBlocks = activeAssessment.blocks;
+
+            activeBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} ${block.status}`;
+
+                let statusIcon, statusText;
+                if (block.status === 'completed') {
+                    statusIcon = '✓';
+                    statusText = 'Done';
+                } else if (block.status === 'pending') {
+                    statusIcon = '○';
+                    statusText = 'Pending';
+                } else {
+                    statusIcon = '🔒';
+                    statusText = 'Locked';
+                }
+
+                const iconClass = iconMap[block.type] || 'fa-cube';
+
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="block-title">
+                            <h4>${block.name}</h4>
+                            <p>${block.desc}</p>
+                        </div>
+                        <div class="block-status ${block.status}">
+                            <span class="status-icon">${statusIcon}</span>
+                            <span class="status-text">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+
+                if (block.status === 'completed' && block.completedBy) {
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'block-meta';
+                    metaDiv.innerHTML = `
+                        <span><i class="fa-solid fa-user"></i> ${block.completedBy}</span>
+                        <span><i class="fa-solid fa-clock"></i> ${block.completedAt}</span>
+                    `;
+                    blockDiv.appendChild(metaDiv);
+                }
+
+                blocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(blocksGrid);
+            return; // END OF TREATMENT PLAN READY WIREFRAME
+            }
+
+            // WIREFRAME: SESSION 1 ACTIVE (First session in progress)
+            if (wireframeToShow === 'session-1-active') {
+                const patientData = patientStateData[patientId] || patientStateData['P004'];
+
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-dumbbell" style="color: #10b981;"></i> Session 1 - In Progress
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Assessment ${patientData.assessmentNumber} - All blocks complete, first session active</p>
+            `;
+            container.appendChild(headerDiv);
+
+            const sessionCard = document.createElement('div');
+            sessionCard.className = 'block-card session active';
+            sessionCard.style.cssText = 'margin-bottom: 24px;';
+            sessionCard.innerHTML = `
+                <div class="block-header">
+                    <div class="block-icon">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <div class="block-title">
+                        <h4>Session 1</h4>
+                        <p>TMS Treatment - DLPFC Protocol</p>
+                    </div>
+                    <div class="block-status active">
+                        <span class="status-icon">●</span>
+                        <span class="status-text">Active</span>
+                    </div>
+                </div>
+                <div class="block-meta">
+                    <span><i class="fa-solid fa-user"></i> Dr. James</span>
+                    <span><i class="fa-solid fa-clock"></i> Started Today</span>
+                </div>
+            `;
+            container.appendChild(sessionCard);
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.cssText = 'margin-top: 24px;';
+            summaryDiv.innerHTML = `<h4 style="font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Assessment Blocks Completed</h4>`;
             
-            // SESSIONS SECTION - Only rendered when sessions exist (replaces assessments)
-            if (hasSessions) {
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
 
-                // Create sessions grid
-                const sessionsGrid = document.createElement('div');
-                sessionsGrid.className = 'blocks-container';
+            patientData.blocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} completed`;
+                const iconClass = iconMap[block.type] || 'fa-cube';
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="block-title">
+                            <h4>${block.name}</h4>
+                            <p>${block.desc}</p>
+                        </div>
+                        <div class="block-status completed">
+                            <span class="status-icon">✓</span>
+                            <span class="status-text">Done</span>
+                        </div>
+                    </div>
+                `;
+                blocksGrid.appendChild(blockDiv);
+            });
 
-                patientData.sessions.forEach(session => {
-                    const sessionDiv = document.createElement('div');
-                    sessionDiv.className = `block-card ${session.status}`;
+            summaryDiv.appendChild(blocksGrid);
+            container.appendChild(summaryDiv);
+            return; // END OF SESSION 1 ACTIVE WIREFRAME
+            }
 
-                    // Only 3 states: completed, pending, locked (no active - one session per day)
-                    let statusIcon, statusText, statusColor;
-                    if (session.status === 'completed') {
-                        statusIcon = '✓';
-                        statusText = 'Completed';
-                        statusColor = '#10b981';
-                    } else if (session.status === 'pending') {
-                        statusIcon = '○';
-                        statusText = 'Ready to Start';
-                        statusColor = '#f59e0b';
-                    } else {
-                        statusIcon = '🔒';
-                        statusText = 'Locked';
-                        statusColor = '#94a3b8';
-                    }
+            // WIREFRAME: 3 SESSIONS COMPLETE (Mid-treatment)
+            if (wireframeToShow === 'sessions-3-complete') {
+                const patientData = patientStateData[patientId] || patientStateData['P005'];
 
-                    let expandedDetailsHTML = '';
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Treatment Progress - 3 Sessions Complete
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Assessment ${patientData.assessmentNumber} - Ongoing treatment</p>
+            `;
+            container.appendChild(headerDiv);
 
-                    // COMPLETED: Show details and view button based on role
-                    if (session.status === 'completed') {
-                        expandedDetailsHTML = `
-                            <div class="block-expanded-details">
-                                <div class="block-info-grid">
-                                    <div class="block-info-item">
-                                        <div class="block-info-label">Date</div>
-                                        <div class="block-info-value">${session.completedAt}</div>
-                                    </div>
-                                    <div class="block-info-item">
-                                        <div class="block-info-label">Duration</div>
-                                        <div class="block-info-value">${session.duration || '60 min'}</div>
-                                    </div>
-                                    <div class="block-info-item">
-                                        <div class="block-info-label">Therapist</div>
-                                        <div class="block-info-value">${session.completedBy}</div>
-                                    </div>
+            const sessionsDiv = document.createElement('div');
+            sessionsDiv.style.cssText = 'margin-bottom: 24px;';
+            sessionsDiv.innerHTML = `
+                <h4 style="font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Treatment Sessions</h4>
+                <div class="blocks-container">
+                    <div class="block-card session completed">
+                        <div class="block-header">
+                            <div class="block-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="block-title"><h4>Session 1</h4><p>TMS - DLPFC Protocol</p></div>
+                            <div class="block-status completed"><span class="status-icon">✓</span><span class="status-text">Done</span></div>
+                        </div>
+                        <div class="block-meta"><span><i class="fa-solid fa-calendar"></i> Jan 15, 2026</span></div>
+                    </div>
+                    <div class="block-card session completed">
+                        <div class="block-header">
+                            <div class="block-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="block-title"><h4>Session 2</h4><p>TMS - Motor Cortex</p></div>
+                            <div class="block-status completed"><span class="status-icon">✓</span><span class="status-text">Done</span></div>
+                        </div>
+                        <div class="block-meta"><span><i class="fa-solid fa-calendar"></i> Jan 20, 2026</span></div>
+                    </div>
+                    <div class="block-card session completed">
+                        <div class="block-header">
+                            <div class="block-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="block-title"><h4>Session 3</h4><p>TMS - DLPFC Protocol</p></div>
+                            <div class="block-status completed"><span class="status-icon">✓</span><span class="status-text">Done</span></div>
+                        </div>
+                        <div class="block-meta"><span><i class="fa-solid fa-calendar"></i> Jan 25, 2026</span></div>
+                    </div>
+                    <div class="block-card session pending">
+                        <div class="block-header">
+                            <div class="block-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="block-title"><h4>Session 4</h4><p>TMS - Upcoming</p></div>
+                            <div class="block-status pending"><span class="status-icon">○</span><span class="status-text">Pending</span></div>
+                        </div>
+                    </div>
+                    <div class="block-card session pending">
+                        <div class="block-header">
+                            <div class="block-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="block-title"><h4>Session 5</h4><p>TMS - Upcoming</p></div>
+                            <div class="block-status pending"><span class="status-icon">○</span><span class="status-text">Pending</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(sessionsDiv);
+
+            const blocksHeader = document.createElement('h4');
+            blocksHeader.style.cssText = 'font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; margin-top: 24px;';
+            blocksHeader.textContent = 'Assessment Blocks Completed';
+            container.appendChild(blocksHeader);
+
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
+
+            patientData.blocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} completed`;
+                const iconClass = iconMap[block.type] || 'fa-cube';
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon"><i class="fa-solid ${iconClass}"></i></div>
+                        <div class="block-title"><h4>${block.name}</h4><p>${block.desc}</p></div>
+                        <div class="block-status completed"><span class="status-icon">✓</span><span class="status-text">Done</span></div>
+                    </div>
+                `;
+                blocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(blocksGrid);
+            return; // END OF 3 SESSIONS COMPLETE WIREFRAME
+            }
+
+            // WIREFRAME: NEW PATIENT - PAYMENT COMPLETED
+            if (wireframeToShow === 'new-patient-paid') {
+            // Show welcome message and initial assessment blocks (4 open, 3 locked)
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-calendar-day" style="color: #10b981;"></i> Welcome - Ready to Begin Assessment
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Clinical Assessment 2 - Payment Complete | Start any of the 4 initial assessments</p>
+            `;
+            container.appendChild(headerDiv);
+
+            // Create blocks for new patient - 4 pending, 3 locked
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
+
+            const newPatientBlocks = [
+                { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
+                { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
+                { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending' },
+                { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending' },
+                { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked' },
+                { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked' },
+                { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked' }
+            ];
+
+            newPatientBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} ${block.status}`;
+
+                let statusIcon, statusText;
+                if (block.status === 'pending') {
+                    statusIcon = '○';
+                    statusText = 'Pending';
+                } else {
+                    statusIcon = '🔒';
+                    statusText = 'Locked';
+                }
+
+                const iconClass = iconMap[block.type] || 'fa-cube';
+
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="block-title">
+                            <h4>${block.name}</h4>
+                            <p>${block.desc}</p>
+                        </div>
+                        <div class="block-status ${block.status}">
+                            <span class="status-icon">${statusIcon}</span>
+                            <span class="status-text">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+
+                if (block.status === 'pending' && permissions.canEditData) {
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'block-actions';
+                    actionDiv.innerHTML = `<button class="block-action-btn start" onclick="startBlock('${block.id}')"><i class="fa-solid fa-play"></i> Start ${block.name}</button>`;
+                    blockDiv.appendChild(actionDiv);
+                }
+
+                blocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(blocksGrid);
+            return; // END OF NEW PATIENT - PAYMENT COMPLETED WIREFRAME
+            }
+
+            // WIREFRAME: NEW PATIENT - PAYMENT PENDING (Pay Later)
+            if (wireframeToShow === 'new-patient-payment-pending') {
+            // Show all blocks locked until payment
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'margin-bottom: 24px;';
+            headerDiv.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    <i class="fa-solid fa-credit-card" style="color: #f59e0b;"></i> Payment Pending - Complete Payment to Start
+                </h3>
+                <p style="font-size: 14px; color: #64748b;">Clinical Assessment 2 - All assessments locked until payment (€300)</p>
+            `;
+            container.appendChild(headerDiv);
+
+            // Payment warning banner
+            const paymentBanner = document.createElement('div');
+            paymentBanner.style.cssText = 'background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;';
+            paymentBanner.innerHTML = `
+                <i class="fa-solid fa-exclamation-triangle" style="color: #f59e0b; font-size: 20px;"></i>
+                <div>
+                    <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">Payment Required</div>
+                    <div style="font-size: 14px; color: #64748b;">Please complete payment to unlock assessment blocks</div>
+                </div>
+            `;
+            container.appendChild(paymentBanner);
+
+            // Create blocks - ALL LOCKED until payment
+            const blocksGrid = document.createElement('div');
+            blocksGrid.className = 'blocks-container';
+
+            const paymentPendingBlocks = [
+                { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked' },
+                { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked' },
+                { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked' },
+                { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked' },
+                { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked' },
+                { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked' },
+                { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked' }
+            ];
+
+            paymentPendingBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} locked`;
+
+                const iconClass = iconMap[block.type] || 'fa-cube';
+
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-icon">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="block-title">
+                            <h4>${block.name}</h4>
+                            <p>${block.desc}</p>
+                        </div>
+                        <div class="block-status locked">
+                            <span class="status-icon">🔒</span>
+                            <span class="status-text">Locked</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; margin-top: 8px;">
+                        <span style="font-size: 12px; color: #64748b;">Payment required to unlock</span>
+                    </div>
+                `;
+
+                blocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(blocksGrid);
+            return; // END OF NEW PATIENT - PAYMENT PENDING WIREFRAME
+            }
+
+            // WIREFRAME: SESSION ACTIVATION
+            if (wireframeToShow === 'session-activation') {
+            // ADD SESSION ACTIVATION WIREFRAME
+            const sessionSeparatorDiv = document.createElement('div');
+            sessionSeparatorDiv.style.cssText = 'margin: 80px 0 40px 0; border-top: 3px solid #cbd5e1; padding-top: 40px;';
+            container.appendChild(sessionSeparatorDiv);
+
+            const sessionWireframeHeader = document.createElement('div');
+            sessionWireframeHeader.style.cssText = 'margin-bottom: 24px;';
+            sessionWireframeHeader.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Session Activation Flow - Wireframe</h3>
+                <p style="font-size: 14px; color: #64748b;">Complete consent and payment (\u20ac100) to activate treatment session</p>
+            `;
+            container.appendChild(sessionWireframeHeader);
+
+            // Session wireframe showing all 5 sessions
+            const sessionWireframeGrid = document.createElement('div');
+            sessionWireframeGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; position: relative; overflow: visible;';
+
+            // Define all 5 sessions for wireframe
+            const wireframeSessions = [
+                { number: 1, status: 'completed', time: '09:30 AM' },
+                { number: 2, status: 'completed', time: '11:45 AM' },
+                { number: 3, status: 'active', time: '02:15 PM' },
+                { number: 4, status: 'pending', time: '04:00 PM' },
+                { number: 5, status: 'locked', prerequisite: 'Complete Session 4' }
+            ];
+
+            wireframeSessions.forEach(sess => {
+                const sessDiv = document.createElement('div');
+                sessDiv.style.cssText = 'background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: visible;';
+
+                let statusIcon, statusText, statusColor, borderColor;
+                if (sess.status === 'completed') {
+                    statusIcon = '✓';
+                    statusText = 'Completed';
+                    statusColor = '#10b981';
+                    borderColor = '#10b981';
+                } else if (sess.status === 'active') {
+                    statusIcon = '●';
+                    statusText = 'Active Now';
+                    statusColor = '#f59e0b';
+                    borderColor = '#f59e0b';
+                } else if (sess.status === 'pending') {
+                    statusIcon = '○';
+                    statusText = 'Scheduled';
+                    statusColor = '#3b82f6';
+                    borderColor = '#3b82f6';
+                } else {
+                    statusIcon = '🔒';
+                    statusText = 'Locked';
+                    statusColor = '#94a3b8';
+                    borderColor = '#cbd5e1';
+                }
+
+                // Top border
+                sessDiv.innerHTML = `<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: ${borderColor}; border-radius: 12px 12px 0 0;"></div>`;
+
+                // Status badge
+                sessDiv.innerHTML += `
+                    <div style="position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; background: white; border: 1.5px solid ${borderColor}; color: ${statusColor};">
+                        <span style="font-size: 12px;">${statusIcon}</span>
+                        <span>${statusText}</span>
+                    </div>
+                `;
+
+                // Icon
+                sessDiv.innerHTML += `
+                    <div style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; background: ${sess.status === 'completed' ? 'rgba(16, 185, 129, 0.15)' : sess.status === 'active' ? 'rgba(245, 158, 11, 0.15)' : sess.status === 'pending' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(203, 213, 225, 0.3)'}; color: ${statusColor};">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                `;
+
+                // Session name
+                sessDiv.innerHTML += `<div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Session ${sess.number}</div>`;
+
+                // Time or prerequisite
+                if (sess.status === 'locked') {
+                    sessDiv.innerHTML += `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">${sess.prerequisite}</div>`;
+                } else {
+                    sessDiv.innerHTML += `<div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">${sess.time}</div>`;
+                }
+
+                // Expanded details based on status
+                let expandedContent = '';
+
+                if (sess.status === 'completed') {
+                    expandedContent = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; width: 100%; font-size: 11px;">
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 2px;">Payment</div>
+                                <div style="font-weight: 700; color: #10b981;">\u20ac100 Paid</div>
+                            </div>
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 2px;">Duration</div>
+                                <div style="font-weight: 700; color: #0f172a;">25 min</div>
+                            </div>
+                        </div>
+                    `;
+                } else if (sess.status === 'active') {
+                    // Only doctors and clinical assistants can start treatment
+                    const canStartTreatment = currentRole === 'doctor' || currentRole === 'clinical-assistant';
+
+                    expandedContent = `
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; width: 100%;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+                                <span style="font-size: 11px; font-weight: 600; color: #0f172a;">Payment Confirmed</span>
+                            </div>
+                            <div style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 8px;">\u20ac100 • Paid</div>
+                            ${canStartTreatment ? `
+                            <button class="action-button primary" style="width: 100%; font-size: 11px; padding: 8px;" onclick="alert('Start Treatment:\\n\\nSession 3 Active\\nDevice ready for treatment\\nProceeding to interface...')">
+                                <i class="fa-solid fa-play"></i> Start Treatment
+                            </button>
+                            ` : `
+                            <div style="background: #e0f2fe; border: 1px solid #0ea5e9; border-radius: 8px; padding: 8px; text-align: center; font-size: 11px; color: #0369a1;">
+                                <i class="fa-solid fa-info-circle"></i> ${currentRole === 'patient' ? 'Treatment will be started by clinic staff' : 'Only doctor or clinical assistant can start treatment'}
+                            </div>
+                            `}
+                        </div>
+                    `;
+                } else if (sess.status === 'pending') {
+                    // Only doctors and clinical assistants can activate sessions
+                    const canActivateSession = currentRole === 'doctor' || currentRole === 'clinical-assistant';
+
+                    expandedContent = `
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; width: 100%;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <i class="fa-solid fa-info-circle" style="color: #3b82f6;"></i>
+                                <span style="font-size: 11px; font-weight: 600; color: #1e40af;">Activation Required</span>
+                            </div>
+                            <div style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 8px;">\u20ac100 per session</div>
+                            ${canActivateSession ? `
+                            <button class="action-button primary" style="width: 100%; font-size: 11px; padding: 8px;" onclick="activateSessionWithFlow('sess-4')">
+                                <i class="fa-solid fa-play"></i> Activate Session
+                            </button>
+                            ` : `
+                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 8px; text-align: center; font-size: 11px; color: #92400e;">
+                                <i class="fa-solid fa-lock"></i> ${currentRole === 'patient' ? 'Session will be activated by clinic staff' : 'Only doctor or clinical assistant can activate'}
+                            </div>
+                            `}
+                        </div>
+                    `;
+                } else if (sess.status === 'locked') {
+                    expandedContent = `
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; width: 100%;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <i class="fa-solid fa-lock" style="color: #94a3b8;"></i>
+                                <span style="font-size: 11px; font-weight: 600; color: #64748b;">Locked</span>
+                            </div>
+                            <div style="font-size: 11px; color: #94a3b8; text-align: center;">${sess.prerequisite}</div>
+                        </div>
+                    `;
+                }
+
+                sessDiv.innerHTML += expandedContent;
+
+                // Add accordion indicator for expandable sessions
+                if (sess.status !== 'locked') {
+                    sessDiv.innerHTML += '<div class="accordion-indicator" style="margin-top: 12px;"><i class="fa-solid fa-chevron-down"></i></div>';
+
+                    // Make expandable
+                    sessDiv.onclick = function (event) {
+                        if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+                        this.classList.toggle('expanded');
+                    };
+                }
+
+                sessionWireframeGrid.appendChild(sessDiv);
+            });
+
+            container.appendChild(sessionWireframeGrid);
+
+
+            const separatorDiv = document.createElement('div');
+            separatorDiv.style.cssText = 'margin: 80px 0 40px 0; border-top: 3px solid #cbd5e1; padding-top: 40px;';
+            container.appendChild(separatorDiv);
+
+            const deepDiveHeader = document.createElement('div');
+            deepDiveHeader.style.cssText = 'margin-bottom: 24px;';
+            deepDiveHeader.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">All Success Case - Deep Dive</h3>
+                <p style="font-size: 14px; color: #64748b;">View all completed assessments and available role-based actions</p>
+            `;
+            container.appendChild(deepDiveHeader);
+
+            // Create completed blocks grid showing all items as completed
+            const completedBlocksGrid = document.createElement('div');
+            completedBlocksGrid.className = 'blocks-container';
+
+            // Define all blocks in completed state
+            const allCompletedBlocks = [
+                {
+                    id: 'anamnesis-completed',
+                    name: 'Anamnesis', 
+                    desc: 'Patient Symptoms',
+                    type: 'anamnesis',
+                    status: 'completed',
+                    completedBy: 'Clinical Assistant Maria',
+                    completedAt: '2026-01-29',
+                    score: null,
+                    channelsCaptured: null,
+                    diagnosis: 'Chronic fatigue syndrome with cognitive symptoms'
+                },
+                { 
+                    id: 'fnon-completed', 
+                    name: 'FNON', 
+                    desc: 'Network Analysis', 
+                    type: 'fnon', 
+                    status: 'completed', 
+                    completedBy: 'Clinical Assistant Sarah',
+                    completedAt: '2026-01-30',
+                    score: 55,
+                    channelsCaptured: null
+                },
+                {
+                    id: 'eeg-completed',
+                    name: 'Brain Mapping',
+                    desc: 'EEG Imaging',
+                    type: 'brain-mapping',
+                    status: 'completed',
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-30',
+                    score: null,
+                    channelsCaptured: 32
+                },
+                {
+                    id: 'prs-completed',
+                    name: 'PRS',
+                    desc: 'Symptoms',
+                    type: 'prs',
+                    status: 'completed',
+                    completedBy: 'Clinical Assistant Alex',
+                    completedAt: '2026-01-30',
+                    currentProgress: 100
+                },
+                {
+                    id: 'ana-completed',
+                    name: "Doctor's Notes",
+                    desc: 'Clinical Notes',
+                    type: 'doctor-notes',
+                    status: 'completed',
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31'
+                },
+                {
+                    id: 'treatment-completed',
+                    name: 'Treatment Plan',
+                    desc: 'Therapy Design',
+                    type: 'treatment-plan',
+                    status: 'completed',
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31'
+                },
+                {
+                    id: 'report-completed',
+                    name: 'Final Report',
+                    desc: 'Comprehensive',
+                    type: 'final-report',
+                    status: 'completed',
+                    completedBy: 'Dr. Johnson',
+                    completedAt: '2026-01-31'
+                }
+            ];
+
+            allCompletedBlocks.forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block-card ${block.type} completed`;
+
+                let statusIcon = '✓';
+                let statusText = 'Done';
+
+                // Build expanded details based on role and block type
+                let expandedDetailsHTML = '';
+
+                if (permissions.canViewScores || permissions.canViewReports || permissions.canEditData) {
+                    let detailsContent = '';
+                    
+                    if (block.type === 'anamnesis' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
                                 </div>
-                                ${permissions.canViewReports ? `
-                                    <div class="block-action-buttons" style="margin-top: 12px;">
-                                        <button class="block-action-btn view" onclick="viewSessionDetails('${session.id}')">
-                                            <i class="fa-solid fa-eye"></i> View Report
-                                        </button>
-                                    </div>
-                                ` : ''}
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Diagnosis</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.diagnosis}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">30 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
                             </div>
                         `;
-                    }
-                    // PENDING: Show start button based on role (doctor or clinical-assistant only)
-                    else if (session.status === 'pending') {
-                        const canStartSession = (currentRole === 'doctor' || currentRole === 'clinical-assistant') && permissions.canEditData;
-                        
-                        if (canStartSession) {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #f59e0b;"><i class="fa-solid fa-calendar"></i> ${session.scheduledDate || 'Today'}</span>
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'anamnesis\')" title="View anamnesis summary"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'anamnesis\')" title="Edit anamnesis data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'fnon' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">FNON Score</div>
+                                    <div class="block-info-value">${block.score || 55}</div>
                                 </div>
-                                <div class="block-action-buttons" style="margin-top: 12px;">
-                                    <button class="block-action-btn start" onclick="startSession('${session.id}')">
-                                        <i class="fa-solid fa-play"></i> Start ${session.name}
-                                    </button>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Improvement</div>
+                                    <div class="block-info-value" style="color: var(--green-primary);">+23%</div>
                                 </div>
-                            `;
-                        } else {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #64748b;"><i class="fa-solid fa-calendar"></i> ${session.scheduledDate || 'Today'}</span>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">45 min</div>
                                 </div>
-                            `;
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                            <div class="detail-section">
+                                <div class="detail-section-title">Activities Performed</div>
+                                <div class="activity-tags">
+                                    <span class="activity-tag">
+                                        Crossword
+                                        <img src="crossword.avif" alt="Crossword" class="activity-tag-image">
+                                    </span>
+                                    <span class="activity-tag">
+                                        Toe Touch
+                                        <img src="exercise.png" alt="Toe Touch" class="activity-tag-image">
+                                    </span>
+                                    <span class="activity-tag">
+                                        Walking
+                                        <img src="walking.jpeg" alt="Walking" class="activity-tag-image">
+                                    </span>
+                                    <span class="activity-tag">
+                                        Sudoku
+                                        <img src="sudoku.jpg" alt="Sudoku" class="activity-tag-image">
+                                    </span>
+                                    <span class="activity-tag">
+                                        Balance Test
+                                        <img src="balance.jpeg" alt="Balance Test" class="activity-tag-image">
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'fnon\')" title="View detailed FNON report"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'fnon\')" title="Edit FNON assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'brain-mapping' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Channels</div>
+                                    <div class="block-info-value">${block.channelsCaptured || 32}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Quality</div>
+                                    <div class="block-info-value" style="font-size: 12px;">High</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">20 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || (currentRole === 'doctor' && permissions.canEditData)) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'brain-mapping\')" title="View EEG data and analysis"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (currentRole === 'doctor') {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'brain-mapping\')" title="Edit EEG analysis (Doctor only)"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            } else if (currentRole === 'clinical-assistant' || currentRole === 'patient') {
+                                detailsContent += '<button class="block-action-btn disabled" title="Only doctors can edit EEG data"><i class="fa-solid fa-lock"></i> Edit Restricted</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'prs' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Progress</div>
+                                    <div class="block-info-value">${block.currentProgress || 100}%</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Duration</div>
+                                    <div class="block-info-value" style="font-size: 12px;">25 min</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'prs\')" title="View PRS assessment responses"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'prs\')" title="Edit PRS assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (block.type === 'treatment-plan' && permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Date</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedAt}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'treatment-plan\')" title="View detailed report"><i class="fa-solid fa-eye"></i> View Treatment Plan</button>';
+                            }
+                            if (currentRole === 'doctor') {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'treatment-plan\')" title="Edit treatment plan"><i class="fa-solid fa-pen"></i> Edit Treatment Plan</button>';
+                            }
+                            detailsContent += '</div>';
+                        }
+                    } else if (permissions.canViewScores) {
+                        detailsContent = `
+                            <div class="block-info-grid">
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Status</div>
+                                    <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Completed By</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                </div>
+                                <div class="block-info-item">
+                                    <div class="block-info-label">Date</div>
+                                    <div class="block-info-value" style="font-size: 12px;">${block.completedAt}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (permissions.canViewReports || permissions.canEditData) {
+                            detailsContent += '<div class="block-action-buttons">';
+                            if (permissions.canViewReports) {
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'' + block.type + '\')" title="View detailed report"><i class="fa-solid fa-eye"></i> View Details</button>';
+                            }
+                            if (permissions.canEditData) {
+                                detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'' + block.type + '\')" title="Edit assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                            }
+                            detailsContent += '</div>';
                         }
                     }
-                    // LOCKED: Show lock reason
-                    else if (session.status === 'locked') {
-                        expandedDetailsHTML = `
-                            <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                <span style="color: #94a3b8;"><i class="fa-solid fa-lock"></i> ${session.lockReason || 'Complete previous session'}</span>
+
+                    if (detailsContent) {
+                        expandedDetailsHTML = `<div class="block-expanded-details">${detailsContent}</div>`;
+                    }
+                }
+
+                blockDiv.innerHTML = `
+                    <div class="block-status">
+                        <span class="block-status-icon">${statusIcon}</span>
+                        <span class="block-status-text">${statusText}</span>
+                    </div>
+                    <div class="block-icon">
+                        <i class="fa-solid ${iconMap[block.type] || 'fa-circle'}"></i>
+                    </div>
+                    <div class="block-name">${block.name}</div>
+                    <div class="block-desc">${block.desc}</div>
+                    ${expandedDetailsHTML}
+                    ${expandedDetailsHTML ? '<div class="accordion-indicator"><i class="fa-solid fa-chevron-down"></i></div>' : ''}
+                `;
+
+                // Add click handler if there are details to show
+                if (expandedDetailsHTML && (permissions.canViewScores || permissions.canViewReports || permissions.canEditData)) {
+                    blockDiv.style.cursor = 'pointer';
+                    blockDiv.onclick = function (event) {
+                        // Don't toggle if clicking on a button or link
+                        if (event.target.tagName === 'BUTTON' || event.target.closest('button') || event.target.closest('.block-action-btn')) {
+                            return;
+                        }
+                        this.classList.toggle('expanded');
+                    };
+                }
+
+                completedBlocksGrid.appendChild(blockDiv);
+            });
+
+            container.appendChild(completedBlocksGrid);
+
+            // ADD TREATMENT SESSIONS SECTION
+            const sessionsSeparatorDiv = document.createElement('div');
+            sessionsSeparatorDiv.style.cssText = 'margin: 80px 0 40px 0; border-top: 3px solid #cbd5e1; padding-top: 40px;';
+            container.appendChild(sessionsSeparatorDiv);
+
+            const sessionsHeader = document.createElement('div');
+            sessionsHeader.style.cssText = 'margin-bottom: 24px;';
+            sessionsHeader.innerHTML = `
+                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Treatment Sessions - Today's Activity</h3>
+                <p style="font-size: 14px; color: #64748b;">View session progress, active treatments, and completed protocols</p>
+            `;
+            container.appendChild(sessionsHeader);
+
+            // Create sessions grid
+            const sessionsGrid = document.createElement('div');
+            sessionsGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; position: relative; overflow: visible;';
+
+            // Define sessions with different states
+            const todaySessions = [
+                {
+                    id: 'sess-1',
+                    number: 1,
+                    status: 'completed',
+                    device: 'TMS-Unit-A',
+                    montage: 'DLPFC',
+                    completedAt: '09:30 AM',
+                    duration: '25 min',
+                    completedBy: 'Clinical Assistant Sarah',
+                    paymentAmount: 100,
+                    paymentStatus: 'Paid',
+                    notes: 'Patient tolerated the session well. No adverse effects reported. Target intensity achieved at 80% motor threshold.',
+                    exercises: ['Deep Breathing', 'Guided Meditation', 'Light Stretching']
+                },
+                {
+                    id: 'sess-2',
+                    number: 2,
+                    status: 'completed',
+                    device: 'TMS-Unit-B',
+                    montage: 'M1 Left',
+                    completedAt: '11:45 AM',
+                    duration: '30 min',
+                    completedBy: 'Clinical Assistant Alex',
+                    paymentAmount: 100,
+                    paymentStatus: 'Paid',
+                    notes: 'Session completed successfully. Patient reported mild tingling sensation which is normal. Motor responses were consistent.',
+                    exercises: ['Balance Training', 'Coordination Test', 'Walking']
+                },
+                {
+                    id: 'sess-3',
+                    number: 3,
+                    status: 'active',
+                    paymentAmount: 100,
+                    paymentStatus: 'Paid',
+                    activatedAt: '02:15 PM',
+                    activatedBy: 'Receptionist Maria'
+                },
+                {
+                    id: 'sess-4',
+                    number: 4,
+                    status: 'pending',
+                    scheduledTime: '04:00 PM'
+                },
+                {
+                    id: 'sess-5',
+                    number: 5,
+                    status: 'locked',
+                    prerequisite: 'Complete Session 4'
+                }
+            ];
+
+            todaySessions.forEach(sess => {
+                const sessDiv = document.createElement('div');
+                sessDiv.style.cssText = 'background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: visible;';
+
+                let statusIcon, statusText, statusColor, borderColor;
+                if (sess.status === 'completed') {
+                    statusIcon = '✓';
+                    statusText = 'Completed';
+                    statusColor = '#10b981';
+                    borderColor = '#10b981';
+                } else if (sess.status === 'active') {
+                    statusIcon = '●';
+                    statusText = 'Active Now';
+                    statusColor = '#f59e0b';
+                    borderColor = '#f59e0b';
+                } else if (sess.status === 'pending') {
+                    statusIcon = '○';
+                    statusText = 'Scheduled';
+                    statusColor = '#3b82f6';
+                    borderColor = '#3b82f6';
+                } else {
+                    statusIcon = '🔒';
+                    statusText = 'Locked';
+                    statusColor = '#94a3b8';
+                    borderColor = '#cbd5e1';
+                }
+
+                // Add top border color
+                sessDiv.innerHTML = `<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: ${borderColor}; border-radius: 12px 12px 0 0;"></div>`;
+
+                // Status badge
+                sessDiv.innerHTML += `
+                    <div style="position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; background: white; border: 1.5px solid ${borderColor}; color: ${statusColor};">
+                        <span style="font-size: 12px;">${statusIcon}</span>
+                        <span>${statusText}</span>
+                    </div>
+                `;
+
+                // Icon
+                sessDiv.innerHTML += `
+                    <div style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; background: ${sess.status === 'completed' ? 'rgba(16, 185, 129, 0.15)' : sess.status === 'active' ? 'rgba(245, 158, 11, 0.15)' : sess.status === 'pending' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(203, 213, 225, 0.3)'}; color: ${statusColor};">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                `;
+
+                // Session name
+                sessDiv.innerHTML += `<div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Session ${sess.number}</div>`;
+
+                // Build expanded details
+                let expandedDetailsHTML = '';
+
+                if (sess.status === 'completed' && (permissions.canViewScores || permissions.canViewReports)) {
+                    let detailsContent = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 16px; border-radius: 8px; margin-top: 16px;">
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Payment</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #10b981;">€${sess.paymentAmount} ${sess.paymentStatus}</div>
                             </div>
-                        `;
-                    }
-
-                    sessionDiv.innerHTML = `
-                        <div class="block-status" style="background: ${statusColor}15; color: ${statusColor}; border: 1px solid ${statusColor};">
-                            <span class="block-status-icon">${statusIcon}</span>
-                            <span class="block-status-text">${statusText}</span>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Time</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${sess.completedAt}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Device</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${sess.device}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Montage</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${sess.montage}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Duration</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${sess.duration}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Completed By</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${sess.completedBy}</div>
+                            </div>
                         </div>
-                        <div class="block-icon">
-                            <i class="fa-solid fa-calendar-day"></i>
-                        </div>
-                        <div class="block-name">${session.name}</div>
-                        <div class="block-desc">${session.desc}</div>
-                        ${expandedDetailsHTML}
-                        ${session.status === 'completed' && expandedDetailsHTML ? '<div class="accordion-indicator"><i class="fa-solid fa-chevron-down"></i></div>' : ''}
-                    `;
-
-                    // Add click handler for completed sessions
-                    if (session.status === 'completed' && expandedDetailsHTML) {
-                        sessionDiv.style.cursor = 'pointer';
-                        sessionDiv.onclick = function(event) {
-                            if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
-                            this.classList.toggle('expanded');
+                        <div style="margin-top: 12px;">
+                            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 8px;">Exercises Performed</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 100;">
+                                ${sess.exercises.map(ex => {
+                        const exerciseImages = {
+                            'Deep Breathing': 'exercise.png',
+                            'Guided Meditation': 'exercise.png',
+                            'Light Stretching': 'exercise.png',
+                            'Balance Training': 'balance.jpeg',
+                            'Coordination Test': 'balance.jpeg',
+                            'Walking': 'walking.jpeg'
                         };
+                        const imgSrc = exerciseImages[ex] || 'exercise.png';
+                        return `
+                                        <span class="activity-tag" style="padding: 6px 12px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 6px; font-size: 12px; font-weight: 600; position: relative; cursor: pointer; z-index: 101;">
+                                            ${ex}
+                                            <img src="${imgSrc}" alt="${ex}" class="activity-tag-image">
+                                        </span>
+                                    `;
+                    }).join('')}
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 12px; border-radius: 6px;">
+                            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 6px;">Clinical Notes</div>
+                            <div style="font-size: 12px; color: #78350f; line-height: 1.6;">${sess.notes}</div>
+                            <div style="font-size: 11px; color: #92400e; margin-top: 6px; font-style: italic;">— ${sess.completedBy}</div>
+                        </div>
+                    `;
+                    if (permissions.canViewReports || permissions.canEditData) {
+                        detailsContent += '<div style="display: flex; gap: 8px; margin-top: 16px; width: 100%;">';
+                        if (permissions.canViewReports) {
+                            detailsContent += '<button class="block-action-btn view" onclick="viewSessionDetails(\'' + sess.id + '\')"><i class="fa-solid fa-eye"></i> View Details</button>';
+                        }
+                        if (permissions.canEditData) {
+                            detailsContent += '<button class="block-action-btn edit" onclick="editSessionDetails(\'' + sess.id + '\')"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                        }
+                        detailsContent += '</div>';
                     }
+                    expandedDetailsHTML = `<div style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; width: 100%;" class="session-expanded-details">${detailsContent}</div>`;
+                } else if (sess.status === 'active') {
+                    let detailsContent = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #fef3c7; padding: 16px; border-radius: 8px; margin-top: 16px; border: 2px solid #fbbf24;">
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #78350f; margin-bottom: 4px;">Payment Status</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #10b981;">€${sess.paymentAmount} ${sess.paymentStatus}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #78350f; margin-bottom: 4px;">Activated At</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #92400e;">${sess.activatedAt}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Activated By</div>
+                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${sess.activatedBy}</div>
+                        </div>
+                        <div style="margin-top: 12px; padding: 16px; background: #ecfdf5; border: 2px dashed #10b981; border-radius: 8px; text-align: center;">
+                            <i class="fa-solid fa-check-circle" style="font-size: 32px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+                            <div style="font-size: 13px; font-weight: 600; color: #065f46;">Session Ready to Start</div>
+                            <div style="font-size: 11px; color: #059669; margin-top: 4px;">Payment confirmed - Awaiting clinical staff</div>
+                        </div>
+                    `;
+                    // Role-based start button
+                    if (currentRole === 'doctor' || currentRole === 'clinical-assistant') {
+                        detailsContent += '<div style="margin-top: 16px;"><button class="block-action-btn edit" onclick="startSession(\'' + sess.id + '\'" style="width: 100%;"><i class="fa-solid fa-play"></i> Start Session</button></div>';
+                    } else if (currentRole === 'receptionist') {
+                        detailsContent += '<div style="margin-top: 16px; padding: 10px; background: #fef3c7; border-radius: 6px; text-align: center; font-size: 12px; color: #78350f;"><i class="fa-solid fa-info-circle"></i> Clinical staff can start this session</div>';
+                    } else if (currentRole === 'patient') {
+                        detailsContent += '<div style="margin-top: 16px; padding: 10px; background: #e0f2fe; border-radius: 6px; text-align: center; font-size: 12px; color: #075985;"><i class="fa-solid fa-clock"></i> Your session is ready and will begin shortly</div>';
+                    }
+                    expandedDetailsHTML = `<div style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; width: 100%;" class="session-expanded-details">${detailsContent}</div>`;
+                } else if (sess.status === 'pending') {
+                    let detailsContent = `
+                        <div style="text-align: center; padding: 16px; color: #64748b; margin-top: 16px;">
+                            <i class="fa-solid fa-clock" style="font-size: 32px; margin-bottom: 8px; display: block; color: #3b82f6;"></i>
+                            <p style="font-size: 13px; margin: 0; font-weight: 600;">Scheduled for ${sess.scheduledTime}</p>
+                            <p style="font-size: 12px; margin: 8px 0 0 0; color: #94a3b8;">Awaiting payment confirmation</p>
+                        </div>
+                    `;
+                    // Receptionist can activate
+                    if (currentRole === 'receptionist') {
+                        detailsContent += '<div style="margin-top: 16px;"><button class="block-action-btn edit" onclick="activateSession(\'' + sess.id + '\'" style="width: 100%;"><i class="fa-solid fa-euro-sign"></i> Confirm Payment & Activate</button></div>';
+                    }
+                    expandedDetailsHTML = `<div style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; width: 100%;" class="session-expanded-details">${detailsContent}</div>`;
+                } else if (sess.status === 'locked') {
+                    sessDiv.innerHTML += `<div style="font-size: 12px; color: #64748b; margin-top: 4px;">${sess.prerequisite}</div>`;
+                }
 
-                    sessionsGrid.appendChild(sessionDiv);
-                });
+                if (expandedDetailsHTML) {
+                    sessDiv.innerHTML += expandedDetailsHTML;
+                    sessDiv.innerHTML += '<div style="position: absolute; bottom: 8px; right: 12px; font-size: 12px; color: #94a3b8; transition: transform 0.3s ease; z-index: 1; pointer-events: none;" class="session-accordion-indicator"><i class="fa-solid fa-chevron-down"></i></div>';
 
-                container.appendChild(sessionsGrid);
+                    sessDiv.onclick = function (event) {
+                        if (event.target.tagName === 'BUTTON' || event.target.closest('button')) {
+                            return;
+                        }
+                        this.classList.toggle('session-expanded');
+                        const details = this.querySelector('.session-expanded-details');
+                        const indicator = this.querySelector('.session-accordion-indicator');
+                        if (this.classList.contains('session-expanded')) {
+                            details.style.maxHeight = '1000px';
+                            details.style.opacity = '1';
+                            details.style.overflow = 'visible';
+                            indicator.style.transform = 'rotate(180deg)';
+                            this.style.paddingBottom = '24px';
+                        } else {
+                            details.style.maxHeight = '0';
+                            details.style.opacity = '0';
+                            details.style.overflow = 'hidden';
+                            indicator.style.transform = 'rotate(0deg)';
+                            this.style.paddingBottom = '16px';
+                        }
+                    };
+                }
+
+                sessionsGrid.appendChild(sessDiv);
+            });
+
+            container.appendChild(sessionsGrid);
+            return; // END OF SESSION ACTIVATION WIREFRAME
             }
-            
-            } // END OF assessment-blocks wireframe
-        } // END OF renderTodayView
-        
+        }
+
+        // WORKING JOURNEY - BLOCKS DEFINITION
         const workingBlocks = [
             {
                 id: 'working-block-0',
@@ -4742,63 +5499,6 @@
 
                 container.appendChild(blockDiv);
             });
-        }
-
-        // START BLOCK - Navigate to assessment pages
-        // Session action functions
-        function startSession(sessionId) {
-            window.location.href = 'workshop_detail.html';
-        }
-
-        function continueSession(sessionId) {
-            window.location.href = 'working-active-journey.html';
-        }
-
-        function viewSessionDetails(sessionId) {
-            window.location.href = 'workshop_detail.html';
-        }
-
-        function startBlock(blockId, blockType) {
-            // Map block types to their respective pages
-            if (blockType === 'anamnesis') {
-                window.location.href = 'anamnesis.html';
-            } else if (blockType === 'fnon') {
-                window.location.href = 'fnon-edit.html';
-            } else if (blockType === 'brain-mapping') {
-                // Brain mapping requires doctor role
-                if (currentRole === 'doctor') {
-                    const patientNameElement = document.getElementById('patientFullName');
-                    const patientName = patientNameElement ? patientNameElement.textContent : 'Patient';
-                    
-                    const sessionData = {
-                        currentRole: currentRole,
-                        patientName: patientName,
-                        blockType: 'brain-mapping',
-                        viewMode: 'edit',
-                        returnUrl: window.location.href
-                    };
-                    localStorage.setItem('eegSession', JSON.stringify(sessionData));
-                    window.location.href = 'eeg.html';
-                } else {
-                    alert('Only doctors can perform EEG brain mapping assessments.');
-                }
-            } else if (blockType === 'prs') {
-                window.location.href = 'prs-edit.html';
-            } else if (blockType === 'doctor-notes') {
-                // Open Doctor's Notes modal in edit mode
-                openDoctorNotesModal(true);
-            } else if (blockType === 'treatment-plan') {
-                // Navigate to treatment plan based on role
-                if (currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
-                } else {
-                    window.location.href = './treatment-plan.html';
-                }
-            } else if (blockType === 'final-report') {
-                window.location.href = './final-report.html';
-            } else {
-                alert(`Starting: ${blockType}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface.`);
-            }
         }
 
         // START WORKING BLOCK
@@ -6477,20 +7177,41 @@
         }
 
         function proceedToJourney(paymentStatus) {
-            // Determine which patient flow to use based on payment status
-            // P-NEW-1: Payment completed - all assessments pending and ready to start
-            // P-NEW-2: Payment pending - only Anamnesis/FNON available, PRS/Brain Mapping locked
-            const patientId = paymentStatus === 'paid' ? 'P-NEW-1' : 'P-NEW-2';
-            
-            // Hide all onboarding screens
-            document.getElementById('patientEntryScreen').style.display = 'none';
-            document.getElementById('questionnaireScreen').style.display = 'none';
-            document.getElementById('consentFormPage').style.display = 'none';
+            // Store payment status globally
+            patientPaymentStatus = paymentStatus;
+
+            // Hide payment page
             document.getElementById('paymentPage').style.display = 'none';
-            
-            // Redirect to patient journey with proper URL parameters
-            // This ensures proper state management and back button behavior
-            window.location.href = `patient-journey.html?patient=${patientId}&role=doctor&tab=today`;
+
+            // Show patient header
+            const header = document.getElementById('selectedPatientHeader');
+            header.style.display = 'block';
+
+            // Show role selector for journey
+            document.getElementById('journeyRoleSelector').style.display = 'block';
+
+            // Populate header
+            document.getElementById('patientInitials').textContent =
+                currentOnboardingPatient.firstName.charAt(0) + currentOnboardingPatient.lastName.charAt(0);
+            document.getElementById('patientFullName').textContent =
+                `${currentOnboardingPatient.firstName} ${currentOnboardingPatient.lastName}`;
+            document.getElementById('patientAge').textContent = `${currentOnboardingPatient.age} years`;
+            document.getElementById('patientGender').textContent = currentOnboardingPatient.gender;
+            document.getElementById('patientCondition').textContent = currentOnboardingPatient.condition;
+
+            // Show journey content
+            document.getElementById('journeyContent').style.display = 'block';
+
+            // Store payment status
+            currentOnboardingPatient.paymentStatus = paymentStatus;
+
+            // Activate Today's Journey tab and render it
+            switchTab('today');
+
+            console.log('Patient onboarding complete:', {
+                patient: currentOnboardingPatient,
+                paymentStatus: paymentStatus
+            });
         }
 
         function backToPatientSelection() {
@@ -6730,9 +7451,6 @@
             // Show journey content
             document.getElementById('journeyContent').style.display = 'block';
 
-            // Update URL with patient ID and current role
-            updateURL(patient.id, currentRole, 'today');
-
             // Activate Today's Journey tab and render it
             switchTab('today');
         }
@@ -6868,130 +7586,10 @@
             }
         });
 
-        // ========================================
-        // URL ROUTING & STATE MANAGEMENT
-        // ========================================
-
-        // Get URL parameters
-        function getURLParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                patientId: params.get('patient'),
-                role: params.get('role'),
-                tab: params.get('tab')
-            };
-        }
-
-        // Update URL without reload
-        function updateURL(patientId, role, tab) {
-            const params = new URLSearchParams();
-            if (patientId) params.set('patient', patientId);
-            if (role) params.set('role', role);
-            if (tab) params.set('tab', tab);
-            
-            const newURL = `${window.location.pathname}?${params.toString()}`;
-            window.history.pushState({ patientId, role, tab }, '', newURL);
-        }
-
-        // Handle browser back/forward buttons
-        window.addEventListener('popstate', function(event) {
-            if (event.state) {
-                const { patientId, role, tab } = event.state;
-                restoreStateFromURL(patientId, role, tab);
-            } else {
-                // No state - go back to patient selection
-                returnToPatientSelection();
-            }
-        });
-
-        // Restore state from URL parameters
-        function restoreStateFromURL(patientId, role, tab) {
-            if (!patientId) {
-                returnToPatientSelection();
-                return;
-            }
-
-            const patient = samplePatients.find(p => p.id === patientId);
-            if (!patient) {
-                returnToPatientSelection();
-                return;
-            }
-
-            selectedPatientData = patient;
-
-            if (role) {
-                currentRole = role;
-                const roleSelector = document.getElementById('roleSelector');
-                if (roleSelector) {
-                    roleSelector.value = role;
-                }
-            }
-
-            showJourneyForPatient(patient);
-            
-            const targetTab = tab || 'today';
-            switchTab(targetTab, true);
-        }
-
-        // Return to patient selection screen
-        function returnToPatientSelection() {
-            // Show entry screen
-            document.getElementById('patientEntryScreen').style.display = 'block';
-            
-            // Hide patient header and journey content
-            document.getElementById('selectedPatientHeader').style.display = 'none';
-            document.getElementById('journeyRoleSelector').style.display = 'none';
-            document.getElementById('journeyContent').style.display = 'none';
-            
-            // Clear selected patient data
-            selectedPatientData = null;
-            
-            // Clear URL
-            window.history.replaceState({}, '', window.location.pathname);
-        }
-
-        // Show journey for patient (without updating URL)
-        function showJourneyForPatient(patient) {
-            // Hide entry screen
-            document.getElementById('patientEntryScreen').style.display = 'none';
-
-            // Show patient header
-            const header = document.getElementById('selectedPatientHeader');
-            header.style.display = 'block';
-
-            // Show role selector
-            document.getElementById('journeyRoleSelector').style.display = 'block';
-
-            // Populate header
-            document.getElementById('patientInitials').textContent = patient.firstName.charAt(0) + patient.lastName.charAt(0);
-            document.getElementById('patientFullName').textContent = `${patient.firstName} ${patient.lastName}`;
-            document.getElementById('patientAge').textContent = `${patient.age} years`;
-            document.getElementById('patientGender').textContent = patient.gender;
-            document.getElementById('patientCondition').textContent = patient.condition;
-
-            // Show journey content
-            document.getElementById('journeyContent').style.display = 'block';
-        }
-
-        // Initialize from URL on page load
-        function initializeFromURL() {
-            const { patientId, role, tab } = getURLParams();
-            
-            if (patientId) {
-                restoreStateFromURL(patientId, role, tab);
-            } else {
-                // No patient in URL - show selection screen
-                returnToPatientSelection();
-            }
-        }
-
         // INITIALIZE
         renderAssessments();
         renderPatientDropdown();
         handleEntryRoleChange(); // Initialize entry role-based UI
-        
-        // Initialize from URL if patient is in URL
-        initializeFromURL();
 
         // EXPOSE FOR DEBUGGING
         window.patientState = patientState;
