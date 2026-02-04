@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Treatment Session - Sozo Clinical Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sozo: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        
+        .input-royal { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; background-color: #f1f5f9; }
+        .input-royal:disabled { background-color: #f8fafc; cursor: not-allowed; }
+        
+        .btn-primary { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3); transform: translateY(-1px); }
+        
+        .btn-secondary { background: white; border: 2px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: #ea580c; color: #ea580c; }
+
+        .card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: #fdba74; }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .badge-sozo { background-color: #fff7ed; color: #ea580c; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .file-thumbnail {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .file-thumbnail img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-sozo-600 to-sozo-700 text-white py-8 px-8 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-3xl font-bold">View Treatment Session</h1>
+                        <p class="text-sozo-100 mt-2 text-sm font-medium">Review completed patient treatment session details</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-medium mb-2">Session Completed</div>
+                        <div class="bg-white/20 backdrop-blur px-4 py-2 rounded-lg font-mono text-sm font-bold" id="completionDate">02/04/2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 bg-slate-50 p-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Patient & Session Info -->
+                    <div class="space-y-6">
+                        <!-- Patient Info -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Patient Information</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Patient Name</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientName">Emma Rodriguez</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Patient ID</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientId">P-2026-0045</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Date of Birth</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientDOB">March 15, 1985</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Condition/Disease</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientCondition">Major Depressive Disorder</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Session Plan -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Session Plan</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Session Number</div>
+                                    <div class="text-base font-600 text-slate-800" id="sessionNumber">Session 3 of 10</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Estimated Duration</div>
+                                    <div class="text-base font-600 text-slate-800" id="estimatedDuration">45 minutes</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Recommended Montages</div>
+                                    <div class="text-base font-600 text-slate-800" id="recommendedMontages">F3-F4, C3-C4</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Recommended Devices</div>
+                                    <div class="text-base font-600 text-slate-800" id="recommendedDevices">tDCS Unit A, TPS Device B</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Session Status -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Session Status</h2>
+                            <span class="badge badge-success" id="sessionStatus">Completed</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Session Details (Read-only) -->
+                    <div class="lg:col-span-2 space-y-6">
+
+                        <!-- Device Settings Used -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-microchip text-sozo-600"></i>Device Settings Used</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-sozo-600">
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">tDCS Unit A - Current (mA)</label>
+                                    <input type="number" value="2.0" class="input-royal mb-3" disabled>
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Duration (minutes)</label>
+                                    <input type="number" value="20" class="input-royal" disabled>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-sozo-600">
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">TPS Device B - Frequency (Hz)</label>
+                                    <input type="number" value="10" class="input-royal mb-3" disabled>
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Intensity (%)</label>
+                                    <input type="number" value="75" class="input-royal" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Montage Adjustments -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders text-sozo-600"></i>Montage Adjustments</h3>
+                            <div class="mb-4">
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Montage Used</label>
+                                <input type="text" value="F3-F4, C3-C4" class="input-royal" disabled>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Adjustment Notes</label>
+                                <textarea class="input-royal h-20" disabled>No adjustments needed. Standard montage placement used with proper electrode contact confirmed.</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Session Duration -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-hourglass-end text-sozo-600"></i>Session Duration</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Start Time</label>
+                                    <input type="time" value="10:00" class="input-royal" disabled>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">End Time</label>
+                                    <input type="time" value="10:47" class="input-royal" disabled>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Total Duration</label>
+                                    <input type="text" value="47 minutes" class="input-royal" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patient Symptoms -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-heart-pulse text-sozo-600"></i>Patient Symptoms</h3>
+                            <div class="mb-4">
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-3 block">Current Symptoms Observed</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" checked disabled>
+                                        <span class="text-sm text-slate-700">Anxiety</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" disabled>
+                                        <span class="text-sm text-slate-700">Depression</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" disabled>
+                                        <span class="text-sm text-slate-700">Headache</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" checked disabled>
+                                        <span class="text-sm text-slate-700">Fatigue</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" disabled>
+                                        <span class="text-sm text-slate-700">Insomnia</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                                        <input type="checkbox" checked disabled>
+                                        <span class="text-sm text-slate-700">Pain</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Additional Symptom Notes</label>
+                                <textarea class="input-royal h-20" disabled>Patient reported mild anxiety at start of session. Fatigue noticeably decreased by end of treatment. Slight pain in shoulders, consistent with previous sessions.</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Notes -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-sozo-600"></i>Clinical Notes</h3>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Real-time Observations</label>
+                                <textarea class="input-royal h-24" disabled>Patient was cooperative and well-relaxed throughout the session. Electrode placement stable, no adverse reactions observed. Patient remained alert and responsive. Good compliance with treatment protocol. No complications during stimulation. Patient engaged positively with clinician.</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Patient Feedback -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-comments text-sozo-600"></i>Patient Feedback</h3>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-2 block">Patient's Verbal Feedback</label>
+                                <textarea class="input-royal h-24" disabled>Patient reported feeling more relaxed and clear-headed after the session. Expressed satisfaction with the treatment experience. Noted improvement in mood compared to previous session. No discomfort or side effects reported. Patient is looking forward to next session. Overall positive experience.</textarea>
+                            </div>
+                        </div>
+
+                
+                        <!-- Session Photos -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-camera text-sozo-600"></i>Session Photos</h3>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-3 block">Progress Images</label>
+                                <div class="grid grid-cols-4 gap-3" id="sessionPhotosList">
+                                    <div class="bg-slate-100 rounded-lg h-32 flex items-center justify-center text-slate-400 overflow-hidden">
+                                        <img src="D:\SOZO CRM\SOZO\Untitled-design-1-1536x1536.png' viewBox='0 0 400 300'%3E%3Crect fill='%23e2e8f0' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='16' fill='%2364748b'%3ESession Setup Photo%3C/text%3E%3C/svg%3E" alt="Session photo 1" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="bg-slate-100 rounded-lg h-32 flex items-center justify-center text-slate-400 overflow-hidden">
+                                        <img src="D:\SOZO CRM\SOZO\How-it-works-tDCS.jpg' viewBox='0 0 400 300'%3E%3Crect fill='%23e2e8f0' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='16' fill='%2364748b'%3EElectrode Placement%3C/text%3E%3C/svg%3E" alt="Session photo 2" class="w-full h-full object-cover">
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-2 pt-6">
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" id="backBtn" class="btn-secondary py-2">← Back</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize session data (dummy data)
+        function initializeSessionData() {
+            const sessionData = {
+                patientName: 'Emma Rodriguez',
+                patientId: 'P-2026-0045',
+                patientDOB: 'March 15, 1985',
+                condition: 'Major Depressive Disorder',
+                sessionNumber: 'Session 3 of 10',
+                estimatedDuration: '45 minutes',
+                montages: 'F3-F4, C3-C4',
+                devices: 'tDCS Unit A, TPS Device B',
+                completionDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+            };
+
+            document.getElementById('patientName').textContent = sessionData.patientName;
+            document.getElementById('patientId').textContent = sessionData.patientId;
+            document.getElementById('patientDOB').textContent = sessionData.patientDOB;
+            document.getElementById('patientCondition').textContent = sessionData.condition;
+            document.getElementById('sessionNumber').textContent = sessionData.sessionNumber;
+            document.getElementById('estimatedDuration').textContent = sessionData.estimatedDuration;
+            document.getElementById('recommendedMontages').textContent = sessionData.montages;
+            document.getElementById('recommendedDevices').textContent = sessionData.devices;
+            document.getElementById('completionDate').textContent = sessionData.completionDate;
+        }
+        
+
+       
+
+        // Back Button
+        document.getElementById('backBtn').addEventListener('click', function() {
+            const patientId = new URLSearchParams(window.location.search).get('patientId');
+            window.location.href = patientId ? `patient-journey.html?patientId=${patientId}` : 'patient-journey.html';
+        });
+
+        // Initialize
+        initializeSessionData();
+    </script>
+</body>
+</html>

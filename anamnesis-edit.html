@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anamnesis Assessment - Edit Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --orange-primary: rgb(244, 121, 32);
+            --blue-primary: rgb(0, 161, 228);
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --slate-border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid var(--orange-primary);
+        }
+
+        .return-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--orange-primary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .return-button:hover {
+            background: #dc6027;
+            transform: translateY(-1px);
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--orange-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--orange-primary);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--orange-primary);
+        }
+
+        .save-button {
+            background: var(--orange-primary);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 32px auto 0 auto;
+        }
+
+        .save-button:hover {
+            background: #dc6027;
+            transform: translateY(-1px);
+        }
+
+        .patient-info {
+            background: rgba(244, 121, 32, 0.1);
+            border: 2px solid rgba(244, 121, 32, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .patient-meta {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .patient-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-meta-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f59e0b;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Return Button -->
+        <a href="javascript:history.back()" class="return-button">
+            <i class="fas fa-arrow-left"></i>
+            Return to Last Page
+        </a>
+
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                        <i class="fas fa-stethoscope" style="color: var(--orange-primary); margin-right: 12px;"></i>
+                        Anamnesis Assessment
+                    </h1>
+                    <p style="font-size: 14px; color: #64748b;">Patient Symptoms & Medical History (Editable)</p>
+                </div>
+                <span class="badge">EDIT MODE</span>
+            </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="patient-info">
+            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Patient Information</h2>
+            <p style="font-size: 14px; color: #64748b;">Sarah Mitchell - Clinical Assessment Active</p>
+            <div class="patient-meta">
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Patient ID</span>
+                    <span class="patient-meta-value">PAT-001</span>
+                </div>
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Assessment Date</span>
+                    <span class="patient-meta-value">February 3, 2026</span>
+                </div>
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Clinician</span>
+                    <span class="patient-meta-value">Dr. Sarah Mitchell</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Chief Complaint -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-clipboard-list"></i>
+                1. Chief Complaint & Diagnosis
+            </div>
+            <div class="form-group">
+                <label class="form-label">Why are you here today? / Primary Diagnosis</label>
+                <textarea class="form-textarea" name="chiefComplaint">Chronic fatigue and concentration issues affecting daily functioning</textarea>
+            </div>
+        </div>
+
+        <!-- Section 2: Main Symptoms -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                2. Main Symptoms
+            </div>
+            <div class="form-group">
+                <label class="form-label">What are your main symptoms?</label>
+                <textarea class="form-textarea" name="mainSymptoms">Difficulty concentrating, memory problems, persistent fatigue</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">What were the initial symptoms?</label>
+                <textarea class="form-textarea" name="initialSymptoms">Started with mild fatigue approximately 6 months ago</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Is there a diagnosis related to the symptoms?</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="diagnosisRelated" value="yes" checked>
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="diagnosisRelated" value="no">
+                        <span>No</span>
+                    </label>
+                </div>
+                <input class="form-input" style="margin-top: 12px;" name="diagnosisDetails" value="Chronic fatigue syndrome">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">When did the symptoms start?</label>
+                <input type="text" class="form-input" name="symptomsStart" value="6 months ago">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">For how long have you had these symptoms?</label>
+                <input type="text" class="form-input" name="symptomsDuration" value="6 months ongoing">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">How often do you have these symptoms?</label>
+                <select class="form-select" name="symptomsFrequency">
+                    <option value="">Select frequency...</option>
+                    <option value="daily" selected>Daily</option>
+                    <option value="several-times-week">Several times a week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="occasionally">Occasionally</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">How intense or severe are these symptoms?</label>
+                <select class="form-select" name="symptomsIntensity">
+                    <option value="">Select intensity...</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate" selected>Moderate</option>
+                    <option value="severe">Severe</option>
+                    <option value="very-severe">Very Severe</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Are the symptoms getting better, worse, or staying about the same?</label>
+                <select class="form-select" name="symptomsProgression">
+                    <option value="">Select progression...</option>
+                    <option value="better">Getting better</option>
+                    <option value="worse" selected>Getting worse</option>
+                    <option value="same">Staying about the same</option>
+                    <option value="fluctuating">Fluctuating</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 3: Secondary Symptoms -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-list-ul"></i>
+                3. Secondary Symptoms
+            </div>
+            <p style="font-size: 12px; color: #6b7280; margin-bottom: 20px;">Please check all that apply and provide details where relevant:</p>
+
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="sleep" checked>
+                    <span>Sleep Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="concentration" checked>
+                    <span>Concentration Problems</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="memory" checked>
+                    <span>Memory Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="gastrointestinal">
+                    <span>Gastrointestinal Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="mood" checked>
+                    <span>Mood Fluctuations</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="fatigue" checked>
+                    <span>Fatigue</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="weakness" checked>
+                    <span>Weakness</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="pain" checked>
+                    <span>Pain</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="depression" checked>
+                    <span>Depression/Anxiety</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="secondarySymptoms" value="bladder">
+                    <span>Bladder Function Issues</span>
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">Additional details about secondary symptoms:</label>
+                <textarea class="form-textarea" name="secondaryDetails">Sleep: Difficulty falling asleep, frequent waking
+Concentration: Severe concentration issues affecting work
+Memory: Short-term memory problems
+Mood: Mild depression due to symptoms
+Fatigue: Severe persistent fatigue
+Weakness: General muscle weakness
+Pain: Mild headaches occasionally</textarea>
+            </div>
+        </div>
+
+        <!-- Section 4: Operations/Surgeries -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-user-md"></i>
+                4. Operations/Surgeries
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you had any operations or surgeries?</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="hasOperations" value="yes">
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="hasOperations" value="no" checked>
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, please provide details:</label>
+                <textarea class="form-textarea" name="operationsDetails">None reported</textarea>
+            </div>
+        </div>
+
+        <!-- Section 5: Previous/Ongoing Treatments -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-therapy"></i>
+                5. Previous or Ongoing Treatments
+            </div>
+            <div class="form-group">
+                <label class="form-label">Previous or ongoing treatments (physiotherapy, speech therapy, psychotherapy, etc.)</label>
+                <textarea class="form-textarea" name="treatments">Previous physiotherapy (6 weeks, 2 times per week) - minimal improvement noted</textarea>
+            </div>
+        </div>
+
+        <!-- Section 6: Medications -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-pills"></i>
+                6. Medications & Supplements
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current medications and supplements:</label>
+                <textarea class="form-textarea" name="medications">Multivitamin (daily)
+Omega-3 supplements (1000mg daily)</textarea>
+            </div>
+        </div>
+
+        <!-- Section 7: Brain MRI & Scans -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-brain"></i>
+                7. Brain MRI & Other Scans
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you had a Brain MRI?</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="brainMRI" value="yes" checked>
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="brainMRI" value="no">
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, when was it performed and what were the results?</label>
+                <textarea class="form-textarea" name="mriDetails">Brain MRI performed 3 months ago - results showed normal brain structure with no abnormalities</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Other scans (CT, EEG, EMG, etc.):</label>
+                <textarea class="form-textarea" name="otherScans">No other scans performed</textarea>
+            </div>
+        </div>
+
+        <!-- Section 8: Neuromodulation Experience -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-bolt"></i>
+                8. Neuromodulation Experience
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you used any neuromodulation techniques before?</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="neuromodulation" value="yes">
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="neuromodulation" value="no" checked>
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, please specify devices used and experience:</label>
+                <textarea class="form-textarea" name="neuromodulationDetails">No previous experience with neuromodulation devices</textarea>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <button class="save-button" onclick="saveAnamnesis()">
+            <i class="fas fa-save"></i>
+            Save Anamnesis Assessment
+        </button>
+    </div>
+
+    <script>
+        function saveAnamnesis() {
+            const formData = {
+                chiefComplaint: document.querySelector('[name="chiefComplaint"]').value,
+                mainSymptoms: document.querySelector('[name="mainSymptoms"]').value,
+                initialSymptoms: document.querySelector('[name="initialSymptoms"]').value,
+                diagnosisRelated: document.querySelector('[name="diagnosisRelated"]:checked')?.value,
+                diagnosisDetails: document.querySelector('[name="diagnosisDetails"]').value,
+                symptomsStart: document.querySelector('[name="symptomsStart"]').value,
+                symptomsDuration: document.querySelector('[name="symptomsDuration"]').value,
+                symptomsFrequency: document.querySelector('[name="symptomsFrequency"]').value,
+                symptomsIntensity: document.querySelector('[name="symptomsIntensity"]').value,
+                symptomsProgression: document.querySelector('[name="symptomsProgression"]').value,
+                secondarySymptoms: Array.from(document.querySelectorAll('[name="secondarySymptoms"]:checked')).map(el => el.value),
+                secondaryDetails: document.querySelector('[name="secondaryDetails"]').value,
+                hasOperations: document.querySelector('[name="hasOperations"]:checked')?.value,
+                operationsDetails: document.querySelector('[name="operationsDetails"]').value,
+                treatments: document.querySelector('[name="treatments"]').value,
+                medications: document.querySelector('[name="medications"]').value,
+                brainMRI: document.querySelector('[name="brainMRI"]:checked')?.value,
+                mriDetails: document.querySelector('[name="mriDetails"]').value,
+                otherScans: document.querySelector('[name="otherScans"]').value,
+                neuromodulation: document.querySelector('[name="neuromodulation"]:checked')?.value,
+                neuromodulationDetails: document.querySelector('[name="neuromodulationDetails"]').value,
+                completedAt: new Date().toISOString(),
+                completedBy: 'Current User'
+            };
+
+            localStorage.setItem('anamnesisData', JSON.stringify(formData));
+            alert('Anamnesis assessment saved successfully!');
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
