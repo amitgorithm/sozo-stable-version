@@ -4496,6 +4496,33 @@
                                 }
                                 detailsContent += '</div>';
                             }
+                        } else if (block.type === 'treatment-plan') {
+                            detailsContent = `
+                                <div class="block-info-grid">
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Status</div>
+                                        <div class="block-info-value" style="font-size: 12px;">Completed</div>
+                                    </div>
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Created By</div>
+                                        <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                    </div>
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Date</div>
+                                        <div class="block-info-value" style="font-size: 12px;">${block.completedAt}</div>
+                                    </div>
+                                </div>
+                            `;
+                            if (currentRole === 'doctor') {
+                                detailsContent += '<div class="block-action-buttons">';
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'treatment-plan\')" title="View treatment plan"><i class="fa-solid fa-eye"></i> View Details</button>';
+                                detailsContent += '<button class="block-action-btn edit" onclick="window.location.href=\'treatment-plan-doctor.html\'" title="Edit treatment plan"><i class="fa-solid fa-pen"></i> Edit Plan</button>';
+                                detailsContent += '</div>';
+                            } else if (currentRole === 'clinical-assistant') {
+                                detailsContent += '<div class="block-action-buttons">';
+                                detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'treatment-plan\')" title="View treatment plan"><i class="fa-solid fa-eye"></i> View Details</button>';
+                                detailsContent += '</div>';
+                            }
                         } else if (block.type === 'prs' && permissions.canViewScores) {
                             detailsContent = `
                                 <div class="block-info-grid">
