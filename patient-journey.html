@@ -4496,6 +4496,33 @@
                                 }
                                 detailsContent += '</div>';
                             }
+                        } else if (block.type === 'prs' && permissions.canViewScores) {
+                            detailsContent = `
+                                <div class="block-info-grid">
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Total Score</div>
+                                        <div class="block-info-value">18/50</div>
+                                    </div>
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Severity</div>
+                                        <div class="block-info-value" style="color: var(--orange-primary);">Mild (36%)</div>
+                                    </div>
+                                    <div class="block-info-item">
+                                        <div class="block-info-label">Completed By</div>
+                                        <div class="block-info-value" style="font-size: 12px;">${block.completedBy}</div>
+                                    </div>
+                                </div>
+                            `;
+                            if (permissions.canViewReports || permissions.canEditData) {
+                                detailsContent += '<div class="block-action-buttons">';
+                                if (permissions.canViewReports) {
+                                    detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'' + block.type + '\')" title="View detailed report"><i class="fa-solid fa-eye"></i> View Details</button>';
+                                }
+                                if (permissions.canEditData) {
+                                    detailsContent += '<button class="block-action-btn edit" onclick="editBlockDetails(\'' + block.type + '\')" title="Edit assessment data"><i class="fa-solid fa-pen"></i> Edit Details</button>';
+                                }
+                                detailsContent += '</div>';
+                            }
                         } else if (permissions.canViewScores) {
                             detailsContent = `
                                 <div class="block-info-grid">
@@ -5054,8 +5081,8 @@
             sessionStorage.setItem('patientName', selectedPatientData ? `${selectedPatientData.firstName} ${selectedPatientData.lastName}` : 'Unknown');
             sessionStorage.setItem('currentRole', currentRole);
             
-            // Navigate to active journey to start session
-            window.location.href = 'working-active-journey.html?session=' + sessionId;
+            // Navigate to start-session.html to begin the treatment session
+            window.location.href = 'start-session.html?session=' + sessionId;
         }
 
         function continueSession(sessionId) {
@@ -5075,8 +5102,8 @@
             sessionStorage.setItem('sessionMode', 'view');
             sessionStorage.setItem('currentRole', currentRole);
             
-            // Navigate to workshop detail page
-            window.location.href = 'workshop_detail.html?session=' + sessionId;
+            // Navigate to view-session.html to view session report
+            window.location.href = 'view-session.html?session=' + sessionId;
         }
 
         function startBlock(blockId, blockType) {
@@ -5086,23 +5113,19 @@
             } else if (blockType === 'fnon') {
                 window.location.href = 'fnon-edit.html';
             } else if (blockType === 'brain-mapping') {
-                // Brain mapping requires doctor role
-                if (currentRole === 'doctor') {
-                    const patientNameElement = document.getElementById('patientFullName');
-                    const patientName = patientNameElement ? patientNameElement.textContent : 'Patient';
-                    
-                    const sessionData = {
-                        currentRole: currentRole,
-                        patientName: patientName,
-                        blockType: 'brain-mapping',
-                        viewMode: 'edit',
-                        returnUrl: window.location.href
-                    };
-                    localStorage.setItem('eegSession', JSON.stringify(sessionData));
-                    window.location.href = 'eeg.html';
-                } else {
-                    alert('Only doctors can perform EEG brain mapping assessments.');
-                }
+                // All roles can start brain mapping, but only doctors can generate EEG in eeg.html
+                const patientNameElement = document.getElementById('patientFullName');
+                const patientName = patientNameElement ? patientNameElement.textContent : 'Patient';
+                
+                const sessionData = {
+                    currentRole: currentRole,
+                    patientName: patientName,
+                    blockType: 'brain-mapping',
+                    viewMode: 'edit',
+                    returnUrl: window.location.href
+                };
+                localStorage.setItem('eegSession', JSON.stringify(sessionData));
+                window.location.href = 'eeg.html';
             } else if (blockType === 'prs') {
                 window.location.href = 'prs-edit.html';
             } else if (blockType === 'doctor-notes') {
