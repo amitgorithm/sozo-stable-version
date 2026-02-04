@@ -4146,7 +4146,7 @@
                 paymentPending: true,
                 blocks: [
                     { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
-                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
+                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', lockReason: 'payment' },
                     { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', lockReason: 'payment' },
                     { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', lockReason: 'payment' },
                     { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
@@ -4222,7 +4222,9 @@
                 sessions: [
                     { id: 'session-1', name: 'Session 1', desc: 'Initial therapy session', status: 'pending', scheduledDate: '2026-02-03' },
                     { id: 'session-2', name: 'Session 2', desc: 'Follow-up therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
-                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'locked', lockReason: 'Complete Session 1 first' }
+                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
+                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
+                    { id: 'session-5', name: 'Session 5', desc: 'Maintenance therapy', status: 'locked', lockReason: 'Complete Session 1 first' }
                 ]
             },
             'P005': { // Lisa Thompson - 3 sessions complete
@@ -4279,7 +4281,8 @@
                         clinicalNotes: 'Good response to treatment. Motor function improvement noted in assessments.',
                         activities: ['Balance Test', 'Sudoku', 'Memory Game']
                     },
-                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'pending', scheduledDate: '2026-02-05' }
+                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'pending', scheduledDate: '2026-02-05' },
+                    { id: 'session-5', name: 'Session 5', desc: 'Maintenance therapy', status: 'pending', scheduledDate: '2026-02-12' }
                 ]
             }
         };
