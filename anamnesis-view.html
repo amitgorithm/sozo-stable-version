@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anamnesis Assessment - View Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --orange-primary: rgb(244, 121, 32);
+            --blue-primary: rgb(0, 161, 228);
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --slate-border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #10b981;
+        }
+
+        .return-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--orange-primary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .return-button:hover {
+            background: #dc6027;
+            transform: translateY(-1px);
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--orange-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .view-value {
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        .patient-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .patient-meta {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .patient-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-meta-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--orange-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Return Button -->
+        <a href="javascript:history.back()" class="return-button">
+            <i class="fas fa-arrow-left"></i>
+            Return to Last Page
+        </a>
+
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                        <i class="fas fa-stethoscope" style="color: var(--orange-primary); margin-right: 12px;"></i>
+                        Anamnesis Assessment
+                    </h1>
+                    <p style="font-size: 14px; color: #64748b;">Patient Symptoms & Medical History (Read-Only)</p>
+                </div>
+                <span class="badge">VIEW MODE</span>
+            </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="patient-info">
+            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Patient Information</h2>
+            <p style="font-size: 14px; color: #64748b;">Sarah Mitchell - Clinical Assessment Completed</p>
+            <div class="patient-meta">
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Patient ID</span>
+                    <span class="patient-meta-value">PAT-001</span>
+                </div>
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Assessment Date</span>
+                    <span class="patient-meta-value">February 3, 2026</span>
+                </div>
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Clinician</span>
+                    <span class="patient-meta-value">Dr. Sarah Mitchell</span>
+                </div>
+                <div class="patient-meta-item">
+                    <span class="patient-meta-label">Completed Date</span>
+                    <span class="patient-meta-value">February 10, 2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Chief Complaint -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-clipboard-list"></i>
+                1. Chief Complaint & Diagnosis
+            </div>
+            <div class="form-group">
+                <label class="form-label">Why are you here today? / Primary Diagnosis</label>
+                <div class="view-value">Chronic fatigue and concentration issues affecting daily functioning</div>
+            </div>
+        </div>
+
+        <!-- Section 2: Main Symptoms -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                2. Main Symptoms
+            </div>
+            <div class="form-group">
+                <label class="form-label">What are your main symptoms?</label>
+                <div class="view-value">Difficulty concentrating, memory problems, persistent fatigue</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">What were the initial symptoms?</label>
+                <div class="view-value">Started with mild fatigue approximately 6 months ago</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Is there a diagnosis related to the symptoms?</label>
+                <div class="view-value"><strong>Yes</strong> - Chronic fatigue syndrome</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">When did the symptoms start?</label>
+                <div class="view-value">6 months ago</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">For how long have you had these symptoms?</label>
+                <div class="view-value">6 months ongoing</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">How often do you have these symptoms?</label>
+                <div class="view-value">Daily</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">How intense or severe are these symptoms?</label>
+                <div class="view-value">Moderate</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Are the symptoms getting better, worse, or staying about the same?</label>
+                <div class="view-value">Getting worse</div>
+            </div>
+        </div>
+
+        <!-- Section 3: Secondary Symptoms -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-list-ul"></i>
+                3. Secondary Symptoms
+            </div>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Sleep Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Concentration Problems</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Memory Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled>
+                    <span>Gastrointestinal Issues</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Mood Fluctuations</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Fatigue</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Weakness</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Pain</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled checked>
+                    <span>Depression/Anxiety</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" disabled>
+                    <span>Bladder Function Issues</span>
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">Additional details about secondary symptoms:</label>
+                <div class="view-value">Sleep: Difficulty falling asleep, frequent waking<br>Concentration: Severe concentration issues affecting work<br>Memory: Short-term memory problems<br>Mood: Mild depression due to symptoms<br>Fatigue: Severe persistent fatigue<br>Weakness: General muscle weakness<br>Pain: Mild headaches occasionally</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Operations/Surgeries -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-user-md"></i>
+                4. Operations/Surgeries
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you had any operations or surgeries?</label>
+                <div class="view-value">No</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, please provide details:</label>
+                <div class="view-value">None reported</div>
+            </div>
+        </div>
+
+        <!-- Section 5: Previous/Ongoing Treatments -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-therapy"></i>
+                5. Previous or Ongoing Treatments
+            </div>
+            <div class="form-group">
+                <label class="form-label">Previous or ongoing treatments (physiotherapy, speech therapy, psychotherapy, etc.)</label>
+                <div class="view-value">Previous physiotherapy (6 weeks, 2 times per week) - minimal improvement noted</div>
+            </div>
+        </div>
+
+        <!-- Section 6: Medications -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-pills"></i>
+                6. Medications & Supplements
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current medications and supplements:</label>
+                <div class="view-value">Multivitamin (daily)<br>Omega-3 supplements (1000mg daily)</div>
+            </div>
+        </div>
+
+        <!-- Section 7: Brain MRI & Scans -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-brain"></i>
+                7. Brain MRI & Other Scans
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you had a Brain MRI?</label>
+                <div class="view-value">Yes</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, when was it performed and what were the results?</label>
+                <div class="view-value">Brain MRI performed 3 months ago - results showed normal brain structure with no abnormalities</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Other scans (CT, EEG, EMG, etc.):</label>
+                <div class="view-value">No other scans performed</div>
+            </div>
+        </div>
+
+        <!-- Section 8: Neuromodulation Experience -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-bolt"></i>
+                8. Neuromodulation Experience
+            </div>
+            <div class="form-group">
+                <label class="form-label">Have you used any neuromodulation techniques before?</label>
+                <div class="view-value">No</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">If yes, please specify devices used and experience:</label>
+                <div class="view-value">No previous experience with neuromodulation devices</div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div style="background: white; border-radius: 12px; padding: 24px; margin-top: 32px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-left: 4px solid #10b981;">
+            <p style="font-size: 12px; color: #64748b; margin: 0;"><i class="fas fa-info-circle" style="margin-right: 8px;"></i>This assessment was completed by Dr. Sarah Mitchell on February 10, 2026. This is a read-only view of the completed assessment.</p>
+        </div>
+    </div>
+</body>
+</html>

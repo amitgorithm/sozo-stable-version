@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Treatment Session - Sozo Clinical Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sozo: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        
+        .input-royal { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; }
+        .input-royal:focus { border-color: #ea580c; outline: none; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1); }
+        
+        .btn-primary { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3); transform: translateY(-1px); }
+        
+        .btn-secondary { background: white; border: 2px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: #ea580c; color: #ea580c; }
+
+        .card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: #fdba74; }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .badge-sozo { background-color: #fff7ed; color: #ea580c; }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(234, 88, 12, 0.3);
+            border-top: 2px solid #ea580c;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-sozo-600 to-sozo-700 text-white py-8 px-8 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-3xl font-bold">Start Treatment Session</h1>
+                        <p class="text-sozo-100 mt-2 text-sm font-medium">Initiate and manage patient treatment session</p>
+                    </div>
+                    <div id="sessionTimer" class="hidden text-right">
+                        <div class="text-sm font-medium mb-2">Session Duration</div>
+                        <div class="bg-white/20 backdrop-blur px-4 py-2 rounded-lg font-mono text-lg font-bold" id="timerDisplay">00:00:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 bg-slate-50 p-8">
+            <div class="max-w-7xl mx-auto">
+                <form id="startSessionForm" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Pre-populated Info -->
+                    <div class="space-y-6">
+                        <!-- Patient Info -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Patient Information</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Patient Name</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientName">Emma Rodriguez</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Patient ID</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientId">P-2026-0045</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Date of Birth</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientDOB">March 15, 1985</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Condition/Disease</div>
+                                    <div class="text-base font-600 text-slate-800" id="patientCondition">Major Depressive Disorder</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Session Plan -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Session Plan</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Session Number</div>
+                                    <div class="text-base font-600 text-slate-800" id="sessionNumber">Session 3 of 10</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Estimated Duration</div>
+                                    <div class="text-base font-600 text-slate-800" id="estimatedDuration">45 minutes</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Recommended Montages</div>
+                                    <div class="text-base font-600 text-slate-800" id="recommendedMontages">F3-F4, C3-C4</div>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Recommended Devices</div>
+                                    <div class="text-base font-600 text-slate-800" id="recommendedDevices">tDCS Unit A, TPS Device B</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Session Status -->
+                        <div class="card p-6">
+                            <h2 class="text-xs font-bold text-sozo-600 uppercase tracking-wide mb-4 border-l-4 border-sozo-600 pl-3">Session Status</h2>
+                            <span class="badge badge-sozo" id="sessionStatus">Not Started</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Form Inputs -->
+                    <div class="lg:col-span-2 space-y-6">
+
+                        <!-- Device Settings Used -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-microchip text-sozo-600"></i>Device Settings Used</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-sozo-600">
+                                    <label for="deviceA" class="text-xs font-bold text-slate-600 uppercase mb-2 block">tDCS Unit A - Current (mA)</label>
+                                    <input type="number" id="deviceA" name="deviceACurrent" step="0.1" placeholder="e.g., 2.0" class="input-royal mb-3">
+                                    <label for="deviceADuration" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Duration (minutes)</label>
+                                    <input type="number" id="deviceADuration" name="deviceADuration" placeholder="e.g., 20" class="input-royal">
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-sozo-600">
+                                    <label for="deviceB" class="text-xs font-bold text-slate-600 uppercase mb-2 block">TPS Device B - Frequency (Hz)</label>
+                                    <input type="number" id="deviceB" name="deviceBFrequency" step="0.1" placeholder="e.g., 10" class="input-royal mb-3">
+                                    <label for="deviceBIntensity" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Intensity (%)</label>
+                                    <input type="number" id="deviceBIntensity" name="deviceBIntensity" min="0" max="100" placeholder="e.g., 75" class="input-royal">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Montage Adjustments -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders text-sozo-600"></i>Montage Adjustments</h3>
+                            <div class="mb-4">
+                                <label for="montageUsed" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Montage Used</label>
+                                <input type="text" id="montageUsed" name="montageUsed" placeholder="e.g., F3-F4, C3-C4 or specify if different from recommended" class="input-royal">
+                            </div>
+                            <div>
+                                <label for="montageNotes" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Adjustment Notes</label>
+                                <textarea id="montageNotes" name="montageNotes" placeholder="Explain any deviations from the recommended montage and why..." class="input-royal h-20"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Session Duration -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-hourglass-end text-sozo-600"></i>Session Duration</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div>
+                                    <label for="sessionStartTime" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Start Time <span class="text-red-500">*</span></label>
+                                    <input type="time" id="sessionStartTime" name="sessionStartTime" class="input-royal" required>
+                                </div>
+                                <div>
+                                    <label for="sessionEndTime" class="text-xs font-bold text-slate-600 uppercase mb-2 block">End Time</label>
+                                    <input type="time" id="sessionEndTime" name="sessionEndTime" class="input-royal">
+                                </div>
+                                <div>
+                                    <button type="button" id="calculateDuration" class="btn-secondary w-full">Calculate</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patient Symptoms -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-heart-pulse text-sozo-600"></i>Patient Symptoms</h3>
+                            <div class="mb-4">
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-3 block">Current Symptoms Observed <span class="text-red-500">*</span></label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="anxiety" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Anxiety</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="depression" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Depression</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="headache" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Headache</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="fatigue" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Fatigue</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="insomnia" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Insomnia</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+                                        <input type="checkbox" name="symptoms" value="pain" class="w-4 h-4">
+                                        <span class="text-sm text-slate-700">Pain</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="symptomNotes" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Additional Symptom Notes</label>
+                                <textarea id="symptomNotes" name="symptomNotes" placeholder="Add any additional details about symptoms observed..." class="input-royal h-20"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Notes -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-sozo-600"></i>Clinical Notes</h3>
+                            <div>
+                                <label for="clinicalNotes" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Real-time Observations <span class="text-red-500">*</span></label>
+                                <textarea id="clinicalNotes" name="clinicalNotes" placeholder="Record any clinical observations, patient behavior, responses, or changes during the session..." class="input-royal h-24"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Patient Feedback -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-comments text-sozo-600"></i>Patient Feedback</h3>
+                            <div>
+                                <label for="patientFeedback" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Patient's Verbal Feedback <span class="text-red-500">*</span></label>
+                                <textarea id="patientFeedback" name="patientFeedback" placeholder="Record patient's feedback, comfort level, perceived effects, or any concerns expressed during the session..." class="input-royal h-24"></textarea>
+                            </div>
+                        </div>
+
+
+                        <!-- Session Photos -->
+                        <div class="card p-6">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-camera text-sozo-600"></i>Session Photos</h3>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 uppercase mb-3 block">Progress Images</label>
+                                <div class="border-2 border-dashed border-sozo-600 rounded-xl p-8 text-center cursor-pointer hover:bg-sozo-50 transition bg-slate-50" id="fileUploadArea">
+                                    <div class="text-4xl mb-3">📸</div>
+                                    <div class="text-sm font-600 text-slate-700 mb-1">Drag and drop images here or click to browse</div>
+                                    <div class="text-xs text-slate-500">Supported formats: JPG, PNG, WEBP (Max 5MB per file)</div>
+                                    <input type="file" id="sessionPhotos" name="sessionPhotos" accept="image/*" multiple class="hidden">
+                                </div>
+                                <div class="grid grid-cols-4 gap-3 mt-4" id="uploadedFilesList"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-2 pt-6">
+                            <button type="button" id="startSessionBtn" class="btn-primary w-full py-3 text-base font-bold">▶ Start Session</button>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" id="saveProgressBtn" class="btn-secondary py-2" disabled>💾 Save Progress</button>
+                                <button type="button" id="completeSessionBtn" class="btn-primary py-2" disabled>✓ Complete</button>
+                                <button type="button" id="cancelSessionBtn" class="btn-secondary py-2">✕ Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-save Indicator -->
+    <div class="auto-save-indicator fixed bottom-8 right-8 bg-slate-800 text-white px-4 py-3 rounded-lg text-sm hidden gap-2 items-center" id="autoSaveIndicator" style="animation: slideIn 0.3s ease;">
+        <span class="spinner"></span>
+        <span>Auto-saving...</span>
+    </div>
+
+    <script>
+        // Session State Management
+        const sessionState = {
+            sessionId: null,
+            isActive: false,
+            startTime: null,
+            elapsedTime: 0,
+            timerInterval: null,
+            uploadedFiles: [],
+            autoSaveInterval: null
+        };
+
+        // Initialize from treatment plan data (would come from API)
+        function initializeSessionData() {
+            // In production, this would fetch from the treatment plan
+            const treatmentPlan = {
+                patientName: 'Emma Rodriguez',
+                patientId: 'P-2026-0045',
+                patientDOB: 'March 15, 1985',
+                condition: 'Major Depressive Disorder',
+                sessionNumber: 'Session 3 of 10',
+                estimatedDuration: '45 minutes',
+                montages: 'F3-F4, C3-C4',
+                devices: 'tDCS Unit A, TPS Device B'
+            };
+
+            document.getElementById('patientName').textContent = treatmentPlan.patientName;
+            document.getElementById('patientId').textContent = treatmentPlan.patientId;
+            document.getElementById('patientDOB').textContent = treatmentPlan.patientDOB;
+            document.getElementById('patientCondition').textContent = treatmentPlan.condition;
+            document.getElementById('sessionNumber').textContent = treatmentPlan.sessionNumber;
+            document.getElementById('estimatedDuration').textContent = treatmentPlan.estimatedDuration;
+            document.getElementById('recommendedMontages').textContent = treatmentPlan.montages;
+            document.getElementById('recommendedDevices').textContent = treatmentPlan.devices;
+        }
+
+        // Start Session
+        document.getElementById('startSessionBtn').addEventListener('click', function() {
+            const startTime = document.getElementById('sessionStartTime').value;
+            if (!startTime) {
+                alert('Please enter the session start time.');
+                return;
+            }
+
+            sessionState.isActive = true;
+            sessionState.sessionId = 'SESSION-' + Date.now();
+            sessionState.startTime = new Date();
+
+            // Update UI
+            this.disabled = true;
+            this.textContent = '▶ Session Started';
+            document.getElementById('cancelSessionBtn').disabled = true;
+            document.getElementById('saveProgressBtn').disabled = false;
+            document.getElementById('completeSessionBtn').disabled = false;
+            document.getElementById('sessionTimer').style.display = 'flex';
+
+            // Start timer
+            startSessionTimer();
+
+            // Start auto-save
+            startAutoSave();
+
+            // Update status
+            document.getElementById('sessionStatus').textContent = 'In Progress';
+            document.getElementById('sessionStatus').className = 'status-badge pending';
+
+            showNotification('Session started successfully', 'success');
+        });
+
+        // Session Timer
+        function startSessionTimer() {
+            sessionState.timerInterval = setInterval(() => {
+                sessionState.elapsedTime++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(sessionState.elapsedTime / 3600);
+            const minutes = Math.floor((sessionState.elapsedTime % 3600) / 60);
+            const seconds = sessionState.elapsedTime % 60;
+            const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = formatted;
+        }
+
+        // Calculate Duration
+        document.getElementById('calculateDuration').addEventListener('click', function() {
+            const startTime = document.getElementById('sessionStartTime').value;
+            const endTime = document.getElementById('sessionEndTime').value;
+
+            if (!startTime || !endTime) {
+                alert('Please enter both start and end times.');
+                return;
+            }
+
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+
+            let duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+            if (duration < 0) duration += 24 * 60;
+
+            const hours = Math.floor(duration / 60);
+            const minutes = duration % 60;
+            alert(`Session Duration: ${hours}h ${minutes}m`);
+        });
+
+        // Auto-save
+        function startAutoSave() {
+            sessionState.autoSaveInterval = setInterval(() => {
+                saveSessionProgress();
+            }, 120000); // Every 2 minutes
+        }
+
+        function saveSessionProgress() {
+            if (!sessionState.isActive) return;
+
+            showAutoSaveIndicator('saving');
+
+            // Collect form data
+            const formData = new FormData(document.getElementById('startSessionForm'));
+            const sessionData = Object.fromEntries(formData);
+            sessionData.sessionId = sessionState.sessionId;
+            sessionData.uploadedFiles = sessionState.uploadedFiles;
+
+            // In production, would make API call
+            setTimeout(() => {
+                showAutoSaveIndicator('success');
+                console.log('Session progress saved:', sessionData);
+            }, 500);
+        }
+
+        // Save Progress Button
+        document.getElementById('saveProgressBtn').addEventListener('click', function() {
+            saveSessionProgress();
+            showNotification('Session progress saved', 'success');
+        });
+
+        // Complete Session
+        document.getElementById('completeSessionBtn').addEventListener('click', function() {
+            if (!document.getElementById('clinicalNotes').value.trim()) {
+                alert('Please add clinical notes before completing the session.');
+                return;
+            }
+
+            if (!document.getElementById('patientFeedback').value.trim()) {
+                alert('Please add patient feedback before completing the session.');
+                return;
+            }
+
+            // Stop timer
+            clearInterval(sessionState.timerInterval);
+            clearInterval(sessionState.autoSaveInterval);
+            sessionState.isActive = false;
+
+            // Set end time if not set
+            if (!document.getElementById('sessionEndTime').value) {
+                const now = new Date();
+                document.getElementById('sessionEndTime').value = 
+                    String(now.getHours()).padStart(2, '0') + ':' + 
+                    String(now.getMinutes()).padStart(2, '0');
+            }
+
+            // Final save
+            saveSessionProgress();
+
+            // Update UI
+            document.getElementById('sessionStatus').textContent = 'Completed';
+            document.getElementById('sessionStatus').className = 'status-badge active';
+            document.getElementById('completeSessionBtn').disabled = true;
+            document.getElementById('saveProgressBtn').disabled = true;
+
+            showNotification('Session completed successfully', 'success');
+
+            // Could redirect to view-session.html
+            setTimeout(() => {
+                const patientId = new URLSearchParams(window.location.search).get('patientId');
+                const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+                window.location.href = `view-session.html?sessionId=${sessionId}&patientId=${patientId}`;
+            }, 2000);
+        });
+
+        // Cancel Session
+        document.getElementById('cancelSessionBtn').addEventListener('click', function() {
+            if (sessionState.isActive && !confirm('Are you sure you want to cancel this session? All unsaved data will be lost.')) {
+                return;
+            }
+
+            clearInterval(sessionState.timerInterval);
+            clearInterval(sessionState.autoSaveInterval);
+            sessionState.isActive = false;
+
+            showNotification('Session cancelled', 'error');
+            setTimeout(() => {
+                // Navigate back to patient journey
+                const patientId = new URLSearchParams(window.location.search).get('patientId');
+                window.location.href = patientId ? `patient-journey.html?patientId=${patientId}` : 'patient-journey.html';
+            }, 1500);
+        });
+
+        // File Upload Handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('sessionPhotos');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFileSelection(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFileSelection(files);
+        });
+
+        function handleFileSelection(files) {
+            files.forEach(file => {
+                if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const fileObj = {
+                            id: Date.now() + Math.random(),
+                            name: file.name,
+                            data: e.target.result
+                        };
+                        sessionState.uploadedFiles.push(fileObj);
+                        renderUploadedFiles();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select valid image files (max 5MB each)');
+                }
+            });
+        }
+
+        function renderUploadedFiles() {
+            const container = document.getElementById('uploadedFilesList');
+            container.innerHTML = sessionState.uploadedFiles.map(file => `
+                <div class="file-thumbnail" title="${file.name}">
+                    <img src="${file.data}" alt="Uploaded image">
+                    <button type="button" class="remove-btn" onclick="removeFile('${file.id}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(fileId) {
+            sessionState.uploadedFiles = sessionState.uploadedFiles.filter(f => f.id !== fileId);
+            renderUploadedFiles();
+        }
+
+        // Notifications
+        function showNotification(message, type = 'info') {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.textContent = message;
+            indicator.className = `auto-save-indicator show ${type}`;
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+
+        function showAutoSaveIndicator(status) {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.add('show');
+
+            if (status === 'saving') {
+                indicator.innerHTML = '<span class="spinner"></span><span>Auto-saving...</span>';
+                indicator.className = 'auto-save-indicator show';
+            } else if (status === 'success') {
+                indicator.innerHTML = '<span>✓ Auto-saved</span>';
+                indicator.className = 'auto-save-indicator show success';
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // Initialize
+        initializeSessionData();
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (sessionState.isActive && sessionState.elapsedTime > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+    </script>
+</body>
+</html>
