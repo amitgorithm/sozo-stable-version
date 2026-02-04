@@ -2886,6 +2886,64 @@
     </div>
     <!-- END CONTAINER -->
 
+    <!-- DEVICE ACTIVATION MODAL -->
+    <div id="deviceActivationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; margin-bottom: 16px;">
+                    <i class="fa-solid fa-check-circle" style="font-size: 40px; color: white;"></i>
+                </div>
+                <h2 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 8px 0;">Payment Confirmed</h2>
+                <p style="font-size: 14px; color: #64748b; margin: 0;">Ready to activate device for brain mapping</p>
+            </div>
+
+            <!-- Patient Info -->
+            <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <p style="font-size: 12px; font-weight: 600; color: #065f46; margin: 0 0 8px 0;">PATIENT</p>
+                <p id="activationPatientName" style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0;">James Wilson</p>
+            </div>
+
+            <!-- Step 1: Generate Key -->
+            <div id="activationStep1">
+                <div style="background: #fffbeb; border: 2px solid #fde047; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                    <p style="font-size: 13px; color: #713f12; margin: 0; line-height: 1.6;">
+                        <i class="fa-solid fa-info-circle" style="margin-right: 8px;"></i>
+                        <strong>Device Activation Required:</strong> Generate a unique serial key to activate the EEG device for this patient.
+                    </p>
+                </div>
+
+                <button onclick="generateSerialKey()" style="width: 100%; background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s;">
+                    <i class="fa-solid fa-key" style="margin-right: 8px;"></i>
+                    Generate Serial Key
+                </button>
+            </div>
+
+            <!-- Step 2: Show Key and Proceed -->
+            <div id="activationStep2" style="display: none;">
+                <div style="background: #eff6ff; border: 2px solid #93c5fd; border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center;">
+                    <p style="font-size: 12px; font-weight: 600; color: #1e3a8a; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">Serial Key Generated</p>
+                    <div style="background: white; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                        <p id="serialKeyDisplay" style="font-size: 28px; font-weight: 900; color: #1e3a8a; margin: 0; letter-spacing: 2px; font-family: 'Courier New', monospace;">XXXX-XXXX-XXXX</p>
+                    </div>
+                    <p style="font-size: 13px; color: #1e40af; margin: 0; line-height: 1.6;">
+                        <i class="fa-solid fa-lightbulb" style="margin-right: 6px;"></i>
+                        Enter this key in the EEG device to activate it for this patient.
+                    </p>
+                </div>
+
+                <button onclick="proceedToBrainMapping()" style="width: 100%; background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; margin-bottom: 12px;">
+                    <i class="fa-solid fa-arrow-right" style="margin-right: 8px;"></i>
+                    Proceed to Brain Mapping
+                </button>
+
+                <button onclick="closeDeviceActivationModal()" style="width: 100%; background: #f3f4f6; color: #64748b; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- FNON ASSESSMENT MODAL -->
     <div id="fnonAssessmentModal" class="assessment-modal" onclick="closeAssessmentModal(event)">
         <div class="assessment-modal-content" onclick="event.stopPropagation()">
@@ -3294,6 +3352,97 @@
         </div>
     </div>
     <!-- END FNON ASSESSMENT MODAL -->
+
+    <!-- DEVICE ACTIVATION MODAL -->
+    <div id="deviceActivationModal" class="assessment-modal" style="display: none;">
+        <div class="assessment-modal-content" style="max-width: 600px;" onclick="event.stopPropagation()">
+            <div class="assessment-modal-header">
+                <div class="assessment-modal-title">
+                    <h2><i class="fa-solid fa-unlock-keyhole"></i> Device Activation</h2>
+                    <p>Activate your EEG device for brain mapping assessment</p>
+                </div>
+                <button class="close-modal-btn" onclick="closeDeviceActivationModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="assessment-modal-body" style="padding: 32px;">
+                <!-- Step 1: Payment Verification -->
+                <div id="activationStep1" class="activation-step">
+                    <div class="device-state-header unlocked-state" style="margin-bottom: 24px;">
+                        <div class="state-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div class="state-info">
+                            <h3>Payment Verified</h3>
+                            <p>Your payment has been confirmed. Ready to activate device.</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: grid; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="color: #64748b; font-size: 14px;">Device Type</span>
+                                <span style="color: #0f172a; font-weight: 600; font-size: 14px;">EEG Headset</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="color: #64748b; font-size: 14px;">Assessment</span>
+                                <span style="color: #0f172a; font-weight: 600; font-size: 14px;">Brain Mapping</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                                <span style="color: #64748b; font-size: 14px;">Patient</span>
+                                <span style="color: #0f172a; font-weight: 600; font-size: 14px;" id="activationPatientName">James Wilson</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="block-action-btn start" onclick="generateSerialKey()" style="width: 100%; margin-top: 12px;">
+                        <i class="fa-solid fa-key"></i> Generate Activation Key
+                    </button>
+                </div>
+
+                <!-- Step 2: Serial Key Generation -->
+                <div id="activationStep2" class="activation-step" style="display: none;">
+                    <div class="device-state-header unlocked-state" style="margin-bottom: 24px;">
+                        <div class="state-icon">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <div class="state-info">
+                            <h3>Device Activated Successfully</h3>
+                            <p>Your EEG device has been activated and is ready to use</p>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
+                        <div style="color: rgba(255, 255, 255, 0.9); font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Device Serial Key</div>
+                        <div id="serialKeyDisplay" style="font-family: 'Courier New', monospace; font-size: 28px; font-weight: 700; color: white; letter-spacing: 4px; margin: 12px 0;">XXXX-XXXX-XXXX</div>
+                        <div style="color: rgba(255, 255, 255, 0.8); font-size: 11px; margin-top: 8px;"><i class="fa-solid fa-circle-info"></i> Keep this key safe for device authentication</div>
+                    </div>
+
+                    <div style="background: #fef3c7; border: 1px solid #fbbf24; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; gap: 12px; align-items: start;">
+                            <i class="fa-solid fa-lightbulb" style="color: #f59e0b; font-size: 20px; margin-top: 2px;"></i>
+                            <div>
+                                <div style="font-weight: 600; color: #92400e; font-size: 13px; margin-bottom: 4px;">Next Steps</div>
+                                <div style="color: #92400e; font-size: 12px; line-height: 1.5;">
+                                    Your device is now active. You can proceed to start the brain mapping assessment.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="block-action-btn" onclick="closeDeviceActivationModal()" style="flex: 1; background: #94a3b8; color: white;">
+                            <i class="fa-solid fa-xmark"></i> Close
+                        </button>
+                        <button class="block-action-btn start" onclick="proceedToBrainMapping()" style="flex: 2;">
+                            <i class="fa-solid fa-play"></i> Start Brain Mapping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END DEVICE ACTIVATION MODAL -->
 
     <!-- ANAMNESIS MODAL -->
     <div id="anamnesisModal" class="assessment-modal" onclick="closeAnamnesisModal(event)">
@@ -3920,24 +4069,13 @@
 
         // ROLE CHANGE HANDLER
         function handleRoleChange() {
-            currentRole = document.getElementById('roleSelector').value;
-            
-            if (selectedPatientData) {
-                let currentTab = 'today';
-                if (document.getElementById('todayTabContent').style.display === 'block') {
-                    currentTab = 'today';
-                } else if (document.getElementById('overallTabContent').style.display === 'block') {
-                    currentTab = 'overall';
-                }
-                updateURL(selectedPatientData.id, currentRole, currentTab);
-            }
-            
-            if (document.getElementById('todayTabContent').style.display === 'block') {
-                renderTodayView();
-            }
-            if (document.getElementById('workingTabContent').style.display === 'block') {
-                renderWorkingView();
-            }
+            const roleSelector = document.getElementById('roleSelector');
+            if (!roleSelector) return;
+
+            currentRole = roleSelector.value;
+            renderTodayView();
+            renderWorkingView();
+            renderDeviceView();
         }
 
         // GET ROLE PERMISSIONS
@@ -3979,6 +4117,7 @@
         const patientWireframeMapping = {
             'P-NEW-1': 'assessment-blocks',  // Just paid - 4 pending, 3 locked
             'P-NEW-2': 'assessment-blocks',  // Payment pending - all locked
+            'P-NEW-3': 'assessment-blocks',  // Device activation needed
             'P001': 'assessment-blocks',     // 2/4 done
             'P002': 'assessment-blocks',     // 4/4 done, doctor notes open
             'P003': 'assessment-blocks',     // All blocks done
@@ -4010,6 +4149,20 @@
                     { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
                     { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', lockReason: 'payment' },
                     { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', lockReason: 'payment' },
+                    { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
+                    { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
+                    { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
+                ]
+            },
+            'P-NEW-3': { // James Wilson - Payment done, device activation needed for brain mapping
+                assessmentNumber: 1,
+                startDate: '2026-02-03',
+                deviceActivationNeeded: true,
+                blocks: [
+                    { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
+                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
+                    { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending' },
+                    { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending', requiresDeviceActivation: true },
                     { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
                     { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
                     { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
@@ -4085,9 +4238,47 @@
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-30' }
                 ],
                 sessions: [
-                    { id: 'session-1', name: 'Session 1', desc: 'Initial therapy session', status: 'completed', completedAt: '2026-01-15', duration: '60 min', completedBy: 'Dr. James' },
-                    { id: 'session-2', name: 'Session 2', desc: 'Follow-up therapy', status: 'completed', completedAt: '2026-01-22', duration: '60 min', completedBy: 'Clinical Assistant Maria' },
-                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'completed', completedAt: '2026-01-29', duration: '60 min', completedBy: 'Dr. James' },
+                    { 
+                        id: 'session-1', 
+                        name: 'Session 1', 
+                        desc: 'Initial therapy session', 
+                        status: 'completed', 
+                        completedAt: '2026-01-15', 
+                        duration: '60 min', 
+                        completedBy: 'Dr. James',
+                        device: 'Neuronika',
+                        montage: 'F3-F4 (DLPFC)',
+                        symptoms: 'Mild tingling sensation, no adverse effects',
+                        clinicalNotes: 'Patient tolerated treatment well. Reported improved focus immediately after session.',
+                        activities: ['Sudoku', 'Crossword', 'Balance Test']
+                    },
+                    { 
+                        id: 'session-2', 
+                        name: 'Session 2', 
+                        desc: 'Follow-up therapy', 
+                        status: 'completed', 
+                        completedAt: '2026-01-22', 
+                        duration: '60 min', 
+                        completedBy: 'Clinical Assistant Maria',
+                        device: 'tVNS',
+                        symptoms: 'No adverse effects reported',
+                        clinicalNotes: 'Session proceeded smoothly. Patient reports better sleep quality since last week.',
+                        activities: ['Walking', 'Toe Touch', 'Breathing Exercise']
+                    },
+                    { 
+                        id: 'session-3', 
+                        name: 'Session 3', 
+                        desc: 'Continued therapy', 
+                        status: 'completed', 
+                        completedAt: '2026-01-29', 
+                        duration: '60 min', 
+                        completedBy: 'Dr. James',
+                        device: 'TPS',
+                        montage: 'C3-C4 (Motor Cortex)',
+                        symptoms: 'Slight headache post-session (resolved within 30 mins)',
+                        clinicalNotes: 'Good response to treatment. Motor function improvement noted in assessments.',
+                        activities: ['Balance Test', 'Sudoku', 'Memory Game']
+                    },
                     { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'pending', scheduledDate: '2026-02-05' }
                 ]
             }
@@ -4423,16 +4614,30 @@
 
                         // For pending blocks, show info ALWAYS VISIBLE (not in accordion)
                         if (canStart && permissions.canEditData) {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
-                                </div>
-                                <div class="block-action-buttons" style="margin-top: 12px;">
-                                    <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
-                                        <i class="fa-solid fa-play"></i> Start ${block.name}
-                                    </button>
-                                </div>
-                            `;
+                            // Check if device activation is required for this block
+                            if (block.requiresDeviceActivation && block.type === 'brain-mapping') {
+                                expandedDetailsHTML = `
+                                    <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                        <span style="color: #f59e0b;"><i class="fa-solid fa-unlock"></i> Device Activation Required</span>
+                                    </div>
+                                    <div class="block-action-buttons" style="margin-top: 12px;">
+                                        <button class="block-action-btn start" onclick="startDeviceAssessment('${block.type}')">
+                                            <i class="fa-solid fa-unlock-keyhole"></i> Activate Device
+                                        </button>
+                                    </div>
+                                `;
+                            } else {
+                                expandedDetailsHTML = `
+                                    <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                        <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
+                                    </div>
+                                    <div class="block-action-buttons" style="margin-top: 12px;">
+                                        <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
+                                            <i class="fa-solid fa-play"></i> Start ${block.name}
+                                        </button>
+                                    </div>
+                                `;
+                            }
                         } else if (waitingMessage) {
                             expandedDetailsHTML = `
                                 <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
@@ -4528,9 +4733,29 @@
 
                     // COMPLETED: Show details and view button based on role
                     if (session.status === 'completed') {
+                        // Only show details to doctor, clinical-assistant, and patient (NOT receptionist)
+                        const canViewPrivateInfo = currentRole === 'doctor' || currentRole === 'clinical-assistant' || currentRole === 'patient';
+                        
+                        // Build device info with montage (only for neuronika and tps)
+                        let deviceInfo = session.device || 'Not specified';
+                        const deviceLower = (session.device || '').toLowerCase();
+                        const showMontage = (deviceLower === 'neuronika' || deviceLower === 'tps') && session.montage;
+                        
+                        // Map activities to images for hover
+                        const activityImages = {
+                            'Sudoku': 'sudoku.jpg',
+                            'Crossword': 'crossword.avif',
+                            'Balance Test': 'balance.jpeg',
+                            'Walking': 'walking.jpeg',
+                            'Toe Touch': 'exercise.png',
+                            'Breathing Exercise': 'exercise.png',
+                            'Memory Game': 'sudoku.jpg'
+                        };
+                        
                         expandedDetailsHTML = `
                             <div class="block-expanded-details">
-                                <div class="block-info-grid">
+                                <!-- Basic Session Info -->
+                                <div class="block-info-grid" style="margin-bottom: 12px;">
                                     <div class="block-info-item">
                                         <div class="block-info-label">Date</div>
                                         <div class="block-info-value">${session.completedAt}</div>
@@ -4543,11 +4768,43 @@
                                         <div class="block-info-label">Therapist</div>
                                         <div class="block-info-value">${session.completedBy}</div>
                                     </div>
+                                    ${canViewPrivateInfo ? `
+                                        <div class="block-info-item">
+                                            <div class="block-info-label">Device</div>
+                                            <div class="block-info-value">${deviceInfo}${showMontage ? ` (${session.montage})` : ''}</div>
+                                        </div>
+                                    ` : ''}
                                 </div>
+                                
+                                ${canViewPrivateInfo ? `
+                                    <!-- Activities Performed -->
+                                    ${session.activities && session.activities.length > 0 ? `
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px;">Activities Performed</div>
+                                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                                ${session.activities.map(activity => `
+                                                    <span style="position: relative; display: inline-block; background: white; border: 2px solid #e2e8f0; color: #0f172a; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                                        ${activity}
+                                                        <img src="${activityImages[activity] || 'sudoku.jpg'}" alt="${activity}" style="display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid white; z-index: 10;" onload="this.parentElement.addEventListener('mouseenter', () => this.style.display = 'block'); this.parentElement.addEventListener('mouseleave', () => this.style.display = 'none');">
+                                                    </span>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- Symptoms & Clinical Notes -->
+                                    ${session.symptoms || session.clinicalNotes ? `
+                                        <div style="background: #f8fafc; border-radius: 6px; padding: 10px; margin-bottom: 12px; font-size: 11px; color: #475569; line-height: 1.5;">
+                                            ${session.symptoms ? `<div style="margin-bottom: 6px;"><strong style="color: #0f172a;">Symptoms:</strong> ${session.symptoms}</div>` : ''}
+                                            ${session.clinicalNotes ? `<div><strong style="color: #0f172a;">Notes:</strong> ${session.clinicalNotes}</div>` : ''}
+                                        </div>
+                                    ` : ''}
+                                ` : ''}
+                                
                                 ${permissions.canViewReports ? `
-                                    <div class="block-action-buttons" style="margin-top: 12px;">
+                                    <div class="block-action-buttons">
                                         <button class="block-action-btn view" onclick="viewSessionDetails('${session.id}')">
-                                            <i class="fa-solid fa-eye"></i> View Report
+                                            <i class="fa-solid fa-eye"></i> View Full Report
                                         </button>
                                     </div>
                                 ` : ''}
@@ -5009,7 +5266,76 @@
 
         // START DEVICE ASSESSMENT
         function startDeviceAssessment(type) {
-            alert(`Starting Brain Mapping Assessment\\n\\nRole: ${currentRole}\\nDevice: EEG Headset\\nStatus: Active\\n\\nThis would open the EEG capture interface.`);
+            // Update patient name in modal
+            const patientName = selectedPatientData ? selectedPatientData.name : 'James Wilson';
+            const activationNameEl = document.getElementById('activationPatientName');
+            if (activationNameEl) {
+                activationNameEl.textContent = patientName;
+            }
+            
+            // Reset modal to step 1
+            document.getElementById('activationStep1').style.display = 'block';
+            document.getElementById('activationStep2').style.display = 'none';
+            
+            // Show modal
+            const modal = document.getElementById('deviceActivationModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDeviceActivationModal() {
+            const modal = document.getElementById('deviceActivationModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function generateSerialKey() {
+            // Generate a random serial key
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let key = '';
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 4; j++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                if (i < 2) key += '-';
+            }
+            
+            // Display the key with animation
+            const keyDisplay = document.getElementById('serialKeyDisplay');
+            if (keyDisplay) {
+                keyDisplay.textContent = key;
+            }
+            
+            // Move to step 2
+            document.getElementById('activationStep1').style.display = 'none';
+            document.getElementById('activationStep2').style.display = 'block';
+        }
+
+        function proceedToBrainMapping() {
+            // Close modal
+            closeDeviceActivationModal();
+            
+            // Store session context
+            const patientId = selectedPatientData ? selectedPatientData.id : 'P-NEW-3';
+            const patientName = selectedPatientData ? selectedPatientData.name : 'James Wilson';
+            
+            sessionStorage.setItem('currentPatientId', patientId);
+            sessionStorage.setItem('patientName', patientName);
+            sessionStorage.setItem('currentRole', currentRole);
+            sessionStorage.setItem('eegSession', JSON.stringify({
+                patientId: patientId,
+                startTime: new Date().toISOString(),
+                operator: currentRole,
+                deviceActivated: true,
+                serialKey: document.getElementById('serialKeyDisplay').textContent
+            }));
+            
+            // Navigate to EEG interface
+            window.location.href = 'eeg.html';
         }
 
         // ACTION HANDLERS
@@ -6583,6 +6909,18 @@
                 stateLabel: '⏳ New - Payment Pending'
             },
             {
+                id: 'P-NEW-3',
+                firstName: 'James',
+                lastName: 'Wilson',
+                age: 38,
+                gender: 'Male',
+                condition: 'Migraine',
+                lastVisit: 'Today',
+                status: 'new',
+                nextAppointment: '2026-02-10',
+                stateLabel: '🔓 Device Activation Needed'
+            },
+            {
                 id: 'P001',
                 firstName: 'Sarah',
                 lastName: 'Johnson',
@@ -7023,6 +7361,12 @@
         }
 
         // INITIALIZE
+        // IMPORTANT: Check URL for role FIRST before any rendering
+        const urlParams = getURLParams();
+        if (urlParams.role) {
+            currentRole = urlParams.role;
+        }
+        
         renderAssessments();
         renderPatientDropdown();
         handleEntryRoleChange(); // Initialize entry role-based UI
