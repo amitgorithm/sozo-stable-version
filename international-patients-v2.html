@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Patient Qualification | Sozo Brain Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sozo: {
+              50: 'rgb(255, 247, 237)',
+              100: 'rgb(255, 237, 213)',
+              200: 'rgb(254, 215, 170)',
+              300: 'rgb(253, 186, 116)',
+              400: 'rgb(251, 146, 60)',
+              500: 'rgb(249, 115, 22)',
+              600: 'rgb(244, 121, 32)',
+              700: 'rgb(202, 65, 12)',
+            },
+            brand: {
+              blue: 'rgb(0, 161, 228)',
+              'blue-dark': 'rgb(0, 130, 185)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --orange-primary: rgb(244, 121, 32);
+      --orange-dark: rgb(202, 65, 12);
+      --orange-light: rgba(244, 121, 32, 0.1);
+      --blue-primary: rgb(0, 161, 228);
+      --blue-dark: rgb(0, 130, 185);
+      --blue-light: rgba(0, 161, 228, 0.1);
+    }
+    
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      min-height: 100vh; 
+    }
+    
+    /* Stage transitions */
+    .stage-container {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    
+    .stage-container.active {
+      display: block;
+      animation: fadeInUp 0.4s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Card styling */
+    .selection-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid #e2e8f0;
+      background: white;
+      position: relative;
+    }
+    
+    .selection-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(244, 121, 32, 0.15);
+      border-color: var(--orange-primary);
+    }
+    
+    .selection-card.selected {
+      border-color: var(--orange-primary);
+      background: linear-gradient(135deg, var(--orange-light) 0%, rgba(0, 161, 228, 0.05) 100%);
+      box-shadow: 0 8px 20px rgba(244, 121, 32, 0.2);
+    }
+    
+    .selection-card.selected::after {
+      content: '\f058';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      color: var(--orange-primary);
+      font-size: 24px;
+    }
+    
+    /* Radio/Checkbox options */
+    .option-card {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+    }
+    
+    .option-card:hover {
+      border-color: var(--orange-primary);
+      background: #fafafa;
+    }
+    
+    .option-card.selected {
+      background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+      color: white;
+      border-color: var(--orange-primary);
+    }
+    
+    .option-card.selected * {
+      color: white !important;
+    }
+    
+    /* Progress bar */
+    .progress-bar {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange-primary), var(--orange-dark));
+      transition: width 0.4s ease;
+    }
+    
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+      color: white;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 6px 16px rgba(244, 121, 32, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: white;
+      border: 2px solid #e2e8f0;
+      color: #64748b;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--orange-primary);
+      color: var(--orange-primary);
+    }
+    
+    /* Input styling */
+    select, input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    select:focus, input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--orange-primary);
+      box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Range slider */
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--orange-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(244, 121, 32, 0.3);
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--orange-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(244, 121, 32, 0.3);
+      border: none;
+    }
+    
+    /* Checkbox styling */
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .checkbox-group label:hover {
+      border-color: var(--orange-primary);
+      background: #fafafa;
+    }
+    
+    .checkbox-group input[type="checkbox"]:checked + span {
+      font-weight: 600;
+      color: var(--orange-primary);
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="max-w-4xl mx-auto p-4 md:p-6">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 mb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-sozo-600 to-sozo-700 rounded-lg flex items-center justify-center">
+            <i class="fas fa-brain text-white text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Sozo Brain Center</h1>
+            <p class="text-xs text-slate-500">International Patient Qualification</p>
+          </div>
+        </div>
+        <div class="text-right hidden md:block">
+          <p class="text-xs text-slate-500">Confidential Assessment</p>
+          <p class="text-xs text-slate-400">Auto-save enabled</p>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="mt-4" id="progressBarContainer" style="display: none;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-slate-700" id="progressLabel">Stage 1 of 9</span>
+          <span class="text-xs text-slate-500" id="progressPercent">11%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 11%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 0: Welcome Screen -->
+    <div id="stage0" class="stage-container active">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-gradient-to-br from-sozo-600 to-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-globe text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Welcome to Sozo Brain Center</h2>
+          <p class="text-sm text-slate-600 max-w-2xl mx-auto">
+            We're here to understand your condition and guide you toward the right next step. This brief assessment helps us determine how we can best support your journey to better health.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+            <i class="fas fa-clock text-sozo-600 text-xl mb-2"></i>
+            <p class="text-sm font-semibold text-slate-700">10-15 Minutes</p>
+            <p class="text-xs text-slate-500">Estimated time</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+            <i class="fas fa-shield-halved text-brand-blue text-xl mb-2"></i>
+            <p class="text-sm font-semibold text-slate-700">100% Confidential</p>
+            <p class="text-xs text-slate-500">Your privacy matters</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+            <i class="fas fa-headset text-sozo-600 text-xl mb-2"></i>
+            <p class="text-sm font-semibold text-slate-700">Expert Review</p>
+            <p class="text-xs text-slate-500">Within 24-48 hours</p>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <button onclick="startAssessment()" class="btn-primary text-base px-8 py-3">
+            <i class="fas fa-play"></i>
+            <span>Begin Assessment</span>
+          </button>
+          <p class="text-xs text-slate-500 mt-4">
+            <i class="fas fa-info-circle mr-1"></i>
+            Your responses will be auto-saved as you progress
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 1: Context & Identity -->
+    <div id="stage1" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Let's start with some context</h2>
+          <p class="text-sm text-slate-600">Help us understand who you are and where you're located</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Who is filling this form -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-3">Who is filling out this form? <span class="text-red-500">*</span></label>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div class="option-card rounded-lg p-4" onclick="selectOption('formFiller', 'patient', this)">
+                <div class="flex items-center gap-3">
+                  <i class="fas fa-user text-sozo-600 text-xl"></i>
+                  <div>
+                    <p class="font-semibold text-sm">I am the patient</p>
+                    <p class="text-xs text-slate-500">Filling for myself</p>
+                  </div>
+                </div>
+              </div>
+              <div class="option-card rounded-lg p-4" onclick="selectOption('formFiller', 'caregiver', this)">
+                <div class="flex items-center gap-3">
+                  <i class="fas fa-user-group text-brand-blue text-xl"></i>
+                  <div>
+                    <p class="font-semibold text-sm">Family / Caregiver</p>
+                    <p class="text-xs text-slate-500">Filling on behalf of patient</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Where are you located? <span class="text-red-500">*</span></label>
+            <select id="country" onchange="saveAnswer('country', this.value); validateStage1();">
+              <option value="">Select your country</option>
+              <option value="UK">United Kingdom</option>
+              <option value="USA">United States</option>
+              <option value="Germany">Germany</option>
+              <option value="France">France</option>
+              <option value="Italy">Italy</option>
+              <option value="Spain">Spain</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="UAE">United Arab Emirates</option>
+              <option value="Saudi Arabia">Saudi Arabia</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Language -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Preferred language for communication <span class="text-red-500">*</span></label>
+            <select id="language" onchange="saveAnswer('language', this.value); validateStage1();">
+              <option value="">Select language</option>
+              <option value="English">English</option>
+              <option value="Arabic">Arabic</option>
+              <option value="Russian">Russian</option>
+              <option value="German">German</option>
+              <option value="French">French</option>
+              <option value="Spanish">Spanish</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Condition -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-3">What is your primary condition of concern? <span class="text-red-500">*</span></label>
+            <div class="space-y-3">
+              <div class="selection-card rounded-lg p-4" onclick="selectDisease('parkinsons', this)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-hand-dots text-orange-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-semibold text-slate-900">Parkinson's Disease</p>
+                    <p class="text-xs text-slate-500">Movement disorder affecting mobility and coordination</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="selection-card rounded-lg p-4" onclick="selectDisease('ms', this)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-brain text-blue-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-semibold text-slate-900">Multiple Sclerosis</p>
+                    <p class="text-xs text-slate-500">Autoimmune condition affecting the nervous system</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="selection-card rounded-lg p-4" onclick="selectDisease('stroke', this)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-heart-pulse text-red-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-semibold text-slate-900">Stroke Recovery</p>
+                    <p class="text-xs text-slate-500">Post-stroke rehabilitation and recovery</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="selection-card rounded-lg p-4" onclick="selectDisease('other', this)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-ellipsis text-slate-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-semibold text-slate-900">Other Neurological Condition</p>
+                    <p class="text-xs text-slate-500">Other brain or nervous system conditions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button id="stage1Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 2: General Clinical Understanding -->
+    <div id="stage2" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Understanding your condition</h2>
+          <p class="text-sm text-slate-600">Help us understand your current situation</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Diagnosis confirmation -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Has your condition been formally diagnosed? <span class="text-red-500">*</span></label>
+            <select id="diagnosis" onchange="saveAnswer('diagnosis', this.value); validateStage2();">
+              <option value="">Please select</option>
+              <option value="neurologist">Yes, confirmed by a neurologist/specialist</option>
+              <option value="gp">Yes, confirmed by a general practitioner</option>
+              <option value="suspected">Suspected, but not yet confirmed</option>
+              <option value="exploring">Still exploring / seeking diagnosis</option>
+            </select>
+          </div>
+
+          <!-- Time since onset -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">How long have you been experiencing symptoms? <span class="text-red-500">*</span></label>
+            <select id="duration" onchange="saveAnswer('duration', this.value); validateStage2();">
+              <option value="">Please select</option>
+              <option value="<6months">Less than 6 months</option>
+              <option value="6-12months">6-12 months</option>
+              <option value="1-3years">1-3 years</option>
+              <option value="3-5years">3-5 years</option>
+              <option value="5+years">More than 5 years</option>
+            </select>
+          </div>
+
+          <!-- Current treatment -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Are you currently receiving treatment? <span class="text-red-500">*</span></label>
+            <select id="currentTreatment" onchange="saveAnswer('currentTreatment', this.value); validateStage2();">
+              <option value="">Please select</option>
+              <option value="medication-effective">Yes, medication working well</option>
+              <option value="medication-partial">Yes, medication with partial relief</option>
+              <option value="medication-ineffective">Yes, but treatment not working well</option>
+              <option value="no-treatment">Not currently on treatment</option>
+              <option value="alternative">Using alternative/complementary therapies</option>
+            </select>
+          </div>
+
+          <!-- Impact on life -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">How much does your condition affect your daily life? <span class="text-red-500">*</span></label>
+            <select id="dailyImpact" onchange="saveAnswer('dailyImpact', this.value); validateStage2();">
+              <option value="">Please select</option>
+              <option value="minimal">Minimal impact, managing well</option>
+              <option value="moderate">Moderate impact, some activities affected</option>
+              <option value="significant">Significant impact, need regular help</option>
+              <option value="severe">Severe impact, dependent on others</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage2Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3: Smart Expectation Selection -->
+    <div id="stage3" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">How does this affect your daily life?</h2>
+          <p class="text-sm text-slate-600">Understanding the functional impact helps us gauge treatment meaningfulness</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Walking independence -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Can you walk independently? <span class="text-red-500">*</span></label>
+            <select id="walking" onchange="saveAnswer('walking', this.value); validateStage3();">
+              <option value="">Please select</option>
+              <option value="independent">Yes, without assistance</option>
+              <option value="occasional-help">Yes, but need occasional help</option>
+              <option value="aid">Only with walking aid (cane, walker)</option>
+              <option value="wheelchair">Use wheelchair most of the time</option>
+              <option value="unable">Unable to walk</option>
+            </select>
+          </div>
+
+          <!-- Daily activities -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Daily activities (dressing, eating, bathing)? <span class="text-red-500">*</span></label>
+            <select id="activities" onchange="saveAnswer('activities', this.value); validateStage3();">
+              <option value="">Please select</option>
+              <option value="independent">Can do independently</option>
+              <option value="some-help">Need help with some tasks</option>
+              <option value="most-help">Need help with most tasks</option>
+              <option value="full-help">Need full assistance</option>
+            </select>
+          </div>
+
+          <!-- Caregiver dependence -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Do you currently rely on a caregiver? <span class="text-red-500">*</span></label>
+            <select id="caregiver" onchange="saveAnswer('caregiver', this.value); validateStage3();">
+              <option value="">Please select</option>
+              <option value="no">No caregiver needed</option>
+              <option value="occasional">Occasional help from family</option>
+              <option value="regular">Regular caregiver support</option>
+              <option value="full-time">Full-time caregiver</option>
+            </select>
+          </div>
+
+          <!-- Falls -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Have you experienced falls in the past 6 months? <span class="text-red-500">*</span></label>
+            <select id="falls" onchange="saveAnswer('falls', this.value); validateStage3();">
+              <option value="">Please select</option>
+              <option value="none">No falls</option>
+              <option value="rare">1-2 times</option>
+              <option value="occasional">3-5 times</option>
+              <option value="frequent">More than 5 times</option>
+            </select>
+          </div>
+
+          <!-- Quality of life -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-3">How would you rate your current quality of life? <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-4">
+              <span class="text-xs text-slate-500 flex-shrink-0">Poor</span>
+              <input type="range" min="1" max="10" value="5" id="qolSlider" oninput="updateQoL(this.value)">
+              <span class="text-xs text-slate-500 flex-shrink-0">Excellent</span>
+            </div>
+            <div class="text-center mt-2">
+              <span class="text-2xl font-bold text-sozo-600" id="qolValue">5</span>
+              <span class="text-sm text-slate-500">/ 10</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage3Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 4: Practical Considerations -->
+    <div id="stage4" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">What have you tried so far?</h2>
+          <p class="text-sm text-slate-600">Understanding your treatment history helps us provide better guidance</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Current medications -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Are you currently taking medications for Parkinson's? <span class="text-red-500">*</span></label>
+            <select id="medications" onchange="saveAnswer('medications', this.value); toggleMedicationEffectiveness(); validateStage4();">
+              <option value="">Please select</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="stopped">Previously, but stopped</option>
+            </select>
+          </div>
+
+          <!-- Medication effectiveness (conditional) -->
+          <div id="medicationEffectivenessBlock" style="display: none;">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">How effective are your current medications? <span class="text-red-500">*</span></label>
+            <select id="medEffectiveness" onchange="saveAnswer('medEffectiveness', this.value); validateStage4();">
+              <option value="">Please select</option>
+              <option value="very-effective">Very effective (symptoms well controlled)</option>
+              <option value="somewhat">Somewhat effective (partial relief)</option>
+              <option value="minimal">Minimal effectiveness</option>
+              <option value="not-effective">Not effective</option>
+            </select>
+          </div>
+
+          <!-- Advanced therapies -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-3">Have you tried any of these therapies? <span class="text-xs text-slate-500">(Select all that apply)</span></label>
+            <div class="checkbox-group space-y-2">
+              <label>
+                <input type="checkbox" value="dbs" onchange="updateCheckboxAnswer('therapies')">
+                <span>Deep Brain Stimulation (DBS)</span>
+              </label>
+              <label>
+                <input type="checkbox" value="physiotherapy" onchange="updateCheckboxAnswer('therapies')">
+                <span>Physiotherapy / Physical therapy</span>
+              </label>
+              <label>
+                <input type="checkbox" value="occupational" onchange="updateCheckboxAnswer('therapies')">
+                <span>Occupational therapy</span>
+              </label>
+              <label>
+                <input type="checkbox" value="speech" onchange="updateCheckboxAnswer('therapies')">
+                <span>Speech therapy</span>
+              </label>
+              <label>
+                <input type="checkbox" value="alternative" onchange="updateCheckboxAnswer('therapies')">
+                <span>Alternative / complementary therapies</span>
+              </label>
+              <label>
+                <input type="checkbox" value="none" onchange="updateCheckboxAnswer('therapies')">
+                <span>None of the above</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Why exploring Sozo -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Why are you exploring Sozo now? <span class="text-red-500">*</span></label>
+            <select id="whySozo" onchange="saveAnswer('whySozo', this.value); validateStage4();">
+              <option value="">Please select</option>
+              <option value="plateau">Current treatments have plateaued</option>
+              <option value="side-effects">Experiencing side effects from medications</option>
+              <option value="progression">Condition is progressing despite treatment</option>
+              <option value="exploring">Exploring all available options</option>
+              <option value="recommendation">Recommended by someone</option>
+              <option value="research">Found through my own research</option>
+              <option value="other">Other reason</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage4Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 5: Contact Information -->
+    <div id="stage5" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">How can we reach you?</h2>
+          <p class="text-sm text-slate-600">We'll review your assessment and contact you within 24-48 hours</p>
+        </div>
+
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+            <input type="text" id="fullName" placeholder="Your name" onkeyup="saveAnswer('fullName', this.value); validateStage5();">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address <span class="text-red-500">*</span></label>
+            <input type="text" id="email" placeholder="your.email@example.com" onkeyup="saveAnswer('email', this.value); validateStage5();">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Phone Number <span class="text-slate-500">(Optional)</span></label>
+            <input type="text" id="phone" placeholder="+44 123 456 7890" onkeyup="saveAnswer('phone', this.value);">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Anything else you'd like us to know? <span class="text-slate-500">(Optional)</span></label>
+            <textarea 
+              id="additionalInfo" 
+              placeholder="Any additional information that might be helpful..."
+              rows="3"
+              onkeyup="saveAnswer('additionalInfo', this.value);"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage5Next" class="btn-primary" onclick="submitAssessment()" disabled>
+            <i class="fas fa-check"></i>
+            <span>Submit Assessment</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 6: Patient Thank You Screen -->
+    <div id="stage6" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <div class="bg-gradient-to-r from-orange-50 to-blue-50 border border-orange-200 rounded-lg p-4 mb-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-lightbulb text-sozo-600 text-xl mt-1"></i>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Important Question</p>
+                <p class="text-xs text-slate-600">This helps us tailor our response to your specific needs and expectations.</p>
+              </div>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 mb-2">What is your primary expectation?</h2>
+          <p class="text-sm text-slate-600">Please select the ONE option that best describes what you're looking for</p>
+        </div>
+
+        <div class="space-y-3">
+          <div class="selection-card rounded-lg p-5" onclick="selectIntent('expert-opinion', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user-doctor text-green-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-bold text-slate-900 mb-1">Clear expert medical opinion and honest assessment of suitability</p>
+                <p class="text-xs text-slate-600">I want professional guidance on whether Sozo treatment could help my specific condition, with transparent advice on my candidacy.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="selection-card rounded-lg p-5" onclick="selectIntent('outcome-improvement', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-bold text-slate-900 mb-1">Meaningful improvement in function, symptoms, and quality of life</p>
+                <p class="text-xs text-slate-600">I'm seeking tangible results and better daily functioning. I'm ready to explore treatment if it can genuinely help me.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="selection-card rounded-lg p-5" onclick="selectIntent('exploring', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-compass text-purple-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-bold text-slate-900 mb-1">Exploring options and gathering information without immediate commitment</p>
+                <p class="text-xs text-slate-600">I'm in the early research phase, learning about different approaches and what might be available to me.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage5Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 6: Travel & Cyprus Feasibility Gate 🚨 -->
+    <div id="stage6" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-plane-departure text-brand-blue text-xl mt-1"></i>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Treatment Location</p>
+                <p class="text-xs text-slate-600">Sozo treatment requires physical presence in Cyprus for 2-6 weeks. Let's assess travel feasibility.</p>
+              </div>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Travel & Cyprus readiness</h2>
+          <p class="text-sm text-slate-600">Understanding your ability to travel helps us plan appropriately</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- International travel ability -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Are you able to travel internationally? <span class="text-red-500">*</span></label>
+            <select id="travelAbility" onchange="saveAnswer('travelAbility', this.value); validateStage6();">
+              <option value="">Please select</option>
+              <option value="independent">Yes, independently without assistance</option>
+              <option value="with-help">Yes, but would need assistance</option>
+              <option value="uncertain">Uncertain about my ability</option>
+              <option value="difficult">Very difficult / not currently possible</option>
+            </select>
+          </div>
+
+          <!-- Stay duration -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Can you stay in Cyprus for 2-6 weeks? <span class="text-red-500">*</span></label>
+            <select id="stayDuration" onchange="saveAnswer('stayDuration', this.value); validateStage6();">
+              <option value="">Please select</option>
+              <option value="yes">Yes, I can arrange this</option>
+              <option value="need-planning">Yes, but need advance planning</option>
+              <option value="unsure">Unsure at this time</option>
+              <option value="difficult">Would be very difficult</option>
+            </select>
+          </div>
+
+          <!-- Caregiver travel -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Would you need a caregiver to travel with you? <span class="text-red-500">*</span></label>
+            <select id="caregiverTravel" onchange="saveAnswer('caregiverTravel', this.value); validateStage6();">
+              <option value="">Please select</option>
+              <option value="no">No, I can travel alone</option>
+              <option value="preferred">Not essential, but preferred</option>
+              <option value="yes">Yes, definitely needed</option>
+              <option value="unsure">Unsure</option>
+            </select>
+          </div>
+
+          <!-- Mobility constraints -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-3">Do you have any mobility constraints for travel? <span class="text-xs text-slate-500">(Select all that apply)</span></label>
+            <div class="checkbox-group space-y-2">
+              <label>
+                <input type="checkbox" value="wheelchair" onchange="updateCheckboxAnswer('mobilityConstraints')">
+                <span>Require wheelchair</span>
+              </label>
+              <label>
+                <input type="checkbox" value="walker" onchange="updateCheckboxAnswer('mobilityConstraints')">
+                <span>Use walker or cane</span>
+              </label>
+              <label>
+                <input type="checkbox" value="assistance" onchange="updateCheckboxAnswer('mobilityConstraints')">
+                <span>Need assistance boarding planes/vehicles</span>
+              </label>
+              <label>
+                <input type="checkbox" value="special-accommodation" onchange="updateCheckboxAnswer('mobilityConstraints')">
+                <span>Require special accommodation</span>
+              </label>
+              <label>
+                <input type="checkbox" value="none" onchange="updateCheckboxAnswer('mobilityConstraints')">
+                <span>No mobility constraints</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Timeframe -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">If suitable, when could you potentially travel? <span class="text-red-500">*</span></label>
+            <select id="travelTimeframe" onchange="saveAnswer('travelTimeframe', this.value); validateStage6();">
+              <option value="">Please select</option>
+              <option value="1month">Within 1 month</option>
+              <option value="1-3months">1-3 months</option>
+              <option value="3-6months">3-6 months</option>
+              <option value="6+months">6+ months</option>
+              <option value="flexible">Flexible / dependent on assessment</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage6Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 7: Financial & Commitment Readiness -->
+    <div id="stage7" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-hand-holding-heart text-sozo-600 text-xl mt-1"></i>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Transparent Conversation</p>
+                <p class="text-xs text-slate-600">We believe in being upfront about the financial aspects to ensure we're aligned from the start.</p>
+              </div>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Financial & commitment readiness</h2>
+          <p class="text-sm text-slate-600">Understanding your financial readiness helps us provide relevant guidance</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Awareness of private funding -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Are you aware that treatment at Sozo is privately funded? <span class="text-red-500">*</span></label>
+            <select id="privateFunding" onchange="saveAnswer('privateFunding', this.value); validateStage7();">
+              <option value="">Please select</option>
+              <option value="yes-aware">Yes, I understand it's private pay</option>
+              <option value="yes-question">Yes, but I have questions about costs</option>
+              <option value="unsure">I wasn't sure about this</option>
+            </select>
+          </div>
+
+          <!-- Budget range -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">What is your approximate budget range for treatment? <span class="text-red-500">*</span></label>
+            <select id="budget" onchange="saveAnswer('budget', this.value); validateStage7();">
+              <option value="">Please select</option>
+              <option value="<10k">Under €10,000</option>
+              <option value="10-25k">€10,000 - €25,000</option>
+              <option value="25-50k">€25,000 - €50,000</option>
+              <option value="50k+">Over €50,000</option>
+              <option value="prefer-not-say">Prefer not to say</option>
+              <option value="need-info">Need more information to decide</option>
+            </select>
+          </div>
+
+          <!-- Funding source -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">How would you plan to fund treatment? <span class="text-red-500">*</span></label>
+            <select id="fundingSource" onchange="saveAnswer('fundingSource', this.value); validateStage7();">
+              <option value="">Please select</option>
+              <option value="self-funded">Self-funded / personal savings</option>
+              <option value="family">Family support</option>
+              <option value="insurance">Insurance coverage (if applicable)</option>
+              <option value="combination">Combination of sources</option>
+              <option value="unsure">Unsure at this stage</option>
+            </select>
+          </div>
+
+          <!-- Decision timeframe -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">When would you ideally want to begin treatment? <span class="text-red-500">*</span></label>
+            <select id="decisionTime" onchange="saveAnswer('decisionTime', this.value); validateStage7();">
+              <option value="">Please select</option>
+              <option value="asap">As soon as possible</option>
+              <option value="1-3months">Within 1-3 months</option>
+              <option value="3-6months">3-6 months</option>
+              <option value="6+months">6+ months from now</option>
+              <option value="just-exploring">Just exploring options currently</option>
+            </select>
+          </div>
+
+          <!-- Decision maker -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Who will be the primary decision-maker? <span class="text-red-500">*</span></label>
+            <select id="decisionMaker" onchange="saveAnswer('decisionMaker', this.value); validateStage7();">
+              <option value="">Please select</option>
+              <option value="myself">Myself (the patient)</option>
+              <option value="family">Family member</option>
+              <option value="joint">Joint decision with family</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage7Next" class="btn-primary" onclick="nextStage()" disabled>
+            <span>Continue</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 8: Motivation & Human Context -->
+    <div id="stage8" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Help us understand your goals</h2>
+          <p class="text-sm text-slate-600">Your personal context helps our team provide more tailored guidance</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Primary goal -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">What is your primary goal from treatment? <span class="text-red-500">*</span></label>
+            <textarea 
+              id="primaryGoal" 
+              placeholder="For example: 'I want to regain independence in daily activities' or 'I hope to reduce tremors so I can continue working'..."
+              rows="3"
+              onkeyup="saveAnswer('primaryGoal', this.value); validateStage8();"
+            ></textarea>
+            <p class="text-xs text-slate-500 mt-1">Please share 1-2 sentences</p>
+          </div>
+
+          <!-- Biggest concern -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">What is your biggest concern or question right now? <span class="text-red-500">*</span></label>
+            <textarea 
+              id="biggestConcern" 
+              placeholder="For example: 'Will this treatment work for my specific symptoms?' or 'I'm worried about the travel requirements'..."
+              rows="3"
+              onkeyup="saveAnswer('biggestConcern', this.value); validateStage8();"
+            ></textarea>
+            <p class="text-xs text-slate-500 mt-1">Please share 1-2 sentences</p>
+          </div>
+
+          <!-- Medical records willingness -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Would you be willing to share medical records if relevant? <span class="text-red-500">*</span></label>
+            <select id="medicalRecords" onchange="saveAnswer('medicalRecords', this.value); validateStage8();">
+              <option value="">Please select</option>
+              <option value="yes">Yes, I can provide records if needed</option>
+              <option value="maybe">Maybe, depending on what's required</option>
+              <option value="prefer-not">I'd prefer not to at this stage</option>
+            </select>
+          </div>
+
+          <!-- Contact information -->
+          <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+            <p class="text-sm font-semibold text-slate-900 mb-4">How can we reach you?</p>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                <input type="text" id="fullName" placeholder="Your name" onkeyup="saveAnswer('fullName', this.value); validateStage8();">
+              </div>
+              
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address <span class="text-red-500">*</span></label>
+                <input type="text" id="email" placeholder="your.email@example.com" onkeyup="saveAnswer('email', this.value); validateStage8();">
+              </div>
+              
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number <span class="text-slate-500">(Optional)</span></label>
+                <input type="text" id="phone" placeholder="+44 123 456 7890" onkeyup="saveAnswer('phone', this.value);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+          <button class="btn-secondary" onclick="previousStage()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+          <button id="stage8Next" class="btn-primary" onclick="submitAssessment()" disabled>
+            <i class="fas fa-check"></i>
+            <span>Submit Assessment</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 9: Thank You / Confirmation (No Scores Shown) -->
+    <div id="stage9" class="stage-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Thank you for completing the assessment</h2>
+          <p class="text-sm text-slate-600 max-w-2xl mx-auto">
+            Our medical team will carefully review your responses and reach out to you within 24-48 hours with next steps.
+          </p>
+        </div>
+
+        <!-- Submission confirmation -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-5 mb-6">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="fas fa-circle-check text-green-600 text-xl"></i>
+            <p class="font-semibold text-slate-900">Submission Confirmed</p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3 text-xs">
+            <div>
+              <p class="text-slate-500">Reference ID</p>
+              <p class="font-mono font-semibold text-slate-900" id="submissionId">INTL-2026-XXXXX</p>
+            </div>
+            <div>
+              <p class="text-slate-500">Submitted</p>
+              <p class="font-semibold text-slate-900" id="submissionDate">04 Feb 2026</p>
+            </div>
+            <div>
+              <p class="text-slate-500">Condition</p>
+              <p class="font-semibold text-slate-900" id="submissionCondition">Parkinson's Disease</p>
+            </div>
+            <div>
+              <p class="text-slate-500">Contact Email</p>
+              <p class="font-semibold text-slate-900" id="submissionEmail">your.email@example.com</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- What happens next -->
+        <div class="space-y-4 mb-8">
+          <h3 class="text-sm font-bold text-slate-900">What happens next?</h3>
+          
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-sozo-100 rounded-full flex items-center justify-center">
+              <span class="font-bold text-sozo-600">1</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-slate-900">Clinical Review</p>
+              <p class="text-xs text-slate-600">Our medical team will review your assessment in detail</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-brand-blue/20 rounded-full flex items-center justify-center">
+              <span class="font-bold text-brand-blue">2</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-slate-900">Personalized Response</p>
+              <p class="text-xs text-slate-600">We'll reach out within 24-48 hours with tailored guidance</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <span class="font-bold text-green-600">3</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-slate-900">Next Steps Discussion</p>
+              <p class="text-xs text-slate-600">We'll discuss whether Sozo treatment could help and outline a potential path forward</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact info -->
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 text-center">
+          <p class="text-xs text-slate-600 mb-2">Questions in the meantime?</p>
+          <p class="text-sm font-semibold text-slate-900">
+            <i class="fas fa-envelope mr-2 text-sozo-600"></i>
+            international@sozobrain.com
+          </p>
+          <p class="text-sm font-semibold text-slate-900 mt-1">
+            <i class="fas fa-phone mr-2 text-brand-blue"></i>
+            +357 XX XXX XXXX
+          </p>
+        </div>
+
+        <div class="mt-8 text-center">
+          <button onclick="location.reload()" class="btn-secondary">
+            <i class="fas fa-rotate-right"></i>
+            <span>Submit Another Assessment</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW: Qualification Dashboard (Hidden from patient) -->
+    <div id="adminDashboard" class="mt-8" style="display: none;">
+      <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-700 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-lg font-bold text-white mb-1">Internal Qualification Dashboard</h3>
+            <p class="text-xs text-slate-400">Admin view only - not visible to patient</p>
+          </div>
+          <button onclick="toggleAdminDashboard()" class="text-xs text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i> Hide
+          </button>
+        </div>
+
+        <!-- Composite Scores -->
+        <div class="grid md:grid-cols-5 gap-4 mb-6">
+          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <p class="text-xs text-slate-400 mb-2">Clinical Relevance</p>
+            <p class="text-2xl font-bold text-white" id="adminClinicalScore">16/20</p>
+            <p class="text-xs text-green-400 mt-1" id="adminClinicalLabel">High</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <p class="text-xs text-slate-400 mb-2">Functional Impact</p>
+            <p class="text-2xl font-bold text-white" id="adminFunctionalScore">14/20</p>
+            <p class="text-xs text-yellow-400 mt-1" id="adminFunctionalLabel">Moderate</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <p class="text-xs text-slate-400 mb-2">Intent Strength</p>
+            <p class="text-2xl font-bold text-white" id="adminIntentScore">10/10</p>
+            <p class="text-xs text-green-400 mt-1" id="adminIntentLabel">Very High</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <p class="text-xs text-slate-400 mb-2">Travel Readiness</p>
+            <p class="text-2xl font-bold text-white" id="adminTravelScore">8/10</p>
+            <p class="text-xs text-green-400 mt-1" id="adminTravelLabel">High</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <p class="text-xs text-slate-400 mb-2">Financial Ready</p>
+            <p class="text-2xl font-bold text-white" id="adminFinancialScore">7/10</p>
+            <p class="text-xs text-yellow-400 mt-1" id="adminFinancialLabel">Likely</p>
+          </div>
+        </div>
+
+        <!-- Composite Output -->
+        <div class="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-700 rounded-lg p-5">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <p class="text-xs text-slate-400 mb-1">Conversion Likelihood</p>
+              <p class="text-xl font-bold text-green-400" id="adminConversion">🟢 HIGH</p>
+              <p class="text-xs text-slate-400 mt-1"><span id="adminTotalScore">55</span>/70 points</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 mb-1">Cyprus Feasibility</p>
+              <p class="text-xl font-bold text-green-400" id="adminFeasibility">🟢 YES</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 mb-1">Recommended Action</p>
+              <p class="text-sm font-bold text-white" id="adminAction">CLINICAL REVIEW ESCALATION</p>
+              <p class="text-xs text-green-400 mt-1">→ Schedule €500 expert consult</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Signals -->
+        <div class="mt-6 bg-slate-800 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs font-bold text-white mb-3">Key Signals</p>
+          <div class="space-y-2 text-xs" id="adminSignals">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ========================================
+    // GLOBAL STATE
+    // ========================================
+    const state = {
+      currentStage: 0,
+      totalStages: 5,
+      answers: {},
+      disease: null,
+      startTime: null,
+      submissionId: null,
+      selectedExpectations: [],
+      scores: {
+        clinical: 0,
+        functional: 0,
+        intent: 0,
+        travel: 0,
+        financial: 0
+      }
+    };
+
+    // ========================================
+    // NAVIGATION
+    // ========================================
+    function startAssessment() {
+      state.startTime = new Date();
+      state.currentStage = 1;
+      showStage(1);
+      document.getElementById('progressBarContainer').style.display = 'block';
+      updateProgress();
+    }
+
+    function showStage(stageNum) {
+      // Hide all stages
+      document.querySelectorAll('.stage-container').forEach(s => {
+        s.classList.remove('active');
+      });
+      
+      // Show target stage
+      const targetStage = document.getElementById('stage' + stageNum);
+      if (targetStage) {
+        targetStage.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
+      state.currentStage = stageNum;
+      updateProgress();
+      autoSave();
+    }
+
+    function nextStage() {
+      if (state.currentStage < state.totalStages) {
+        showStage(state.currentStage + 1);
+      }
+    }
+
+    function previousStage() {
+      if (state.currentStage > 1) {
+        showStage(state.currentStage - 1);
+      }
+    }
+
+    function updateProgress() {
+      const percent = Math.round((state.currentStage / state.totalStages) * 100);
+      document.getElementById('progressLabel').textContent = `Stage ${state.currentStage} of ${state.totalStages}`;
+      document.getElementById('progressPercent').textContent = percent + '%';
+      document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    // ========================================
+    // ANSWER HANDLING
+    // ========================================
+    function saveAnswer(key, value) {
+      state.answers[key] = value;
+      autoSave();
+    }
+
+    function selectOption(key, value, element) {
+      // Remove selection from siblings
+      const siblings = element.parentElement.querySelectorAll('.option-card');
+      siblings.forEach(s => s.classList.remove('selected'));
+      
+      // Mark this as selected
+      element.classList.add('selected');
+      
+      saveAnswer(key, value);
+      
+      // Validate current stage
+      const validators = {
+        1: validateStage1,
+        2: validateStage2,
+        3: validateStage3,
+        4: validateStage4,
+        5: validateStage5,
+        6: validateStage6,
+        7: validateStage7,
+        8: validateStage8
+      };
+      
+      if (validators[state.currentStage]) {
+        validators[state.currentStage]();
+      }
+    }
+
+    function selectDisease(disease, element) {
+      state.disease = disease;
+      selectOption('disease', disease, element);
+    }
+
+    function selectIntent(intent, element) {
+      selectOption('intent', intent, element);
+    }
+
+    function updateCheckboxAnswer(key) {
+      const checkboxes = document.querySelectorAll(`input[type="checkbox"][onchange*="${key}"]`);
+      const selected = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+      
+      state.answers[key] = selected;
+      autoSave();
+      
+      // Validate current stage
+      if (state.currentStage === 2) validateStage2();
+      if (state.currentStage === 4) validateStage4();
+      if (state.currentStage === 6) validateStage6();
+    }
+
+    function updateQoL(value) {
+      document.getElementById('qolValue').textContent = value;
+      saveAnswer('qol', value);
+      validateStage3();
+    }
+
+    function toggleMedicationEffectiveness() {
+      const medications = document.getElementById('medications').value;
+      const block = document.getElementById('medicationEffectivenessBlock');
+      
+      if (medications === 'yes') {
+        block.style.display = 'block';
+        document.getElementById('medEffectiveness').required = true;
+      } else {
+        block.style.display = 'none';
+        document.getElementById('medEffectiveness').required = false;
+        document.getElementById('medEffectiveness').value = '';
+        delete state.answers.medEffectiveness;
+      }
+    }
+
+    // ========================================
+    // STAGE VALIDATION
+    // ========================================
+    function validateStage1() {
+      const valid = state.answers.formFiller && 
+                    state.answers.country && 
+                    state.answers.language && 
+                    state.answers.disease;
+      
+      document.getElementById('stage1Next').disabled = !valid;
+    }
+
+    function validateStage2() {
+      const valid = state.answers.diagnosis && 
+                    state.answers.duration && 
+                    state.answers.symptoms && 
+                    state.answers.symptoms.length > 0 &&
+                    state.answers.stage;
+      
+      document.getElementById('stage2Next').disabled = !valid;
+    }
+
+    function validateStage3() {
+      const valid = state.answers.walking && 
+                    state.answers.activities && 
+                    state.answers.caregiver && 
+                    state.answers.falls &&
+                    state.answers.qol;
+      
+      document.getElementById('stage3Next').disabled = !valid;
+    }
+
+    function validateStage4() {
+      let valid = state.answers.medications && 
+                  state.answers.whySozo;
+      
+      // If medications === 'yes', also require effectiveness
+      if (state.answers.medications === 'yes') {
+        valid = valid && state.answers.medEffectiveness;
+      }
+      
+      document.getElementById('stage4Next').disabled = !valid;
+    }
+
+    function validateStage5() {
+      const valid = state.answers.intent;
+      document.getElementById('stage5Next').disabled = !valid;
+    }
+
+    function validateStage6() {
+      const valid = state.answers.travelAbility && 
+                    state.answers.stayDuration && 
+                    state.answers.caregiverTravel && 
+                    state.answers.travelTimeframe;
+      
+      document.getElementById('stage6Next').disabled = !valid;
+    }
+
+    function validateStage7() {
+      const valid = state.answers.privateFunding && 
+                    state.answers.budget && 
+                    state.answers.fundingSource && 
+                    state.answers.decisionTime &&
+                    state.answers.decisionMaker;
+      
+      document.getElementById('stage7Next').disabled = !valid;
+    }
+
+    function validateStage8() {
+      const valid = state.answers.primaryGoal && 
+                    state.answers.primaryGoal.trim().length > 10 &&
+                    state.answers.biggestConcern && 
+                    state.answers.biggestConcern.trim().length > 10 &&
+                    state.answers.medicalRecords &&
+                    state.answers.fullName &&
+                    state.answers.email &&
+                    validateEmail(state.answers.email);
+      
+      document.getElementById('stage8Next').disabled = !valid;
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // ========================================
+    // SUBMISSION & SCORING
+    // ========================================
+    function submitAssessment() {
+      // Calculate scores
+      calculateScores();
+      
+      // Generate submission ID
+      state.submissionId = 'INTL-' + Date.now().toString(36).toUpperCase();
+      
+      // Populate confirmation screen
+      document.getElementById('submissionId').textContent = state.submissionId;
+      document.getElementById('submissionDate').textContent = new Date().toLocaleDateString('en-GB');
+      document.getElementById('submissionCondition').textContent = getDiseaseDisplayName(state.disease);
+      document.getElementById('submissionEmail').textContent = state.answers.email;
+      
+      // Populate admin dashboard
+      populateAdminDashboard();
+      
+      // Show confirmation
+      showStage(9);
+      
+      // In production, send to backend
+      sendToBackend();
+    }
+
+    function calculateScores() {
+      let clinical = 0;
+      let functional = 0;
+      let intent = 0;
+      let travel = 0;
+      let financial = 0;
+      
+      // CLINICAL RELEVANCE (0-20)
+      if (state.answers.diagnosis === 'neurologist') clinical += 5;
+      else if (state.answers.diagnosis === 'gp') clinical += 4;
+      else if (state.answers.diagnosis === 'suspected') clinical += 2;
+      
+      if (state.answers.duration === '3-5years' || state.answers.duration === '5-10years') clinical += 5;
+      else if (state.answers.duration === '1-2years') clinical += 3;
+      else if (state.answers.duration === '>10years') clinical += 4;
+      
+      if (state.answers.stage === 'moderate') clinical += 5;
+      else if (state.answers.stage === 'advanced') clinical += 4;
+      else if (state.answers.stage === 'early') clinical += 3;
+      
+      if (state.answers.symptoms && state.answers.symptoms.length >= 3) clinical += 5;
+      else if (state.answers.symptoms && state.answers.symptoms.length >= 2) clinical += 3;
+      
+      // FUNCTIONAL IMPACT (0-20)
+      if (state.answers.walking === 'aid' || state.answers.walking === 'wheelchair') functional += 5;
+      else if (state.answers.walking === 'occasional-help') functional += 4;
+      else if (state.answers.walking === 'independent') functional += 3;
+      
+      if (state.answers.activities === 'most-help' || state.answers.activities === 'full-help') functional += 5;
+      else if (state.answers.activities === 'some-help') functional += 4;
+      else if (state.answers.activities === 'independent') functional += 2;
+      
+      if (state.answers.caregiver === 'full-time') functional += 4;
+      else if (state.answers.caregiver === 'regular') functional += 3;
+      
+      const qol = parseInt(state.answers.qol || 5);
+      if (qol <= 4) functional += 4;
+      else if (qol <= 6) functional += 3;
+      else functional += 2;
+      
+      if (state.answers.falls === 'frequent') functional += 2;
+      
+      // INTENT STRENGTH (0-10)
+      if (state.answers.intent === 'expert-opinion') intent = 10;
+      else if (state.answers.intent === 'outcome-improvement') intent = 8;
+      else if (state.answers.intent === 'exploring') intent = 4;
+      
+      // TRAVEL READINESS (0-10)
+      if (state.answers.travelAbility === 'independent') travel += 4;
+      else if (state.answers.travelAbility === 'with-help') travel += 3;
+      else if (state.answers.travelAbility === 'uncertain') travel += 1;
+      
+      if (state.answers.stayDuration === 'yes') travel += 3;
+      else if (state.answers.stayDuration === 'need-planning') travel += 2;
+      
+      if (state.answers.travelTimeframe === '1month' || state.answers.travelTimeframe === '1-3months') travel += 3;
+      else if (state.answers.travelTimeframe === '3-6months') travel += 2;
+      else if (state.answers.travelTimeframe === 'flexible') travel += 2;
+      
+      // FINANCIAL READINESS (0-10)
+      if (state.answers.privateFunding === 'yes-aware') financial += 3;
+      else if (state.answers.privateFunding === 'yes-question') financial += 2;
+      
+      if (state.answers.budget === '25-50k' || state.answers.budget === '50k+') financial += 3;
+      else if (state.answers.budget === '10-25k') financial += 2;
+      else if (state.answers.budget === 'need-info') financial += 1;
+      
+      if (state.answers.fundingSource === 'self-funded') financial += 2;
+      else if (state.answers.fundingSource === 'family' || state.answers.fundingSource === 'combination') financial += 2;
+      
+      if (state.answers.decisionTime === 'asap' || state.answers.decisionTime === '1-3months') financial += 2;
+      else if (state.answers.decisionTime === '3-6months') financial += 1;
+      
+      // Store scores
+      state.scores = { clinical, functional, intent, travel, financial };
+    }
+
+    function populateAdminDashboard() {
+      const { clinical, functional, intent, travel, financial } = state.scores;
+      const total = clinical + functional + intent + travel + financial;
+      
+      document.getElementById('adminClinicalScore').textContent = clinical + '/20';
+      document.getElementById('adminClinicalLabel').textContent = clinical >= 15 ? 'High' : clinical >= 10 ? 'Moderate' : 'Low';
+      
+      document.getElementById('adminFunctionalScore').textContent = functional + '/20';
+      document.getElementById('adminFunctionalLabel').textContent = functional >= 15 ? 'High' : functional >= 10 ? 'Moderate' : 'Low';
+      
+      document.getElementById('adminIntentScore').textContent = intent + '/10';
+      document.getElementById('adminIntentLabel').textContent = intent >= 8 ? 'Very High' : intent >= 5 ? 'High' : 'Moderate';
+      
+      document.getElementById('adminTravelScore').textContent = travel + '/10';
+      document.getElementById('adminTravelLabel').textContent = travel >= 8 ? 'High' : travel >= 5 ? 'Moderate' : 'Low';
+      
+      document.getElementById('adminFinancialScore').textContent = financial + '/10';
+      document.getElementById('adminFinancialLabel').textContent = financial >= 8 ? 'Ready' : financial >= 5 ? 'Likely' : 'Uncertain';
+      
+      document.getElementById('adminTotalScore').textContent = total;
+      
+      // Determine category
+      let category, action, conversionColor, feasibility;
+      
+      if (total >= 50) {
+        category = '🟢 HIGH';
+        action = 'CLINICAL REVIEW ESCALATION';
+        conversionColor = 'text-green-400';
+        feasibility = '🟢 YES';
+      } else if (total >= 35) {
+        category = '🟡 MEDIUM-HIGH';
+        action = 'DISCOVERY CALL WITHIN 48H';
+        conversionColor = 'text-yellow-400';
+        feasibility = travel >= 5 ? '🟢 YES' : '🟡 CONDITIONAL';
+      } else if (total >= 20) {
+        category = '🟠 MEDIUM';
+        action = 'NURTURE SEQUENCE';
+        conversionColor = 'text-orange-400';
+        feasibility = travel >= 5 ? '🟡 CONDITIONAL' : '🔴 DIFFICULT';
+      } else {
+        category = '🔴 LOW';
+        action = 'EDUCATIONAL MATERIALS ONLY';
+        conversionColor = 'text-red-400';
+        feasibility = '🔴 DIFFICULT';
+      }
+      
+      document.getElementById('adminConversion').textContent = category;
+      document.getElementById('adminConversion').className = 'text-xl font-bold ' + conversionColor;
+      document.getElementById('adminFeasibility').textContent = feasibility;
+      document.getElementById('adminAction').textContent = action;
+      
+      // Generate signals
+      const signals = [];
+      
+      if (state.answers.diagnosis === 'neurologist') signals.push('✓ Confirmed neurologist diagnosis');
+      if (state.answers.medications === 'yes' && (state.answers.medEffectiveness === 'minimal' || state.answers.medEffectiveness === 'not-effective')) {
+        signals.push('✓ Treatment plateau (medications not effective)');
+      }
+      if (state.answers.intent === 'expert-opinion') signals.push('✓ Explicit intent: Honest assessment');
+      if (state.answers.intent === 'outcome-improvement') signals.push('✓ Outcome-focused intent');
+      if (state.answers.travelAbility === 'independent') signals.push('✓ Can travel independently');
+      if (state.answers.decisionTime === 'asap' || state.answers.decisionTime === '1-3months') {
+        signals.push('✓ Decision timeframe: ' + (state.answers.decisionTime === 'asap' ? 'ASAP' : '1-3 months'));
+      }
+      if (state.answers.caregiver === 'full-time' || state.answers.caregiver === 'regular') {
+        signals.push('⚠ Caregiver dependence (moderate-high)');
+      }
+      if (state.answers.travelAbility === 'uncertain' || state.answers.travelAbility === 'difficult') {
+        signals.push('⚠ Travel concerns flagged');
+      }
+      
+      document.getElementById('adminSignals').innerHTML = signals.map(s => `<p class="text-slate-300">${s}</p>`).join('');
+      
+      // Show dashboard (for demo - in production this would be admin-only)
+      document.getElementById('adminDashboard').style.display = 'block';
+    }
+
+    function toggleAdminDashboard() {
+      const dash = document.getElementById('adminDashboard');
+      dash.style.display = dash.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function getDiseaseDisplayName(disease) {
+      const names = {
+        'parkinsons': "Parkinson's Disease",
+        'ms': 'Multiple Sclerosis',
+        'stroke': 'Stroke Recovery',
+        'other': 'Other Neurological Condition'
+      };
+      return names[disease] || disease;
+    }
+
+    // ========================================
+    // AUTO-SAVE & BACKEND
+    // ========================================
+    function autoSave() {
+      try {
+        localStorage.setItem('sozo_qualification_v2', JSON.stringify(state));
+        console.log('✓ Auto-saved');
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+      }
+    }
+
+    function sendToBackend() {
+      const payload = {
+        submissionId: state.submissionId,
+        disease: state.disease,
+        answers: state.answers,
+        scores: state.scores,
+        timestamp: new Date().toISOString(),
+        duration: Math.round((new Date() - state.startTime) / 1000)
+      };
+      
+      console.log('📤 Would send to backend:', payload);
+      
+      // Production API call:
+      // fetch('/api/international-qualification', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(payload)
+      // });
+    }
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('Sozo International Patient Qualification v2.0');
+      console.log('9-stage progressive qualification flow initialized');
+    });
+  </script>
+
+</body>
+</html>
