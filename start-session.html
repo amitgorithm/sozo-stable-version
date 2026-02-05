@@ -176,16 +176,20 @@
                             </div>
                         </div>
 
-                        <!-- Montage Adjustments -->
+                        <!-- Montage Adjustments with Device Tabs -->
                         <div class="card p-6">
-                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders text-sozo-600"></i>Montage Adjustments</h3>
-                            <div class="mb-4">
-                                <label for="montageUsed" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Montage Used</label>
-                                <input type="text" id="montageUsed" name="montageUsed" placeholder="e.g., F3-F4, C3-C4 or specify if different from recommended" class="input-royal">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders text-sozo-600"></i>Montage Adjustments & Device Configuration</h3>
+                            
+                            <!-- Device Tabs Navigation -->
+                            <div class="mb-6 border-b border-slate-200">
+                                <div class="flex gap-2 overflow-x-auto pb-2" id="deviceTabsContainer">
+                                    <!-- Device tabs will be rendered here -->
+                                </div>
                             </div>
-                            <div>
-                                <label for="montageNotes" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Adjustment Notes</label>
-                                <textarea id="montageNotes" name="montageNotes" placeholder="Explain any deviations from the recommended montage and why..." class="input-royal h-20"></textarea>
+                            
+                            <!-- Device Tab Content -->
+                            <div id="deviceTabContent" class="space-y-4">
+                                <!-- Content for selected device will be rendered here -->
                             </div>
                         </div>
 
@@ -195,7 +199,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                                 <div>
                                     <label for="sessionStartTime" class="text-xs font-bold text-slate-600 uppercase mb-2 block">Start Time <span class="text-red-500">*</span></label>
-                                    <input type="time" id="sessionStartTime" name="sessionStartTime" class="input-royal" required>
+                                    <input type="time" id="sessionStartTime" name="sessionStartTime" class="input-royal">
                                 </div>
                                 <div>
                                     <label for="sessionEndTime" class="text-xs font-bold text-slate-600 uppercase mb-2 block">End Time</label>
@@ -311,6 +315,237 @@
             uploadedFiles: [],
             autoSaveInterval: null
         };
+
+        // Device Management State
+        const deviceState = {
+            devices: [
+                {
+                    id: 'device1',
+                    name: 'Plato System',
+                    type: 'Plato Multi-Channel',
+                    status: 'active',
+                    network: 'Block 1 Standard',
+                    anodes: ['F4', 'C4'],
+                    cathode: 'Fp2',
+                    intensity: 2.5,
+                    duration: 40,
+                    frequency: 'Daily'
+                },
+                {
+                    id: 'device2',
+                    name: 'Alpha Stim AID',
+                    type: 'Cranial Electrotherapy',
+                    status: 'active',
+                    network: 'Bilateral CES Mode',
+                    anodes: ['T3', 'T4'],
+                    cathode: 'Cz',
+                    intensity: 0.5,
+                    duration: 60,
+                    frequency: 'Twice daily'
+                },
+                {
+                    id: 'device3',
+                    name: 'Newronika System',
+                    type: 'Closed-Loop Adaptive',
+                    status: 'active',
+                    network: 'Dynamic Attention Network',
+                    anodes: ['Fp1', 'Fp2'],
+                    cathode: 'Cz',
+                    intensity: 1.8,
+                    duration: 30,
+                    frequency: 'Every other day'
+                }
+            ],
+            activeDeviceId: 'device1'
+        };
+
+        // Render device tabs
+        function renderDeviceTabs() {
+            const container = document.getElementById('deviceTabsContainer');
+            container.innerHTML = deviceState.devices.map((device, idx) => `
+                <button 
+                    class="device-tab px-4 py-2 rounded-t-lg font-semibold text-sm transition-all whitespace-nowrap border-b-2 ${
+                        deviceState.activeDeviceId === device.id 
+                            ? 'bg-sozo-50 border-sozo-600 text-sozo-600' 
+                            : 'bg-slate-100 border-transparent text-slate-600 hover:bg-slate-200'
+                    }"
+                    onclick="switchDevice('${device.id}')"
+                >
+                    <i class="fa-solid fa-microchip mr-2"></i>${device.name}
+                    <span class="ml-2 text-xs px-2 py-0.5 rounded-full ${
+                        device.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                    }">${device.status}</span>
+                </button>
+            `).join('');
+        }
+
+        // Switch device
+        function switchDevice(deviceId) {
+            deviceState.activeDeviceId = deviceId;
+            renderDeviceTabs();
+            renderDeviceContent();
+        }
+
+        // Render device content
+        function renderDeviceContent() {
+            const activeDevice = deviceState.devices.find(d => d.id === deviceState.activeDeviceId);
+            if (!activeDevice) return;
+
+            const content = document.getElementById('deviceTabContent');
+            content.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Device Info -->
+                    <div>
+                        <h4 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-blue-600"></i>Device Information
+                        </h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between pb-2 border-b border-slate-200">
+                                <span class="font-semibold text-slate-600">Device Name:</span>
+                                <span class="text-slate-800">${activeDevice.name}</span>
+                            </div>
+                            <div class="flex justify-between pb-2 border-b border-slate-200">
+                                <span class="font-semibold text-slate-600">Type:</span>
+                                <span class="text-slate-800">${activeDevice.type}</span>
+                            </div>
+                            <div class="flex justify-between pb-2 border-b border-slate-200">
+                                <span class="font-semibold text-slate-600">Status:</span>
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold ${
+                                    activeDevice.status === 'active' 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : 'bg-yellow-100 text-yellow-800'
+                                }">${activeDevice.status}</span>
+                            </div>
+                            <div class="flex justify-between pb-2 border-b border-slate-200">
+                                <span class="font-semibold text-slate-600">Network Target:</span>
+                                <span class="text-slate-800">${activeDevice.network}</span>
+                            </div>
+                            <div class="flex justify-between pb-2 border-b border-slate-200">
+                                <span class="font-semibold text-slate-600">Frequency:</span>
+                                <span class="text-slate-800">${activeDevice.frequency}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Montage Configuration -->
+                    <div>
+                        <h4 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-purple-600"></i>Montage Configuration
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+                                <label class="text-xs font-bold text-red-700 block mb-1">Anode(s) (+)</label>
+                                <p class="font-mono text-sm font-semibold text-red-900">${activeDevice.anodes.join(', ')}</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <label class="text-xs font-bold text-blue-700 block mb-1">Cathode (-)</label>
+                                <p class="font-mono text-sm font-semibold text-blue-900">${activeDevice.cathode}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <label class="text-xs font-bold text-slate-700 block mb-1">Stimulation Parameters</label>
+                                <div class="text-sm text-slate-800 space-y-1">
+                                    <div><strong>Intensity:</strong> ${activeDevice.intensity} mA</div>
+                                    <div><strong>Duration:</strong> ${activeDevice.duration} min</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brain Visualization -->
+                <div class="mt-6 bg-white p-4 rounded-lg border border-slate-200">
+                    <h4 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-head-side-virus text-orange-600"></i>Electrode Placement Visualization
+                    </h4>
+                    <svg viewBox="0 0 300 300" class="w-full max-w-sm mx-auto">
+                        <!-- Brain outline -->
+                        <circle cx="150" cy="150" r="120" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5,5"/>
+                        <circle cx="150" cy="150" r="110" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                        
+                        <!-- Reference markers -->
+                        <circle cx="150" cy="35" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+                        <text x="150" y="25" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">NASION</text>
+                        
+                        <circle cx="150" cy="265" r="6" fill="#64748b" stroke="#475569" stroke-width="2"/>
+                        <text x="150" y="285" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">INION</text>
+                        
+                        <!-- Electrode positions with highlighting -->
+                        ${renderElectrodePositions(activeDevice)}
+                    </svg>
+                    <div class="mt-4 flex items-center justify-center gap-6 text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span class="text-slate-700"><strong>Anode (+)</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <span class="text-slate-700"><strong>Cathode (-)</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-slate-300"></div>
+                            <span class="text-slate-700"><strong>Reference</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render electrode positions
+        function renderElectrodePositions(device) {
+            const electrodes = [
+                { id: 'Fp1', cx: 120, cy: 65 },
+                { id: 'Fp2', cx: 180, cy: 65 },
+                { id: 'F7', cx: 65, cy: 95 },
+                { id: 'F3', cx: 115, cy: 95 },
+                { id: 'Fz', cx: 150, cy: 90 },
+                { id: 'F4', cx: 185, cy: 95 },
+                { id: 'F8', cx: 235, cy: 95 },
+                { id: 'T3', cx: 50, cy: 150 },
+                { id: 'C3', cx: 105, cy: 150 },
+                { id: 'Cz', cx: 150, cy: 150 },
+                { id: 'C4', cx: 195, cy: 150 },
+                { id: 'T4', cx: 250, cy: 150 },
+                { id: 'T5', cx: 65, cy: 205 },
+                { id: 'P3', cx: 115, cy: 205 },
+                { id: 'Pz', cx: 150, cy: 210 },
+                { id: 'P4', cx: 185, cy: 205 },
+                { id: 'T6', cx: 235, cy: 205 },
+                { id: 'O1', cx: 120, cy: 235 },
+                { id: 'O2', cx: 180, cy: 235 }
+            ];
+
+            return electrodes.map(e => {
+                let fill = '#e2e8f0';
+                let stroke = '#64748b';
+                let strokeWidth = 2;
+                let filter = '';
+
+                if (device.anodes.includes(e.id)) {
+                    fill = '#ef4444';
+                    stroke = '#dc2626';
+                    strokeWidth = 3;
+                    filter = 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))';
+                } else if (e.id === device.cathode) {
+                    fill = '#3b82f6';
+                    stroke = '#2563eb';
+                    strokeWidth = 3;
+                    filter = 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))';
+                }
+
+                return `
+                    <circle cx="${e.cx}" cy="${e.cy}" r="10" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" style="filter: ${filter}"/>
+                    <text x="${e.cx}" y="${e.cy + 4}" text-anchor="middle" font-size="9" font-weight="bold" fill="${fill === '#e2e8f0' ? '#1e293b' : '#ffffff'}">${e.id}</text>
+                `;
+            }).join('');
+        }
+
+        // Initialize device tabs
+        function initializeDeviceTabs() {
+            renderDeviceTabs();
+            renderDeviceContent();
+        }
 
         // Initialize from treatment plan data (would come from API)
         function initializeSessionData() {
@@ -439,16 +674,6 @@
 
         // Complete Session
         document.getElementById('completeSessionBtn').addEventListener('click', function() {
-            if (!document.getElementById('clinicalNotes').value.trim()) {
-                alert('Please add clinical notes before completing the session.');
-                return;
-            }
-
-            if (!document.getElementById('patientFeedback').value.trim()) {
-                alert('Please add patient feedback before completing the session.');
-                return;
-            }
-
             // Stop timer
             clearInterval(sessionState.timerInterval);
             clearInterval(sessionState.autoSaveInterval);
@@ -472,6 +697,9 @@
             document.getElementById('saveProgressBtn').disabled = true;
 
             showNotification('Session completed successfully', 'success');
+            
+            // Show session complete popup
+            showSessionCompletePopup();
 
             // Could redirect to view-session.html
             setTimeout(() => {
@@ -560,6 +788,30 @@
             renderUploadedFiles();
         }
 
+        // Session Complete Popup
+        function showSessionCompletePopup() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+                    <div class="text-center">
+                        <div class="text-6xl text-green-500 mb-4">✓</div>
+                        <h2 class="text-2xl font-bold text-slate-900 mb-2">Session Complete!</h2>
+                        <p class="text-slate-600 mb-6">Your treatment session has been successfully completed and saved.</p>
+                        <div class="space-y-3">
+                            <button onclick="this.closest('.fixed').remove(); window.location.href='patient-journey.html'" class="btn-primary w-full py-3">
+                                <i class="fas fa-arrow-right mr-2"></i> Continue
+                            </button>
+                            <button onclick="this.closest('.fixed').remove()" class="btn-secondary w-full py-3">
+                                <i class="fas fa-times mr-2"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
         // Notifications
         function showNotification(message, type = 'info') {
             const indicator = document.getElementById('autoSaveIndicator');
@@ -588,6 +840,7 @@
 
         // Initialize
         initializeSessionData();
+        initializeDeviceTabs();
 
         // Clean up on page unload
         window.addEventListener('beforeunload', (e) => {
