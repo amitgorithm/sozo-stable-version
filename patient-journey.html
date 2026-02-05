@@ -3860,22 +3860,7 @@
                     let scoreHTML = '';
                     if (block.type === 'prs' && (block.status === 'completed' || block.status === 'active') && block.totalScore !== undefined) {
                         scoreHTML = `
-                            <div style="margin-top: 12px; padding: 8px; background: #f0f9ff; border-radius: 4px; border-left: 3px solid #0ea5e9;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <span style="font-weight: 600; color: #0f172a; font-size: 12px;">Score Summary</span>
-                                    <span style="background: ${block.scorePercentage > 50 ? '#fca5a5' : '#fbbf24'}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;">${block.severity}</span>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                    <div>
-                                        <p style="margin: 0; font-size: 11px; color: #64748b;">Total Score</p>
-                                        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">${block.totalScore}/${block.maxScore}</p>
-                                    </div>
-                                    <div>
-                                        <p style="margin: 0; font-size: 11px; color: #64748b;">Severity</p>
-                                        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">${block.scorePercentage}%</p>
-                                    </div>
-                                </div>
-                            </div>
+                            
                         `;
                     }
 
@@ -6013,17 +5998,28 @@
 
             let html = '';
 
-            // SCORE SUMMARY AT THE TOP
-            const totalScore = prsState.totalScore || 0;
-            const maxScore = 100;
-            const scorePercentage = (totalScore / maxScore) * 100;
-            const scoreSeverity = scorePercentage > 70 ? 'Severe' : scorePercentage > 50 ? 'Moderate' : scorePercentage > 30 ? 'Mild' : 'Normal';
-            const severityColor = scorePercentage > 70 ? '#ef4444' : scorePercentage > 50 ? '#f59e0b' : scorePercentage > 30 ? '#eab308' : '#10b981';
+            // SCORE SUMMARY AT THE TOP - Use dummy data in view mode
+            let totalScore, scorePercentage, scoreSeverity, severityColor;
+           
+            if (!editable) {
+                // View mode: use dummy score
+                totalScore = 18;
+                scorePercentage = 36;
+                scoreSeverity = 'Mild';
+                severityColor = 'white';
+            } else {
+                // Edit mode: use calculated score
+                totalScore = prsState.totalScore || 0;
+                const maxScore = 100;
+                scorePercentage = (totalScore / maxScore) * 100;
+                scoreSeverity = scorePercentage > 70 ? 'Severe' : scorePercentage > 50 ? 'Moderate' : scorePercentage > 30 ? 'Mild' : 'Normal';
+                severityColor = 'white';
+            }
 
             html += `<div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border-radius: 8px; color: white;">
                 <div style="text-align: center;">
                     <p style="font-size: 14px; margin: 0 0 8px 0; opacity: 0.9;">Patient Score</p>
-                    <h2 style="font-size: 48px; font-weight: 900; margin: 0 0 12px 0;">${totalScore}</h2>
+                    <h2 style="font-size: 48px; font-weight: 900; margin: 0 0 12px 0;">${totalScore}/50</h2>
                     <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
                         <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px;">
                             <p style="font-size: 12px; margin: 0 0 4px 0; opacity: 0.9;">Severity</p>
