@@ -2726,7 +2726,7 @@
                         <h3>Track Your Progress</h3>
                         <p>Compare metrics across clinical assessments and see improvements over time</p>
                     </div>
-                    <button class="improvements-btn" onclick="window.location.href='improvements.html'">
+                    <button class="improvements-btn" onclick="window.open('improvements.html', '_blank')">
                         See Improvements
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -4519,7 +4519,7 @@
                             if (currentRole === 'doctor') {
                                 detailsContent += '<div class="block-action-buttons">';
                                 detailsContent += '<button class="block-action-btn view" onclick="viewBlockDetails(\'treatment-plan\')" title="View treatment plan"><i class="fa-solid fa-eye"></i> View Details</button>';
-                                detailsContent += '<button class="block-action-btn edit" onclick="window.location.href=\'treatment-plan-doctor.html\'" title="Edit treatment plan"><i class="fa-solid fa-pen"></i> Edit Plan</button>';
+                                detailsContent += '<button class="block-action-btn edit" onclick="window.open(\'treatment-plan-doctor.html\', \'_blank\')" title="Edit treatment plan"><i class="fa-solid fa-pen"></i> Edit Plan</button>';
                                 detailsContent += '</div>';
                             } else if (currentRole === 'clinical-assistant') {
                                 detailsContent += '<div class="block-action-buttons">';
@@ -4626,7 +4626,7 @@
                                     detailsContent += '<button class="block-action-btn view" onclick="openPrsModal(false)" title="View current PRS assessment"><i class="fa-solid fa-eye"></i> View Details</button>';
                                 }
                                 if (permissions.canEditData) {
-                                    detailsContent += '<button class="block-action-btn edit" onclick="window.location.href=\'prs-edit.html?mode=continue\'" title="Continue PRS assessment"><i class="fa-solid fa-play"></i> Continue Assessment</button>';
+                                    detailsContent += '<button class="block-action-btn edit" onclick="window.open(\'prs-edit.html?mode=continue\', \'_blank\')" title="Continue PRS assessment"><i class="fa-solid fa-play"></i> Continue Assessment</button>';
                                 }
                                 detailsContent += '</div>';
                             }
@@ -5112,7 +5112,7 @@
             sessionStorage.setItem('currentRole', currentRole);
             
             // Navigate to start-session.html to begin the treatment session
-            window.location.href = 'start-session.html?session=' + sessionId;
+            window.open('start-session.html?session=' + sessionId, '_blank');
         }
 
         function continueSession(sessionId) {
@@ -5122,7 +5122,7 @@
             sessionStorage.setItem('currentRole', currentRole);
             
             // Navigate to active journey to continue session
-            window.location.href = 'working-active-journey.html?session=' + sessionId;
+            window.open('working-active-journey.html?session=' + sessionId, '_blank');
         }
 
         function viewSessionDetails(sessionId) {
@@ -5133,15 +5133,15 @@
             sessionStorage.setItem('currentRole', currentRole);
             
             // Navigate to view-session.html to view session report
-            window.location.href = 'view-session.html?session=' + sessionId;
+            window.open('view-session.html?session=' + sessionId, '_blank');
         }
 
         function startBlock(blockId, blockType) {
             // Map block types to their respective pages
             if (blockType === 'anamnesis') {
-                window.location.href = 'anamnesis.html';
+                window.open('anamnesis.html', '_blank');
             } else if (blockType === 'fnon') {
-                window.location.href = 'fnon-edit.html';
+                window.open('fnon-edit.html', '_blank');
             } else if (blockType === 'brain-mapping') {
                 // All roles can start brain mapping, but only doctors can generate EEG in eeg.html
                 const patientNameElement = document.getElementById('patientFullName');
@@ -5155,17 +5155,17 @@
                     returnUrl: window.location.href
                 };
                 localStorage.setItem('eegSession', JSON.stringify(sessionData));
-                window.location.href = 'eeg.html';
+                window.open('eeg.html', '_blank');
             } else if (blockType === 'prs') {
-                window.location.href = 'prs-edit.html';
+                window.open('prs-edit.html', '_blank');
             } else if (blockType === 'doctor-notes') {
                 // Open Doctor's Notes modal in edit mode
                 openDoctorNotesModal(true);
             } else if (blockType === 'treatment-plan') {
                 // Navigate to treatment plan page (role-based view handled in target page)
-                window.location.href = 'treatment-plan.html';
+                window.open('treatment-plan.html', '_blank');
             } else if (blockType === 'final-report') {
-                window.location.href = 'final-report.html';
+                window.open('final-report.html', '_blank');
             } else {
                 alert(`Starting: ${blockType}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface.`);
             }
@@ -5176,7 +5176,7 @@
             // Check if this is an anamnesis block and redirect appropriately
             const block = workingBlocks.find(b => b.id === blockId);
             if (block && block.type === 'anamnesis') {
-                window.location.href = 'anamnesis.html';
+                window.open('anamnesis.html', '_blank');
             } else {
                 alert(`Starting: ${blockName}\\n\\nRole: ${currentRole}\\n\\nThis would open the assessment interface for data entry.`);
             }
@@ -5388,7 +5388,7 @@
             }));
             
             // Navigate to EEG interface
-            window.location.href = 'eeg.html';
+            window.open('eeg.html', '_blank');
         }
 
         // ACTION HANDLERS
@@ -5399,7 +5399,7 @@
         function continueBlock(blockId) {
             // Check if this is a PRS block
             if (blockId && blockId.includes('prs')) {
-                window.location.href = 'prs-edit.html?mode=continue';
+                window.open('prs-edit.html?mode=continue', '_blank');
             } else {
                 alert(`Continuing block: ${blockId}\\n\\nThis would open the data entry interface.`);
             }
@@ -5443,10 +5443,10 @@
                 openDoctorNotesModal(false);
             } else if (blockType === 'treatment-plan') {
                 // Navigate to treatment plan page (role-based view handled in target page)
-                window.location.href = 'treatment-plan.html';
+                window.open('treatment-plan.html', '_blank');
             } else if (blockType === 'final-report') {
-                // Navigate to final-report.html in the same tab
-                window.location.href = 'final-report.html';
+                // Navigate to final-report.html in new tab
+                window.open('final-report.html', '_blank');
             } else {
                 // For other block types, show placeholder alert
                 const blockNames = {
@@ -5499,11 +5499,11 @@
             };
             if (blockType === 'anamnesis') {
                 // Navigate to anamnesis.html
-                window.location.href = 'anamnesis.html';
+                window.open('anamnesis.html', '_blank');
                 return;
             } else if (blockType === 'fnon') {
                 // Navigate to fnon-edit.html page
-                window.location.href = 'fnon-edit.html';
+                window.open('fnon-edit.html', '_blank');
                 return;
             } else if (blockType === 'brain-mapping') {
                 // Navigate to eeg.html page for doctor role
@@ -5519,14 +5519,14 @@
                         returnUrl: window.location.href
                     };
                     localStorage.setItem('eegSession', JSON.stringify(sessionData));
-                    window.location.href = 'eeg.html';
+                    window.open('eeg.html', '_blank');
                 } else {
                     alert('Only doctors can edit EEG brain mapping assessments.');
                 }
                 return;
             } else if (blockType === 'prs') {
                 // Navigate to prs-edit.html page
-                window.location.href = 'prs-edit.html';
+                window.open('prs-edit.html', '_blank');
                 return;
             } else if (blockType === 'doctor-notes') {
                 // Open Doctor's Notes modal in edit mode
@@ -5534,11 +5534,11 @@
                 return;
             } else if (blockType === 'treatment-plan') {
                 // Navigate to treatment plan page (role-based view handled in target page)
-                window.location.href = 'treatment-plan.html';
+                window.open('treatment-plan.html', '_blank');
                 return;
             } else if (blockType === 'final-report') {
-                // Navigate to final-report.html in the same tab
-                window.location.href = 'final-report.html';
+                // Navigate to final-report.html in new tab
+                window.open('final-report.html', '_blank');
                 return;
             }
 
@@ -5554,7 +5554,7 @@
             sessionStorage.setItem('currentRole', currentRole);
             
             // Navigate to workshop detail page in edit mode
-            window.location.href = 'workshop_detail.html?session=' + sessionId + '&mode=edit';
+            window.open('workshop_detail.html?session=' + sessionId + '&mode=edit', '_blank');
         }
 
         function activateSession(sessionId) {
@@ -6305,7 +6305,7 @@
         function openAnamnesisModal(editable) {
             console.log('Opening Anamnesis modal, editable:', editable);
             if (editable) {
-                window.location.href = 'anamnesis.html';
+                window.open('anamnesis.html', '_blank');
             } else {
                 renderAnamnesisModal(false);
                 document.getElementById('anamnesisModal').classList.add('open');
@@ -6501,9 +6501,9 @@
             // Open treatment plan based on role
             setTimeout(() => {
                 if (window.currentRole === 'doctor') {
-                    window.location.href = './treatment-plan-doctor.html';
+                    window.open('./treatment-plan-doctor.html', '_blank');
                 } else {
-                    window.location.href = './treatment-plan.html';
+                    window.open('./treatment-plan.html', '_blank');
                 }
             }, 300);
         }
@@ -6645,7 +6645,7 @@
         function startNewPatientAssessment(assessmentId, assessmentName) {
             // Handle Anamnesis assessment
             if (assessmentId === 'anamnesis-paid') {
-                window.location.href = 'anamnesis.html';
+                window.open('anamnesis.html', '_blank');
                 return;
             }
 
