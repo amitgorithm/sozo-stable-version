@@ -2237,6 +2237,73 @@
         .payment-override-form.hide {
             display: none;
         }
+
+        /* SOZO BRANDING STYLES */
+        .sozo-logo-container {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sozo-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .page-header-left {
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        .page-title-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sozo-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 16px 0;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: calc(100% - 48px);
+            margin: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .footer-left, .footer-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            
+            .sozo-logo {
+                height: 40px;
+            }
+            
+            .page-header-left {
+                flex-direction: column !important;
+                text-align: center;
+            }
+            
+            .sozo-logo-container {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 
@@ -2245,8 +2312,13 @@
         <!-- PAGE HEADER -->
         <div class="page-header">
             <div class="page-header-left">
-                <h1 class="page-title">SOZO Clinical Journey</h1>
-                <p class="page-subtitle">Clinical Assessment Progress & Session Timeline</p>
+                <div class="sozo-logo-container">
+                    <img src="logo1.png" alt="SOZO Brain Center" class="sozo-logo">
+                </div>
+                <div class="page-title-container">
+                    <h1 class="page-title">Clinical Neuromodulation Journey</h1>
+                    <p class="page-subtitle">Clinical Assessment Progress & Session Timeline</p>
+                </div>
             </div>
             <div class="page-header-right">
                 <!-- Role Selector -->
@@ -3175,7 +3247,7 @@
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
                     <div class="role-info">
-                        <h3 id="roleTitle">Receptionist</h3>
+                        <h3 id="roleTitle">SOZO Receptionist</h3>
                         <p id="roleDescription">Manage patient records and appointments</p>
                     </div>
                 </div>
@@ -3353,6 +3425,18 @@
 
     </div>
     <!-- END CONTAINER -->
+
+    <!-- SOZO FOOTER -->
+    <div class="sozo-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span>© Copyright 2026 SOZO Brain Center</span>
+            </div>
+            <div class="footer-right">
+                <span>Get In Touch : info@sozobraincenter.com | +35722879000</span>
+            </div>
+        </div>
+    </div>
 
     <!-- DEVICE ACTIVATION MODAL -->
     <div id="deviceActivationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10000; align-items: center; justify-content: center;">
@@ -8085,25 +8169,25 @@
             const roleConfig = {
                 'doctor': {
                     icon: 'fa-user-doctor',
-                    title: 'Doctor',
+                    title: 'SOZO Doctor',
                     description: 'Full clinical access - Manage assessments and treatment plans',
                     class: 'doctor'
                 },
                 'clinical-assistant': {
                     icon: 'fa-user-nurse',
-                    title: 'Clinical Assistant',
+                    title: 'SOZO Clinical Assistant',
                     description: 'Support role - Assist with assessments and patient care',
                     class: 'clinical-assistant'
                 },
                 'patient': {
                     icon: 'fa-user',
-                    title: 'Patient',
+                    title: 'SOZO Patient',
                     description: 'Patient view - Track your health journey and results',
                     class: 'patient'
                 },
                 'receptionist': {
                     icon: 'fa-user-tie',
-                    title: 'Receptionist',
+                    title: 'SOZO Receptionist',
                     description: 'Administrative access - Manage patient records and appointments',
                     class: 'receptionist'
                 }

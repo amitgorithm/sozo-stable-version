@@ -37,13 +37,68 @@
         .badge-info { background-color: #dbeafe; color: #1e40af; }
         .badge-warning { background-color: #fef08a; color: #854d0e; }
         .badge-danger { background-color: #fee2e2; color: #991b1b; }
+        
+        /* SOZO BRANDING STYLES */
+        .sozo-logo-container {
+            margin-right: 16px;
+        }
+        
+        .sozo-logo {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .sozo-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 16px 0;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: calc(100% - 64px);
+            margin: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            
+            .sozo-logo {
+                height: 35px;
+            }
+            
+            .mb-6 {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .sozo-logo-container {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="p-8">
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
-            <p class="text-slate-500">Functional Network of Neurons - Assessment Overview</p>
+        <div class="mb-6 flex items-center gap-4">
+            <div class="sozo-logo-container">
+                <img src="logo1.png" alt="SOZO Brain Center" class="sozo-logo">
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">FNON Assessment</h2>
+                <p class="text-slate-500">Functional Network of Neurons - Assessment Overview</p>
+            </div>
         </div>
 
         <!-- FNON Assessment Read-Only Display -->
@@ -521,6 +576,18 @@
                 <button onclick="saveFnonAssessment()" class="bg-white text-sozo-600 px-6 py-2 rounded-lg font-bold hover:bg-slate-100 transition flex items-center gap-2">
                     Save Changes <i class="fa-solid fa-check"></i>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOZO FOOTER -->
+    <div class="sozo-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span>© Copyright 2026 SOZO Brain Center</span>
+            </div>
+            <div class="footer-right">
+                <span>Get In Touch : info@sozobraincenter.com | +35722879000</span>
             </div>
         </div>
     </div>

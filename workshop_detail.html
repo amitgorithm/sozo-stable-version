@@ -141,6 +141,43 @@
         .funnel-step:last-child::after {
             display: none;
         }
+        
+        /* SOZO BRANDING STYLES */
+        .sozo-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .sozo-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 16px 0;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: 7xl;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            
+            .sozo-logo {
+                height: 35px;
+            }
+        }
     </style>
 </head>
 
@@ -536,6 +573,18 @@
         </div>
 
     </main>
+
+    <!-- SOZO FOOTER -->
+    <div class="sozo-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span>© Copyright 2026 SOZO Brain Center</span>
+            </div>
+            <div class="footer-right">
+                <span>Get In Touch : info@sozobraincenter.com | +35722879000</span>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- Mock Data ---
