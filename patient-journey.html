@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Journey - Sozo Clinical Operating System</title>
+    <title>SOZO Clinical Journey - Sozo Clinical Operating System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -542,6 +542,19 @@
             margin-bottom: 32px;
             padding-bottom: 20px;
             border-bottom: 2px solid var(--slate-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-header-left {
+            flex: 1;
+        }
+
+        .page-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .page-title {
@@ -666,6 +679,73 @@
             display: block;
         }
 
+        /* ROLE DISPLAY BANNER */
+        .role-display-banner {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .role-display-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .role-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .role-icon.doctor,
+        .role-icon.clinical-assistant,
+        .role-icon.patient,
+        .role-icon.receptionist {
+            background: linear-gradient(135deg, var(--orange-primary), #dc6027);
+        }
+
+        .role-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+
+        .role-info p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .role-badge {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-badge.doctor,
+        .role-badge.clinical-assistant,
+        .role-badge.patient,
+        .role-badge.receptionist {
+            background: rgba(244, 121, 32, 0.1);
+            color: #dc6027;
+        }
+
         /* ROLE SELECTOR */
         .role-selector-container {
             background: white;
@@ -704,6 +784,48 @@
             outline: none;
             border-color: var(--orange-primary);
             box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
+        }
+
+        /* PATIENT NAVIGATION BUTTONS */
+        .patient-navigation {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #0f172a;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-button:hover:not(:disabled) {
+            border-color: var(--orange-primary);
+            background: rgba(244, 121, 32, 0.05);
+            color: var(--orange-primary);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .patient-counter {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
         }
 
         /* TODAY'S VIEW */
@@ -2122,8 +2244,37 @@
     <div class="container-journey">
         <!-- PAGE HEADER -->
         <div class="page-header">
-            <h1 class="page-title">Patient Journey</h1>
-            <p class="page-subtitle">Clinical Assessment Progress & Session Timeline</p>
+            <div class="page-header-left">
+                <h1 class="page-title">SOZO Clinical Journey</h1>
+                <p class="page-subtitle">Clinical Assessment Progress & Session Timeline</p>
+            </div>
+            <div class="page-header-right">
+                <!-- Role Selector -->
+                <div id="topRoleSelector" style="display: none;">
+                    <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">VIEW AS:</label>
+                    <select id="topRoleSelect" onchange="handleTopRoleChange()"
+                        style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
+                        <option value="receptionist" selected>Receptionist</option>
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="clinical-assistant">Clinical Assistant</option>
+                    </select>
+                </div>
+                <!-- Clarity Wireframes Dropdown -->
+                <div id="topClarityWireframes" style="display: none;">
+                    <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">CLARITY WIREFRAMES:</label>
+                    <select id="topClaritySelector" onchange="handleTopClarityWireframeChange()"
+                        style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
+                        <option value="none" selected>-- Select Wireframe --</option>
+                        <option value="working">Working Active Journey</option>
+                        <option value="device">Device Locking</option>
+                    </select>
+                </div>
+                <!-- Back to List Button -->
+                <button id="topBackToListBtn" onclick="backToPatientList()" style="display: none; padding: 10px 20px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to List
+                </button>
+            </div>
         </div>
 
         <!-- PATIENT REGISTRATION QUESTIONNAIRE PAGE (Hidden by default) -->
@@ -2993,33 +3144,17 @@
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <!-- Role Selector (only shown in journey) -->
-                    <div id="journeyRoleSelector" style="display: none;">
-                        <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">VIEW
-                            AS:</label>
-                        <select id="roleSelector" onchange="handleRoleChange()"
-                            style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
-                            <option value="receptionist" selected>Receptionist</option>
-                            <option value="patient">Patient</option>
-                            <option value="doctor">Doctor</option>
-                            <option value="clinical-assistant">Clinical Assistant</option>
-                        </select>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <!-- Patient Navigation Buttons (Doctor & Clinical Assistant only) -->
+                    <div id="patientNavigation" class="patient-navigation" style="display: none;">
+                        <button id="prevPatientBtn" class="nav-button" onclick="navigateToPreviousPatient()">
+                            <i class="fa-solid fa-chevron-left"></i> Previous
+                        </button>
+                        <span id="patientCounter" class="patient-counter">1 / 10</span>
+                        <button id="nextPatientBtn" class="nav-button" onclick="navigateToNextPatient()">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <!-- Clarity Wireframes Dropdown -->
-                    <div>
-                        <label style="font-size: 12px; font-weight: 600; color: #475569; margin-right: 8px;">CLARITY WIREFRAMES:</label>
-                        <select id="clarityWireframesSelector" onchange="handleClarityWireframeChange()"
-                            style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer; background: white;">
-                            <option value="none" selected>-- Select Wireframe --</option>
-                            <option value="working">Working Active Journey</option>
-                            <option value="device">Device Locking</option>
-                        </select>
-                    </div>
-                    <button onclick="backToPatientList()"
-                        style="padding: 10px 20px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                        <i class="fa-solid fa-arrow-left"></i> Back to List
-                    </button>
                 </div>
             </div>
         </div>
@@ -3031,6 +3166,20 @@
             <div class="tabs-container">
                 <button class="tab-button active" id="todayTab" onclick="switchTab('today')">Today's Journey</button>
                 <button class="tab-button" id="overallTab" onclick="switchTab('overall')">Overall Journey</button>
+            </div>
+
+            <!-- ROLE DISPLAY BANNER -->
+            <div id="roleDisplayBanner" class="role-display-banner">
+                <div class="role-display-left">
+                    <div id="roleIcon" class="role-icon receptionist">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div class="role-info">
+                        <h3 id="roleTitle">Receptionist</h3>
+                        <p id="roleDescription">Manage patient records and appointments</p>
+                    </div>
+                </div>
+                <div id="roleBadge" class="role-badge receptionist">Receptionist</div>
             </div>
 
             <!-- OVERALL JOURNEY TAB -->
@@ -4420,6 +4569,10 @@
         // CLARITY WIREFRAMES DROPDOWN HANDLER
         function handleClarityWireframeChange() {
             const selectedWireframe = document.getElementById('clarityWireframesSelector').value;
+            
+            // Sync the top dropdown
+            const topSelector = document.getElementById('topClaritySelector');
+            if (topSelector) topSelector.value = selectedWireframe;
             
             if (selectedWireframe === 'none') {
                 return;
@@ -7754,6 +7907,9 @@
         }
 
         function proceedDirectlyToJourney(patient) {
+            // Update selected patient data
+            selectedPatientData = patient;
+
             // Hide entry screen
             document.getElementById('patientEntryScreen').style.display = 'none';
 
@@ -7761,8 +7917,17 @@
             const header = document.getElementById('selectedPatientHeader');
             header.style.display = 'block';
 
-            // Show role selector
-            document.getElementById('journeyRoleSelector').style.display = 'block';
+            // Show back to list button in top header
+            document.getElementById('topBackToListBtn').style.display = 'block';
+
+            // Sync role selector (top is always visible)
+            const topRoleSelect = document.getElementById('topRoleSelect');
+            if (topRoleSelect) {
+                topRoleSelect.value = currentRole;
+            }
+
+            // Update current patient index and navigation
+            updateCurrentPatientIndex(patient.id);
 
             // Populate header
             document.getElementById('patientInitials').textContent = patient.firstName.charAt(0) + patient.lastName.charAt(0);
@@ -7788,6 +7953,9 @@
             document.getElementById('consentFormPage').style.display = 'none';
             document.getElementById('paymentPage').style.display = 'none';
 
+            // Hide back to list button only
+            document.getElementById('topBackToListBtn').style.display = 'none';
+
             // Show entry screen
             document.getElementById('patientEntryScreen').style.display = 'block';
 
@@ -7799,8 +7967,8 @@
             hasSignature = false;
 
             // Reset clarity wireframes dropdown
-            const clarityDropdown = document.getElementById('clarityWireframesSelector');
-            if (clarityDropdown) clarityDropdown.value = 'none';
+            const topClarityDropdown = document.getElementById('topClaritySelector');
+            if (topClarityDropdown) topClarityDropdown.value = 'none';
 
             // Reset to Today's Journey tab
             switchTab('today');
@@ -7891,6 +8059,9 @@
 
             currentRole = roleSelector.value;
 
+            // Update patient navigation visibility
+            updatePatientNavigationVisibility();
+
             // Re-render views if patient is selected
             if (document.getElementById('journeyContent').style.display === 'block') {
                 if (document.getElementById('todayTabContent').style.display === 'block') {
@@ -7899,6 +8070,161 @@
                 if (document.getElementById('workingTabContent').style.display === 'block') {
                     renderWorkingView();
                 }
+            }
+        }
+
+        // Update role display banner
+        function updateRoleDisplay(role) {
+            const roleIcon = document.getElementById('roleIcon');
+            const roleTitle = document.getElementById('roleTitle');
+            const roleDescription = document.getElementById('roleDescription');
+            const roleBadge = document.getElementById('roleBadge');
+            
+            if (!roleIcon || !roleTitle || !roleDescription || !roleBadge) return;
+            
+            const roleConfig = {
+                'doctor': {
+                    icon: 'fa-user-doctor',
+                    title: 'Doctor',
+                    description: 'Full clinical access - Manage assessments and treatment plans',
+                    class: 'doctor'
+                },
+                'clinical-assistant': {
+                    icon: 'fa-user-nurse',
+                    title: 'Clinical Assistant',
+                    description: 'Support role - Assist with assessments and patient care',
+                    class: 'clinical-assistant'
+                },
+                'patient': {
+                    icon: 'fa-user',
+                    title: 'Patient',
+                    description: 'Patient view - Track your health journey and results',
+                    class: 'patient'
+                },
+                'receptionist': {
+                    icon: 'fa-user-tie',
+                    title: 'Receptionist',
+                    description: 'Administrative access - Manage patient records and appointments',
+                    class: 'receptionist'
+                }
+            };
+            
+            const config = roleConfig[role] || roleConfig['receptionist'];
+            
+            // Update icon
+            roleIcon.className = 'role-icon ' + config.class;
+            roleIcon.innerHTML = '<i class="fa-solid ' + config.icon + '"></i>';
+            
+            // Update title and description
+            roleTitle.textContent = config.title;
+            roleDescription.textContent = config.description;
+            
+            // Update badge
+            roleBadge.className = 'role-badge ' + config.class;
+            roleBadge.textContent = role.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        // Handler functions for top controls
+        function handleTopRoleChange() {
+            const topRoleSelect = document.getElementById('topRoleSelect');
+            
+            if (!topRoleSelect) return;
+            
+            currentRole = topRoleSelect.value;
+            
+            // Update role display banner
+            updateRoleDisplay(currentRole);
+            
+            // Update patient navigation visibility
+            updatePatientNavigationVisibility();
+
+            // Re-render views if patient is selected
+            if (document.getElementById('journeyContent').style.display === 'block') {
+                if (document.getElementById('todayTabContent').style.display === 'block') {
+                    renderTodayView();
+                }
+                if (document.getElementById('workingTabContent').style.display === 'block') {
+                    renderWorkingView();
+                }
+            }
+        }
+
+        function handleTopClarityWireframeChange() {
+            const topSelector = document.getElementById('topClaritySelector');
+            
+            if (!topSelector) return;
+            
+            const selectedWireframe = topSelector.value;
+            
+            if (selectedWireframe === 'none') {
+                return;
+            }
+            
+            // Handle wireframe navigation
+            if (selectedWireframe === 'working') {
+                window.location.href = 'working-active-journey.html';
+            } else if (selectedWireframe === 'device') {
+                switchTab('device');
+            }
+        }
+
+        // PATIENT NAVIGATION FUNCTIONS
+        let currentPatientIndex = 0;
+
+        function updatePatientNavigationVisibility() {
+            const navigationDiv = document.getElementById('patientNavigation');
+
+            // Show navigation only for Doctor and Clinical Assistant roles
+            if (currentRole === 'doctor' || currentRole === 'clinical-assistant') {
+                if (navigationDiv) navigationDiv.style.display = 'flex';
+            } else {
+                if (navigationDiv) navigationDiv.style.display = 'none';
+            }
+        }
+
+        function updatePatientCounter() {
+            const counterSpan = document.getElementById('patientCounter');
+            const prevBtn = document.getElementById('prevPatientBtn');
+            const nextBtn = document.getElementById('nextPatientBtn');
+            
+            const totalPatients = samplePatients.length;
+            const counterText = `${currentPatientIndex + 1} / ${totalPatients}`;
+
+            // Update counter
+            if (counterSpan) counterSpan.textContent = counterText;
+
+            // Disable/enable buttons based on position
+            const isPrevDisabled = currentPatientIndex === 0;
+            const isNextDisabled = currentPatientIndex === totalPatients - 1;
+
+            if (prevBtn) prevBtn.disabled = isPrevDisabled;
+            if (nextBtn) nextBtn.disabled = isNextDisabled;
+        }
+
+        function navigateToPreviousPatient() {
+            if (currentPatientIndex > 0) {
+                currentPatientIndex--;
+                const patient = samplePatients[currentPatientIndex];
+                selectPatient(patient);
+                updatePatientCounter();
+            }
+        }
+
+        function navigateToNextPatient() {
+            if (currentPatientIndex < samplePatients.length - 1) {
+                currentPatientIndex++;
+                const patient = samplePatients[currentPatientIndex];
+                selectPatient(patient);
+                updatePatientCounter();
+            }
+        }
+
+        function updateCurrentPatientIndex(patientId) {
+            const index = samplePatients.findIndex(p => p.id === patientId);
+            if (index !== -1) {
+                currentPatientIndex = index;
+                updatePatientCounter();
+                updatePatientNavigationVisibility();
             }
         }
 
@@ -7965,9 +8291,9 @@
 
             if (role) {
                 currentRole = role;
-                const roleSelector = document.getElementById('roleSelector');
-                if (roleSelector) {
-                    roleSelector.value = role;
+                const topRoleSelect = document.getElementById('topRoleSelect');
+                if (topRoleSelect) {
+                    topRoleSelect.value = role;
                 }
             }
 
@@ -8003,8 +8329,16 @@
             const header = document.getElementById('selectedPatientHeader');
             header.style.display = 'block';
 
-            // Show role selector
-            document.getElementById('journeyRoleSelector').style.display = 'block';
+            // Show top header controls
+            document.getElementById('topRoleSelector').style.display = 'block';
+            document.getElementById('topClarityWireframes').style.display = 'block';
+            document.getElementById('topBackToListBtn').style.display = 'block';
+
+            // Update role display banner
+            updateRoleDisplay(currentRole);
+
+            // Update current patient index and navigation
+            updateCurrentPatientIndex(patient.id);
 
             // Populate header
             document.getElementById('patientInitials').textContent = patient.firstName.charAt(0) + patient.lastName.charAt(0);
@@ -8039,6 +8373,9 @@
         renderAssessments();
         renderPatientDropdown();
         handleEntryRoleChange(); // Initialize entry role-based UI
+        
+        // Initialize role display banner with current role
+        updateRoleDisplay(currentRole);
         
         // Initialize from URL if patient is in URL
         initializeFromURL();
