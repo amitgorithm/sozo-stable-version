@@ -1796,6 +1796,325 @@
                 font-size: 14px;
             }
         }
+
+        /* Payment Override Modal Styles */
+        .payment-override-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .payment-override-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .payment-override-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+            animation: modalSlideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(30px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .payment-override-header {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .payment-override-header-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .payment-override-header-text h3 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+        }
+
+        .payment-override-header-text p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .payment-override-body {
+            padding: 28px;
+        }
+
+        .payment-override-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .payment-override-warning i {
+            color: #d97706;
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .payment-override-warning-text {
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        .payment-override-warning-text strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #78350f;
+        }
+
+        .payment-override-consent {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .payment-override-consent-title {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-override-consent-title i {
+            color: #6366f1;
+        }
+
+        .payment-override-consent-text {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .payment-override-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .payment-override-checkbox input {
+            width: 20px;
+            height: 20px;
+            accent-color: #dc2626;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .payment-override-checkbox label {
+            font-size: 13px;
+            color: #0f172a;
+            line-height: 1.5;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .payment-override-footer {
+            display: flex;
+            gap: 12px;
+            padding-top: 8px;
+        }
+
+        .payment-override-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .payment-override-btn-cancel {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #64748b;
+        }
+
+        .payment-override-btn-cancel:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .payment-override-btn-confirm {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            border: none;
+            color: white;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .payment-override-btn-confirm.enabled {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .payment-override-btn-confirm.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .override-payment-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .override-payment-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Payment Override Success State */
+        .payment-override-success {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .payment-override-success.show {
+            display: block;
+        }
+
+        .payment-override-success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            animation: successPop 0.4s ease;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .payment-override-success h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 8px 0;
+        }
+
+        .payment-override-success p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0 0 24px 0;
+        }
+
+        .payment-override-start-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .payment-override-start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .payment-override-close-link {
+            display: block;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #64748b;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .payment-override-close-link:hover {
+            color: #475569;
+        }
+
+        .payment-override-form {
+            display: block;
+        }
+
+        .payment-override-form.hide {
+            display: none;
+        }
     </style>
 </head>
 
@@ -3524,6 +3843,80 @@
         </div>
     </div>
     <!-- END EEG PDF VIEWER MODAL -->
+
+    <!-- PAYMENT OVERRIDE MODAL -->
+    <div id="paymentOverrideModal" class="payment-override-modal" onclick="closePaymentOverrideModal(event)">
+        <div class="payment-override-content" onclick="event.stopPropagation()">
+            <div class="payment-override-header" id="overrideModalHeader">
+                <div class="payment-override-header-icon">
+                    <i class="fa-solid fa-credit-card"></i>
+                </div>
+                <div class="payment-override-header-text">
+                    <h3>Payment Override Request</h3>
+                    <p>Brain Mapping Assessment</p>
+                </div>
+            </div>
+            <div class="payment-override-body">
+                <!-- Form View -->
+                <div id="overrideFormView" class="payment-override-form">
+                    <div class="payment-override-warning">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <div class="payment-override-warning-text">
+                            <strong>Important Notice</strong>
+                            You are about to override the payment requirement for this assessment. 
+                            The patient has not completed their payment for this service.
+                        </div>
+                    </div>
+                    <div class="payment-override-consent">
+                        <div class="payment-override-consent-title">
+                            <i class="fa-solid fa-file-signature"></i>
+                            Doctor's Consent Declaration
+                        </div>
+                        <div class="payment-override-consent-text">
+                            By proceeding with this override, you acknowledge and agree to the following terms:
+                        </div>
+                        <ul style="font-size: 13px; color: #475569; margin: 0 0 16px 20px; line-height: 1.8;">
+                            <li>The patient's payment is currently pending for this assessment</li>
+                            <li>You are authorizing the Brain Mapping assessment to proceed without payment</li>
+                            <li>Sozo Medical reserves the right to charge the override amount to your account</li>
+                            <li>This action will be logged in the patient's record for audit purposes</li>
+                        </ul>
+                        <div class="payment-override-checkbox">
+                            <input type="checkbox" id="overrideConsentCheckbox" onchange="toggleOverrideButton()">
+                            <label for="overrideConsentCheckbox">
+                                I, as the attending physician, authorize this payment override and accept responsibility for any charges that may be applied to my account by Sozo Medical.
+                            </label>
+                        </div>
+                    </div>
+                    <div class="payment-override-footer">
+                        <button class="payment-override-btn payment-override-btn-cancel" onclick="closePaymentOverrideModal()">
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancel
+                        </button>
+                        <button id="confirmOverrideBtn" class="payment-override-btn payment-override-btn-confirm" onclick="confirmPaymentOverride()" disabled>
+                            <i class="fa-solid fa-unlock"></i>
+                            Confirm Override
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Success View -->
+                <div id="overrideSuccessView" class="payment-override-success">
+                    <div class="payment-override-success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3>Brain Mapping Unlocked!</h3>
+                    <p>The payment override has been recorded. You can now proceed with the Brain Mapping assessment.</p>
+                    <button class="payment-override-start-btn" onclick="startBrainMappingFromOverride()">
+                        <i class="fa-solid fa-brain"></i>
+                        Start Brain Mapping
+                    </button>
+                    <span class="payment-override-close-link" onclick="closePaymentOverrideModal()">Close and return later</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END PAYMENT OVERRIDE MODAL -->
     
     <script>
         // PATIENT STATE - SINGLE SOURCE OF TRUTH
@@ -4118,6 +4511,7 @@
             'P-NEW-1': 'assessment-blocks',  // Just paid - 4 pending, 3 locked
             'P-NEW-2': 'assessment-blocks',  // Payment pending - all locked
             'P-NEW-3': 'assessment-blocks',  // Device activation needed
+            'P-NEW-4': 'assessment-blocks',  // Payment pending - doctor override available
             'P001': 'assessment-blocks',     // 2/4 done
             'P002': 'assessment-blocks',     // 4/4 done, doctor notes open
             'P003': 'assessment-blocks',     // All blocks done
@@ -4163,6 +4557,22 @@
                     { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
                     { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending' },
                     { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending', requiresDeviceActivation: true },
+                    { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
+                    { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
+                    { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
+                ]
+            },
+            'P-NEW-4': { // Thomas Brown - Payment pending, doctor can override for brain mapping
+                assessmentNumber: 1,
+                startDate: '2026-02-04',
+                paymentPending: true,
+                allowPaymentOverride: true,
+                paymentOverrideBlocks: ['brain-mapping'],
+                blocks: [
+                    { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'locked', lockReason: 'payment' },
+                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'locked', lockReason: 'payment' },
+                    { id: 'prs-1', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'locked', lockReason: 'payment' },
+                    { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'locked', lockReason: 'payment', allowOverride: true },
                     { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
                     { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
                     { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
@@ -4715,12 +5125,29 @@
                             lockIcon = 'fa-lock';
                         }
                         
+                        // Check if payment override is available for this block
+                        const canOverride = block.allowOverride && block.lockReason === 'payment' && 
+                            (currentRole === 'doctor' || currentRole === 'clinical-assistant');
+                        
                         // For locked blocks, show info ALWAYS VISIBLE
-                        expandedDetailsHTML = `
-                            <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                <span style="color: #94a3b8;"><i class="fa-solid ${lockIcon}"></i> ${lockMessage}</span>
-                            </div>
-                        `;
+                        if (canOverride) {
+                            expandedDetailsHTML = `
+                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                    <span style="color: #dc2626;"><i class="fa-solid ${lockIcon}"></i> ${lockMessage}</span>
+                                </div>
+                                <div class="block-action-buttons" style="margin-top: 12px;">
+                                    <button class="override-payment-btn" onclick="openPaymentOverrideModal('${block.id}', '${block.type}')">
+                                        <i class="fa-solid fa-unlock"></i> Override Payment
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            expandedDetailsHTML = `
+                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                    <span style="color: #94a3b8;"><i class="fa-solid ${lockIcon}"></i> ${lockMessage}</span>
+                                </div>
+                            `;
+                        }
                     }
 
                     if (detailsContent) {
@@ -6420,6 +6847,187 @@
             document.body.style.overflow = 'auto';
         }
 
+        // PAYMENT OVERRIDE MODAL FUNCTIONS
+        let pendingOverrideBlockId = null;
+        let pendingOverrideBlockType = null;
+
+        function openPaymentOverrideModal(blockId, blockType) {
+            pendingOverrideBlockId = blockId;
+            pendingOverrideBlockType = blockType;
+            
+            // Reset checkbox and button state
+            const checkbox = document.getElementById('overrideConsentCheckbox');
+            const confirmBtn = document.getElementById('confirmOverrideBtn');
+            if (checkbox) checkbox.checked = false;
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.remove('enabled');
+            }
+            
+            // Reset to form view (hide success view)
+            const formView = document.getElementById('overrideFormView');
+            const successView = document.getElementById('overrideSuccessView');
+            const header = document.getElementById('overrideModalHeader');
+            if (formView) formView.classList.remove('hide');
+            if (successView) successView.classList.remove('show');
+            if (header) header.style.display = 'flex';
+            
+            const modal = document.getElementById('paymentOverrideModal');
+            if (modal) modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePaymentOverrideModal(event) {
+            if (event && event.target !== event.currentTarget) {
+                return;
+            }
+            const modal = document.getElementById('paymentOverrideModal');
+            if (modal) modal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+            
+            // Reset views
+            const formView = document.getElementById('overrideFormView');
+            const successView = document.getElementById('overrideSuccessView');
+            const header = document.getElementById('overrideModalHeader');
+            if (formView) formView.classList.remove('hide');
+            if (successView) successView.classList.remove('show');
+            if (header) header.style.display = 'flex';
+            
+            // Re-render the patient journey if override was successful
+            if (pendingOverrideBlockId === null && pendingOverrideBlockType === null) {
+                renderPatientJourney();
+            }
+            
+            pendingOverrideBlockId = null;
+            pendingOverrideBlockType = null;
+        }
+
+        function toggleOverrideButton() {
+            const checkbox = document.getElementById('overrideConsentCheckbox');
+            const confirmBtn = document.getElementById('confirmOverrideBtn');
+            
+            if (checkbox && confirmBtn) {
+                if (checkbox.checked) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.add('enabled');
+                } else {
+                    confirmBtn.disabled = true;
+                    confirmBtn.classList.remove('enabled');
+                }
+            }
+        }
+
+        function confirmPaymentOverride() {
+            const checkbox = document.getElementById('overrideConsentCheckbox');
+            if (!checkbox || !checkbox.checked) return;
+            
+            // Get current patient data
+            const patientId = selectedPatientData?.id;
+            if (!patientId || !patientStateData[patientId]) {
+                alert('Unable to process override. Patient data not found.');
+                return;
+            }
+
+            // Find and update the block status
+            const patientData = patientStateData[patientId];
+            const blockIndex = patientData.blocks.findIndex(b => b.id === pendingOverrideBlockId);
+            
+            if (blockIndex !== -1) {
+                // Update block to pending status (unlocked)
+                patientData.blocks[blockIndex].status = 'pending';
+                patientData.blocks[blockIndex].lockReason = null;
+                patientData.blocks[blockIndex].allowOverride = false;
+                patientData.blocks[blockIndex].overriddenBy = currentRole === 'doctor' ? 'Dr. ' + (selectedPatientData?.doctorName || 'Physician') : 'Clinical Assistant';
+                patientData.blocks[blockIndex].overriddenAt = new Date().toISOString();
+                
+                // Log the override action
+                console.log('Payment override confirmed:', {
+                    patientId: patientId,
+                    blockId: pendingOverrideBlockId,
+                    blockType: pendingOverrideBlockType,
+                    overriddenBy: patientData.blocks[blockIndex].overriddenBy,
+                    timestamp: patientData.blocks[blockIndex].overriddenAt
+                });
+            }
+
+            // Show success view in modal
+            showOverrideSuccessInModal();
+        }
+
+        function showOverrideSuccessInModal() {
+            // Hide form view, show success view
+            const formView = document.getElementById('overrideFormView');
+            const successView = document.getElementById('overrideSuccessView');
+            const header = document.getElementById('overrideModalHeader');
+            
+            if (formView) formView.classList.add('hide');
+            if (successView) successView.classList.add('show');
+            
+            // Update header to success state
+            if (header) {
+                header.innerHTML = `
+                    <div class="payment-override-header-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div class="payment-override-header-text">
+                        <h3 style="color: white;">Override Successful</h3>
+                        <p style="color: rgba(255,255,255,0.9);">Brain Mapping Assessment</p>
+                    </div>
+                `;
+                header.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            }
+            
+            // Clear the pending block info so closeModal knows override was successful
+            pendingOverrideBlockId = null;
+            pendingOverrideBlockType = null;
+        }
+
+        function startBrainMappingFromOverride() {
+            // Close modal first
+            const modal = document.getElementById('paymentOverrideModal');
+            if (modal) modal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+            
+            // Reset modal views for next time
+            const formView = document.getElementById('overrideFormView');
+            const successView = document.getElementById('overrideSuccessView');
+            const header = document.getElementById('overrideModalHeader');
+            if (formView) formView.classList.remove('hide');
+            if (successView) successView.classList.remove('show');
+            if (header) {
+                header.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                header.innerHTML = `
+                    <div class="payment-override-header-icon">
+                        <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <div class="payment-override-header-text">
+                        <h3>Payment Override Request</h3>
+                        <p>Brain Mapping Assessment</p>
+                    </div>
+                `;
+            }
+            
+            // Store session data for EEG page
+            const patientNameElement = document.getElementById('patientFullName');
+            const patientName = patientNameElement ? patientNameElement.textContent : 'Patient';
+            
+            const sessionData = {
+                currentRole: currentRole,
+                patientName: patientName,
+                blockType: 'brain-mapping',
+                viewMode: 'edit',
+                returnUrl: window.location.href,
+                paymentOverridden: true
+            };
+            localStorage.setItem('eegSession', JSON.stringify(sessionData));
+            
+            // Re-render the today view to update the UI
+            renderTodayView();
+            
+            // Navigate to EEG page in new tab
+            window.open('eeg.html', '_blank');
+        }
+
         function renderDoctorNotesModal(editable) {
             const body = document.getElementById('doctorNotesModalBody');
             if (!body) return;
@@ -6972,6 +7580,18 @@
                 status: 'new',
                 nextAppointment: '2026-02-10',
                 stateLabel: '🔓 Device Activation Needed'
+            },
+            {
+                id: 'P-NEW-4',
+                firstName: 'Thomas',
+                lastName: 'Brown',
+                age: 52,
+                gender: 'Male',
+                condition: 'Chronic Pain',
+                lastVisit: 'Today',
+                status: 'new',
+                nextAppointment: '2026-02-10',
+                stateLabel: '🔴 Payment Pending - Override Available'
             },
             {
                 id: 'P001',
