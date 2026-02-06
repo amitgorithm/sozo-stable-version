@@ -3426,7 +3426,7 @@
                         </div>
                         <div class="patient-meta-item">
                             <div class="patient-meta-label">Assessment</div>
-                            <div class="patient-meta-value">Clinical Assessment 2</div>
+                            <div class="patient-meta-value">Follow-Up Assessment 1</div>
                         </div>
                         <div class="patient-meta-item">
                             <div class="patient-meta-label">Status</div>
@@ -3469,7 +3469,7 @@
                         </div>
                         <div class="patient-meta-item">
                             <div class="patient-meta-label">Assessment</div>
-                            <div class="patient-meta-value">Clinical Assessment 2</div>
+                            <div class="patient-meta-value">Follow-Up Assessment 1</div>
                         </div>
                         <div class="patient-meta-item">
                             <div class="patient-meta-label">Device Required</div>
@@ -4397,7 +4397,7 @@
                     blocks: [
                         { 
                             id: 'anamnesis-2', 
-                            name: 'Anamnesis', 
+                            name: 'Follow-Up<br>Anamnesis', 
                             desc: 'Patient Symptoms',
                             type: 'anamnesis',
                             status: 'completed', 
@@ -4407,7 +4407,7 @@
                         },
                         { 
                             id: 'fnon-2', 
-                            name: 'FNON', 
+                            name: 'Follow-Up<br>FNON', 
                             desc: 'Network Analysis',
                             type: 'fnon',
                             status: 'completed',
@@ -4417,7 +4417,7 @@
                         },
                         {
                             id: 'eeg-2',
-                            name: 'Brain Mapping',
+                            name: 'Follow-Up<br>Brain Mapping',
                             desc: 'EEG Imaging',
                             type: 'brain-mapping',
                             status: 'completed',
@@ -4427,7 +4427,7 @@
                         },
                         {
                             id: 'prs-2',
-                            name: 'PRS',
+                            name: 'Follow-Up<br>PRS',
                             desc: 'Symptoms',
                             type: 'prs',
                             status: 'active', 
@@ -4562,9 +4562,10 @@
                 const statusIcon = ca.status === 'completed' ? '✓' : ca.status === 'active' ? '●' : '🔒';
                 const statusText = ca.status === 'completed' ? 'Completed' : ca.status === 'active' ? 'Active' : 'Locked';
 
+                const assessmentTitle = ca.number === 1 ? 'Assessment 1' : `Follow-Up Assessment ${ca.number - 1}`;
                 headerDiv.innerHTML = `
                     <div class="assessment-title">
-                        <h2>Clinical Assessment ${ca.number}</h2>
+                        <h2>${assessmentTitle}</h2>
                         <span class="assessment-badge ${ca.status}">
                             ${statusIcon} ${statusText}
                         </span>
@@ -4956,10 +4957,10 @@
                 assessmentNumber: 2,
                 startDate: '2026-01-15',
                 blocks: [
-                    { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-16' },
-                    { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-18', score: 32 },
-                    { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'pending', performer: null },
-                    { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending', performer: null },
+                    { id: 'anamnesis-2', name: 'Follow-Up<br>Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-16' },
+                    { id: 'fnon-2', name: 'Follow-Up<br>FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-18', score: 32 },
+                    { id: 'prs-2', name: 'Follow-Up<br>PRS', desc: 'Symptoms', type: 'prs', status: 'pending', performer: null },
+                    { id: 'eeg-2', name: 'Follow-Up<br>Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending', performer: null },
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', performer: null },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', performer: null },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', performer: null }
@@ -4969,10 +4970,10 @@
                 assessmentNumber: 2,
                 startDate: '2026-01-10',
                 blocks: [
-                    { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-11' },
-                    { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-12', score: 45 },
-                    { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-13' },
-                    { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-14' },
+                    { id: 'anamnesis-2', name: 'Follow-Up<br>Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-11' },
+                    { id: 'fnon-2', name: 'Follow-Up<br>FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-12', score: 45 },
+                    { id: 'prs-2', name: 'Follow-Up<br>PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-13' },
+                    { id: 'eeg-2', name: 'Follow-Up<br>Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-14' },
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'pending', performer: null },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', performer: null },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', performer: null }
@@ -4982,10 +4983,10 @@
                 assessmentNumber: 2,
                 startDate: '2026-01-05',
                 blocks: [
-                    { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-06' },
-                    { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-07', score: 38 },
-                    { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-08' },
-                    { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-09' },
+                    { id: 'anamnesis-2', name: 'Follow-Up<br>Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-06' },
+                    { id: 'fnon-2', name: 'Follow-Up<br>FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-07', score: 38 },
+                    { id: 'prs-2', name: 'Follow-Up<br>PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-08' },
+                    { id: 'eeg-2', name: 'Follow-Up<br>Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-09' },
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-10' },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-12' },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'pending', performer: null }
@@ -4995,30 +4996,30 @@
                 assessmentNumber: 2,
                 startDate: '2026-01-01',
                 blocks: [
-                    { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-02' },
-                    { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-03', score: 42 },
-                    { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-04' },
-                    { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-05' },
+                    { id: 'anamnesis-2', name: 'Follow-Up<br>Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2026-01-02' },
+                    { id: 'fnon-2', name: 'Follow-Up<br>FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-03', score: 42 },
+                    { id: 'prs-2', name: 'Follow-Up<br>PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2026-01-04' },
+                    { id: 'eeg-2', name: 'Follow-Up<br>Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2026-01-05' },
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-06' },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-08' },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'completed', completedBy: 'Dr. James', completedAt: '2026-01-10' }
                 ],
                 sessions: [
-                    { id: 'session-1', name: 'Session 1', desc: 'Initial therapy session', status: 'pending', scheduledDate: '2026-02-03' },
-                    { id: 'session-2', name: 'Session 2', desc: 'Follow-up therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
-                    { id: 'session-3', name: 'Session 3', desc: 'Continued therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
-                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'locked', lockReason: 'Complete Session 1 first' },
-                    { id: 'session-5', name: 'Session 5', desc: 'Maintenance therapy', status: 'locked', lockReason: 'Complete Session 1 first' }
+                    { id: 'session-1', name: 'Session 1', desc: 'In-Clinic Session', status: 'pending', scheduledDate: '2026-02-03' },
+                    { id: 'session-2', name: 'Session 2', desc: 'In-Clinic Session', status: 'locked', lockReason: 'Complete Session 1 first' },
+                    { id: 'session-3', name: 'Session 3', desc: 'In-Clinic Session', status: 'locked', lockReason: 'Complete Session 1 first' },
+                    { id: 'session-4', name: 'Session 4', desc: 'In-Clinic Session', status: 'locked', lockReason: 'Complete Session 1 first' },
+                    { id: 'session-5', name: 'Session 5', desc: 'In-Clinic Session', status: 'locked', lockReason: 'Complete Session 1 first' }
                 ]
             },
             'P005': { // Lisa Thompson - 3 sessions complete
                 assessmentNumber: 2,
                 startDate: '2025-12-20',
                 blocks: [
-                    { id: 'anamnesis-2', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2025-12-21' },
-                    { id: 'fnon-2', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-22', score: 50 },
-                    { id: 'prs-2', name: 'PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2025-12-23' },
-                    { id: 'eeg-2', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2025-12-24' },
+                    { id: 'anamnesis-2', name: 'Follow-Up<br>Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'completed', completedBy: 'Clinical Assistant Maria', completedAt: '2025-12-21' },
+                    { id: 'fnon-2', name: 'Follow-Up<br>FNON', desc: 'Network Analysis', type: 'fnon', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-22', score: 50 },
+                    { id: 'prs-2', name: 'Follow-Up<br>PRS', desc: 'Symptoms', type: 'prs', status: 'completed', completedBy: 'Clinical Assistant Alex', completedAt: '2025-12-23' },
+                    { id: 'eeg-2', name: 'Follow-Up<br>Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'completed', completedBy: 'Tech Sarah', completedAt: '2025-12-24' },
                     { id: 'ana-2', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-26' },
                     { id: 'treatment-2', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-28' },
                     { id: 'report-2', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'completed', completedBy: 'Dr. James', completedAt: '2025-12-30' }
@@ -5027,7 +5028,7 @@
                     { 
                         id: 'session-1', 
                         name: 'Session 1', 
-                        desc: 'Initial therapy session', 
+                        desc: 'In-Clinic Session', 
                         status: 'completed', 
                         completedAt: '2026-01-15', 
                         duration: '60 min', 
@@ -5041,7 +5042,7 @@
                     { 
                         id: 'session-2', 
                         name: 'Session 2', 
-                        desc: 'Follow-up therapy', 
+                        desc: 'In-Clinic Session', 
                         status: 'completed', 
                         completedAt: '2026-01-22', 
                         duration: '60 min', 
@@ -5054,7 +5055,7 @@
                     { 
                         id: 'session-3', 
                         name: 'Session 3', 
-                        desc: 'Continued therapy', 
+                        desc: 'In-Clinic Session', 
                         status: 'completed', 
                         completedAt: '2026-01-29', 
                         duration: '60 min', 
@@ -5065,8 +5066,8 @@
                         clinicalNotes: 'Good response to treatment. Motor function improvement noted in assessments.',
                         activities: ['Balance Test', 'Sudoku', 'Memory Game']
                     },
-                    { id: 'session-4', name: 'Session 4', desc: 'Advanced therapy', status: 'pending', scheduledDate: '2026-02-05' },
-                    { id: 'session-5', name: 'Session 5', desc: 'Maintenance therapy', status: 'pending', scheduledDate: '2026-02-12' }
+                    { id: 'session-4', name: 'Session 4', desc: 'In-Clinic Session', status: 'pending', scheduledDate: '2026-02-05' },
+                    { id: 'session-5', name: 'Session 5', desc: 'In-Clinic Session', status: 'pending', scheduledDate: '2026-02-12' }
                 ]
             }
         };
@@ -5139,7 +5140,7 @@
                 const totalBlocks = patientData.blocks.length;
                 const isFirstVisit = activeAssessment.number === 1 || completedBlocks === 0;
                 
-                let assessmentTitle = isFirstVisit ? 'First Visit - Clinical Assessment' : `Clinical Assessment ${activeAssessment.number}`;
+                let assessmentTitle = isFirstVisit ? 'First Visit - Assessment 1' : activeAssessment.number === 1 ? 'Assessment 1' : `Follow-Up Assessment ${activeAssessment.number - 1}`;
                 let assessmentSubtitle = `${completedBlocks} of ${totalBlocks} assessments completed`;
                 
                 if (isFirstVisit && completedBlocks === 0) {
