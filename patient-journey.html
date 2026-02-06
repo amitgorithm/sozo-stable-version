@@ -2340,6 +2340,89 @@
                 margin-bottom: 10px;
             }
         }
+        
+        /* SOZO WATERMARKS */
+        .container-journey::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 150px,
+                    rgba(244, 117, 32, 0.06) 150px,
+                    rgba(244, 117, 32, 0.06) 152px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 150px,
+                    rgba(244, 117, 32, 0.05) 150px,
+                    rgba(244, 117, 32, 0.05) 152px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .watermark-text {
+            position: fixed;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: rgba(244, 117, 32, 0.09);
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+            transform: rotate(-45deg);
+            white-space: nowrap;
+        }
+        
+        .watermark-logo {
+            position: fixed;
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+            transform: rotate(-45deg);
+        }
+        
+        .watermark-logo img {
+            width: 120px;
+            height: auto;
+            filter: grayscale(100%) contrast(0.5);
+        }
+        
+        .watermark-1 { top: 15%; left: 10%; }
+        .watermark-2 { top: 15%; right: 10%; }
+        .watermark-3 { top: 35%; left: 5%; }
+        .watermark-4 { top: 35%; right: 5%; }
+        .watermark-5 { top: 55%; left: 15%; }
+        .watermark-6 { top: 55%; right: 15%; }
+        .watermark-7 { top: 75%; left: 8%; }
+        .watermark-8 { top: 75%; right: 8%; }
+        
+        .watermark-logo-1 { top: 25%; left: 20%; }
+        .watermark-logo-2 { top: 25%; right: 20%; }
+        .watermark-logo-3 { top: 45%; left: 25%; }
+        .watermark-logo-4 { top: 45%; right: 25%; }
+        .watermark-logo-5 { top: 65%; left: 12%; }
+        .watermark-logo-6 { top: 65%; right: 12%; }
+        
+        /* Ensure main content stays above watermarks */
+        .page-header,
+        .role-display-banner,
+        .selectedPatientHeader,
+        .journey-content,
+        .assessment-section,
+        .sozo-footer {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.98);
+        }
     </style>
 </head>
 
@@ -3464,6 +3547,36 @@
 
     </div>
     <!-- END CONTAINER -->
+
+    <!-- SOZO WATERMARKS -->
+    <div class="watermark-text watermark-1">SOZO BRAIN CENTER</div>
+    <div class="watermark-text watermark-2">SOZO</div>
+    <div class="watermark-text watermark-3">NEUROMODULATION</div>
+    <div class="watermark-text watermark-4">SOZO BRAIN CENTER</div>
+    <div class="watermark-text watermark-5">SOZO</div>
+    <div class="watermark-text watermark-6">CLINICAL JOURNEY</div>
+    <div class="watermark-text watermark-7">SOZO BRAIN CENTER</div>
+    <div class="watermark-text watermark-8">SOZO</div>
+    
+    <!-- SOZO LOGO WATERMARKS -->
+    <div class="watermark-logo watermark-logo-1">
+        <img src="logo1.png" alt="SOZO">
+    </div>
+    <div class="watermark-logo watermark-logo-2">
+        <img src="logo.png" alt="SOZO">
+    </div>
+    <div class="watermark-logo watermark-logo-3">
+        <img src="logo1.png" alt="SOZO">
+    </div>
+    <div class="watermark-logo watermark-logo-4">
+        <img src="logo.png" alt="SOZO">
+    </div>
+    <div class="watermark-logo watermark-logo-5">
+        <img src="logo1.png" alt="SOZO">
+    </div>
+    <div class="watermark-logo watermark-logo-6">
+        <img src="logo.png" alt="SOZO">
+    </div>
 
     <!-- SOZO FOOTER -->
     <div class="sozo-footer">
