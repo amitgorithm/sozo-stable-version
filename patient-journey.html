@@ -795,9 +795,9 @@
 
         .nav-button {
             padding: 8px 16px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            color: #0f172a;
+            border: 2px solid var(--orange-primary);
+            background: linear-gradient(135deg, var(--orange-primary), #dc6027);
+            color: white;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 600;
@@ -806,12 +806,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            box-shadow: 0 2px 4px rgba(244, 121, 32, 0.2);
         }
 
         .nav-button:hover:not(:disabled) {
-            border-color: var(--orange-primary);
-            background: rgba(244, 121, 32, 0.05);
-            color: var(--orange-primary);
+            background: linear-gradient(135deg, #dc6027, var(--orange-primary));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(244, 121, 32, 0.3);
         }
 
         .nav-button:disabled {
@@ -2261,6 +2262,40 @@
             flex-direction: column;
         }
         
+        /* PROMINENT ROLE DISPLAY BANNER */
+        .role-display-banner.prominent {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid var(--orange-primary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: 0 8px 24px rgba(244, 121, 32, 0.1);
+        }
+        
+        .role-display-banner.prominent .role-info h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .role-display-banner.prominent .role-info p {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .role-display-banner.prominent .role-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            margin-right: 20px;
+        }
+        
+        .role-display-banner.prominent .role-badge {
+            font-size: 16px;
+            padding: 12px 20px;
+            font-weight: 700;
+        }
+        
         .sozo-footer {
             background: #f8fafc;
             border-top: 1px solid #e2e8f0;
@@ -3196,6 +3231,20 @@
             </div>
         </div>
 
+        <!-- ROLE DISPLAY BANNER -->
+        <div id="roleDisplayBanner" class="role-display-banner prominent">
+            <div class="role-display-left">
+                <div id="roleIcon" class="role-icon receptionist">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="role-info">
+                    <h3 id="roleTitle">SOZO Receptionist</h3>
+                    <p id="roleDescription">Administrative access - Manage patient records and appointments</p>
+                </div>
+            </div>
+            <div id="roleBadge" class="role-badge receptionist">Receptionist</div>
+        </div>
+
         <!-- SELECTED PATIENT HEADER (Hidden by default) -->
         <div id="selectedPatientHeader"
             style="display: none; background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-left: 4px solid var(--orange-primary);">
@@ -3206,6 +3255,9 @@
                         <span id="patientInitials">SM</span>
                     </div>
                     <div>
+                        <div style="font-size: 11px; font-weight: 600; color: var(--orange-primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                            <i class="fa-solid fa-user"></i> PATIENT
+                        </div>
                         <h2 id="patientFullName"
                             style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Sarah
                             Mitchell</h2>
@@ -3221,11 +3273,11 @@
                     <!-- Patient Navigation Buttons (Doctor & Clinical Assistant only) -->
                     <div id="patientNavigation" class="patient-navigation" style="display: none;">
                         <button id="prevPatientBtn" class="nav-button" onclick="navigateToPreviousPatient()">
-                            <i class="fa-solid fa-chevron-left"></i> Previous
+                            <i class="fa-solid fa-chevron-left"></i> Previous Patient
                         </button>
                         <span id="patientCounter" class="patient-counter">1 / 10</span>
                         <button id="nextPatientBtn" class="nav-button" onclick="navigateToNextPatient()">
-                            Next <i class="fa-solid fa-chevron-right"></i>
+                            Next Patient <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
@@ -3239,20 +3291,6 @@
             <div class="tabs-container">
                 <button class="tab-button active" id="todayTab" onclick="switchTab('today')">Today's Journey</button>
                 <button class="tab-button" id="overallTab" onclick="switchTab('overall')">Overall Journey</button>
-            </div>
-
-            <!-- ROLE DISPLAY BANNER -->
-            <div id="roleDisplayBanner" class="role-display-banner">
-                <div class="role-display-left">
-                    <div id="roleIcon" class="role-icon receptionist">
-                        <i class="fa-solid fa-user-tie"></i>
-                    </div>
-                    <div class="role-info">
-                        <h3 id="roleTitle">SOZO Receptionist</h3>
-                        <p id="roleDescription">Manage patient records and appointments</p>
-                    </div>
-                </div>
-                <div id="roleBadge" class="role-badge receptionist">Receptionist</div>
             </div>
 
             <!-- OVERALL JOURNEY TAB -->
