@@ -1947,10 +1947,11 @@
             background: white;
             border-radius: 20px;
             width: 90%;
-            max-width: 520px;
+            max-width: 580px;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
             animation: modalSlideIn 0.3s ease;
             overflow: hidden;
+            border: 1px solid rgba(0, 161, 228, 0.1);
         }
 
         @keyframes modalSlideIn {
@@ -1966,10 +1967,50 @@
 
         .payment-override-header {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            padding: 24px 28px;
+            padding: 28px 32px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
+            position: relative;
+        }
+
+        .payment-override-header h2 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .payment-override-header h2 i {
+            font-size: 22px;
+            opacity: 0.9;
+        }
+
+        .payment-override-close {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .payment-override-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.05);
         }
 
         .payment-override-header-icon {
@@ -1998,7 +2039,92 @@
         }
 
         .payment-override-body {
-            padding: 28px;
+            padding: 32px;
+        }
+
+        .payment-override-info {
+            margin-bottom: 28px;
+        }
+
+        .payment-override-patient,
+        .payment-override-block {
+            background: linear-gradient(135deg, rgba(0, 161, 228, 0.05) 0%, rgba(2, 132, 199, 0.05) 100%);
+            border: 1px solid rgba(0, 161, 228, 0.15);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .payment-override-patient i,
+        .payment-override-block i {
+            color: var(--blue-primary);
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .payment-override-patient span,
+        .payment-override-block span {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 15px;
+        }
+
+        .payment-override-reason-section {
+            background: linear-gradient(135deg, rgba(244, 121, 32, 0.05) 0%, rgba(251, 146, 60, 0.05) 100%);
+            border: 1px solid rgba(244, 121, 32, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .payment-override-reason-section p {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .payment-override-reason {
+            margin-bottom: 32px;
+        }
+
+        .payment-override-reason label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .payment-override-reason textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #fafbfc;
+            box-sizing: border-box;
+        }
+
+        .payment-override-reason textarea:focus {
+            outline: none;
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 0 3px rgba(0, 161, 228, 0.1);
+            background: white;
+        }
+
+        .payment-override-reason textarea::placeholder {
+            color: #94a3b8;
+            font-style: italic;
         }
 
         .payment-override-warning {
@@ -2032,11 +2158,31 @@
         }
 
         .payment-override-consent {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1.5px solid rgba(16, 185, 129, 0.2);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .payment-override-consent-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .payment-override-consent input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #10b981;
+            cursor: pointer;
+            margin-top: 2px;
+            border-radius: 4px;
         }
 
         .payment-override-consent-title {
@@ -2083,16 +2229,18 @@
             font-weight: 500;
         }
 
-        .payment-override-footer {
+        .payment-override-actions {
             display: flex;
-            gap: 12px;
-            padding-top: 8px;
+            gap: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 8px;
         }
 
         .payment-override-btn {
             flex: 1;
-            padding: 14px 20px;
-            border-radius: 10px;
+            padding: 16px 24px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -2100,7 +2248,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-override-btn i {
+            font-size: 16px;
         }
 
         .payment-override-btn-cancel {
@@ -2112,6 +2266,8 @@
         .payment-override-btn-cancel:hover {
             background: #f8fafc;
             border-color: #cbd5e1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.15);
         }
 
         .payment-override-btn-confirm {
@@ -2150,6 +2306,131 @@
         .override-payment-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .override-assessment-btn {
+            background: linear-gradient(135deg, var(--blue-primary) 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            margin-left: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .override-assessment-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .override-assessment-btn:hover::before {
+            left: 100%;
+        }
+
+        .override-assessment-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 161, 228, 0.4);
+        }
+
+        .block-override-reason {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .block-override-reason strong {
+            color: #047857;
+        }
+
+        /* Assessment Override Modal Customization */
+        #assessmentOverrideModal .payment-override-header {
+            background: linear-gradient(135deg, var(--blue-primary) 0%, #0284c7 100%);
+        }
+
+        #assessmentOverrideModal .payment-override-btn-confirm {
+            background: linear-gradient(135deg, var(--blue-primary) 0%, #0284c7 100%);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #assessmentOverrideModal .payment-override-btn-confirm.enabled {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        #assessmentOverrideModal .payment-override-btn-confirm.enabled:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 161, 228, 0.4);
+        }
+        
+        /* Consultation Discount Modal Styling */
+        #consultationDiscountModal .payment-override-header {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, #dc6027 100%);
+        }
+        
+        .consultation-discount-preview {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1.5px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .discount-calculation {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .discount-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .discount-row.discount-amount {
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
+        
+        .discount-row.final-amount {
+            color: #10b981;
+            font-weight: 700;
+            font-size: 16px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        #discountPercentage {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #1e293b;
+        }
+        
+        #discountPercentage:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.1);
         }
 
         /* Payment Override Success State */
@@ -2198,7 +2479,7 @@
         }
 
         .payment-override-start-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            background: linear-gradient(135deg, var(--blue-primary) 0%, #0284c7 100%);
             color: white;
             border: none;
             padding: 16px 32px;
@@ -2210,12 +2491,12 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 6px 20px rgba(0, 161, 228, 0.3);
         }
 
         .payment-override-start-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 161, 228, 0.4);
         }
 
         .payment-override-close-link {
@@ -2769,16 +3050,98 @@
                         256-bit SSL Encryption</p>
                 </div>
 
+                <!-- Role Selector for Demo -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 24px;">
+                    <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-user-gear" style="color: var(--blue-primary);"></i>
+                        View Mode (Demo)
+                    </h4>
+                    <select id="paymentRoleSelector" onchange="updatePaymentRole()" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white;">
+                        <option value="patient">Patient View</option>
+                        <option value="doctor">Doctor View</option>
+                        <option value="receptionist">Receptionist View</option>
+                    </select>
+                </div>
+                
+                <!-- Doctor Discount Section (Hidden by default) -->
+                <div id="doctorDiscountSection" style="background: linear-gradient(135deg, rgba(244, 121, 32, 0.05), rgba(251, 146, 60, 0.05)); border: 2px solid rgba(244, 121, 32, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; display: none;">
+                    <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-percentage" style="color: var(--orange-primary);"></i>
+                        Apply Consultation Discount
+                    </h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">
+                                Discount Percentage:
+                            </label>
+                            <select id="paymentDiscountSelect" onchange="calculatePaymentDiscount()" style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                <option value="0">No Discount</option>
+                                <option value="10">10% - New Patient</option>
+                                <option value="15">15% - Financial Hardship</option>
+                                <option value="20">20% - Insurance Issues</option>
+                                <option value="25">25% - Senior Citizen</option>
+                                <option value="30">30% - Student</option>
+                                <option value="50">50% - Emergency/Compassionate</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">
+                                Patient:
+                            </label>
+                            <input type="text" id="paymentPatientName" placeholder="Enter patient name" value="Sarah Mitchell" style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">
+                            Reason for Discount:
+                        </label>
+                        <textarea id="paymentDiscountReason" rows="2" placeholder="Please provide a reason for the discount..." style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;"></textarea>
+                    </div>
+                    
+                    <button id="applyPaymentDiscountBtn" onclick="applyPaymentDiscount()" style="background: linear-gradient(135deg, var(--orange-primary), #dc6027); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" disabled>
+                        <i class="fa-solid fa-check"></i>
+                        Apply Discount
+                    </button>
+                </div>
+
                 <!-- Payment Summary -->
-                <div
+                <div id="paymentSummarySection"
                     style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border: 2px solid #10b981; border-radius: 16px; padding: 24px; margin-bottom: 32px;">
-                    <div
+                    <div id="originalFeeRow"
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <span style="font-size: 14px; color: #64748b;" class="payment-description">Initial Consultation
                             Fee</span>
                         <span style="font-size: 24px; font-weight: 700; color: #0f172a;"
                             class="payment-amount">€300</span>
                     </div>
+                    
+                    <!-- Discount Row (Hidden by default) -->
+                    <div id="discountRow" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 14px; color: var(--orange-primary); font-weight: 600;">
+                            <i class="fa-solid fa-percentage"></i> Discount (<span id="discountPercentDisplay">0</span>%)
+                        </span>
+                        <span style="font-size: 20px; font-weight: 700; color: var(--orange-primary);" id="discountAmountDisplay">-€0</span>
+                    </div>
+                    
+                    <!-- Final Amount Row -->
+                    <div id="finalAmountRow" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-top: 12px; border-top: 2px dashed #10b981;">
+                        <span style="font-size: 16px; color: #10b981; font-weight: 700;">Final Amount</span>
+                        <span style="font-size: 28px; font-weight: 700; color: #10b981;" id="finalAmountDisplay">€300</span>
+                    </div>
+                    
+                    <!-- Discount Info (Hidden by default) -->
+                    <div id="discountInfo" style="display: none; background: rgba(244, 121, 32, 0.1); border-left: 3px solid var(--orange-primary); padding: 12px; margin-top: 16px; border-radius: 0 8px 8px 0;">
+                        <div style="font-size: 12px; color: #92400e; font-weight: 600;">
+                            <i class="fa-solid fa-info-circle"></i> Discount Applied
+                        </div>
+                        <div style="font-size: 11px; color: #92400e; margin-top: 4px;">
+                            <strong>Reason:</strong> <span id="discountReasonDisplay">-</span><br>
+                            <strong>Applied by:</strong> <span id="discountAppliedByDisplay">-</span>
+                        </div>
+                    </div>
+                    
                     <div style="padding-top: 12px; border-top: 2px dashed #10b981; font-size: 12px; color: #64748b;"
                         class="payment-details">
                         <i class="fa-solid fa-info-circle"></i> This includes initial assessments (PRS, FNON, EEG) and
@@ -4303,6 +4666,144 @@
     </div>
     <!-- END PAYMENT OVERRIDE MODAL -->
     
+    <!-- CONSULTATION DISCOUNT MODAL -->
+    <div id="consultationDiscountModal" class="payment-override-modal" onclick="closeConsultationDiscountModal(event)">
+        <div class="payment-override-content" onclick="event.stopPropagation()">
+            <div class="payment-override-header">
+                <h2><i class="fa-solid fa-percentage"></i> Apply Consultation Discount</h2>
+                <button class="payment-override-close" onclick="closeConsultationDiscountModal()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="payment-override-body">
+                <div class="payment-override-info">
+                    <div class="payment-override-patient">
+                        <i class="fa-solid fa-user-circle"></i>
+                        <span id="discountPatientName">Patient Name</span>
+                    </div>
+                    <div class="payment-override-block">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                        <span>Consultation Fee: <span id="originalConsultationFee">$150</span></span>
+                    </div>
+                </div>
+                
+                <div class="payment-override-reason">
+                    <label for="discountPercentage">Discount Percentage:</label>
+                    <select id="discountPercentage" onchange="calculateDiscountedFee()">
+                        <option value="0">No Discount</option>
+                        <option value="10">10% - New Patient</option>
+                        <option value="15">15% - Financial Hardship</option>
+                        <option value="20">20% - Insurance Issues</option>
+                        <option value="25">25% - Senior Citizen</option>
+                        <option value="30">30% - Student</option>
+                        <option value="50">50% - Emergency/Compassionate</option>
+                    </select>
+                </div>
+                
+                <div class="consultation-discount-preview" id="discountPreview" style="display: none;">
+                    <div class="discount-calculation">
+                        <div class="discount-row">
+                            <span>Original Fee:</span>
+                            <span id="previewOriginalFee">$150.00</span>
+                        </div>
+                        <div class="discount-row discount-amount">
+                            <span>Discount (<span id="previewDiscountPercent">0</span>%):</span>
+                            <span id="previewDiscountAmount">-$0.00</span>
+                        </div>
+                        <div class="discount-row final-amount">
+                            <span>Final Amount:</span>
+                            <span id="previewFinalAmount">$150.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-override-reason">
+                    <label for="discountReason">Reason for Discount (Required):</label>
+                    <textarea id="discountReason" rows="3" placeholder="Please provide a reason for the discount (e.g., 'Financial hardship - patient is unemployed', 'Student discount', 'Insurance processing delay', etc.)"></textarea>
+                </div>
+                
+                <div class="payment-override-actions">
+                    <button class="payment-override-btn payment-override-btn-cancel" onclick="closeConsultationDiscountModal()">
+                        <i class="fa-solid fa-times"></i>
+                        Cancel
+                    </button>
+                    <button id="applyDiscountBtn" class="payment-override-btn payment-override-btn-confirm" onclick="applyConsultationDiscount()" disabled>
+                        <i class="fa-solid fa-check"></i>
+                        Apply Discount
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END CONSULTATION DISCOUNT MODAL -->
+    
+    <!-- ASSESSMENT OVERRIDE MODAL -->
+    <div id="assessmentOverrideModal" class="payment-override-modal" onclick="closeAssessmentOverrideModal(event)">
+        <div class="payment-override-content">
+            <!-- Override Request Step -->
+            <div id="assessmentOverrideStep1" class="payment-override-step">
+                <div class="payment-override-header">
+                    <h2><i class="fa-solid fa-user-doctor"></i> Override Assessment Requirement</h2>
+                    <button class="payment-override-close" onclick="closeAssessmentOverrideModal()">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="payment-override-body">
+                    <div class="payment-override-info">
+                        <div class="payment-override-patient">
+                            <i class="fa-solid fa-user-circle"></i>
+                            <span>Daniel Foster (12 yrs) - Autism Spectrum Disorder</span>
+                        </div>
+                        <div class="payment-override-block">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <span id="assessmentOverrideBlockName">PRS Assessment</span>
+                        </div>
+                        <div class="payment-override-reason-section">
+                            <p>As a doctor, you can override the requirement for this assessment. This is particularly appropriate for patients with Autism Spectrum Disorder where PRS assessment may not be suitable or necessary.</p>
+                        </div>
+                    </div>
+                    <div class="payment-override-consent">
+                        <label class="payment-override-consent-label">
+                            <input type="checkbox" id="assessmentOverrideConsent">
+                            I understand that this assessment will be marked as "Not Required" and will not be performed for this patient.
+                        </label>
+                    </div>
+                    <div class="payment-override-reason">
+                        <label for="assessmentOverrideReason">Reason for Override (Required):</label>
+                        <textarea id="assessmentOverrideReason" rows="4" placeholder="Please provide a clinical reason for overriding this assessment (e.g., 'Patient with ASD - PRS assessment not clinically appropriate', 'Communication difficulties make PRS assessment unreliable', etc.)"></textarea>
+                    </div>
+                    <div class="payment-override-actions">
+                        <button class="payment-override-btn payment-override-btn-cancel" onclick="closeAssessmentOverrideModal()">
+                            <i class="fa-solid fa-times"></i>
+                            Cancel
+                        </button>
+                        <button id="assessmentOverrideConfirmBtn" class="payment-override-btn payment-override-btn-confirm" onclick="confirmAssessmentOverride()" disabled>
+                            <i class="fa-solid fa-check"></i>
+                            Override Assessment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Override Success Step -->
+            <div id="assessmentOverrideStep2" class="payment-override-step" style="display: none;">
+                <div class="payment-override-success">
+                    <div class="payment-override-success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3>Assessment Override Complete!</h3>
+                    <p>The PRS assessment has been marked as "Not Required" for this patient. The reason has been recorded in the patient's clinical notes.</p>
+                    <button class="payment-override-start-btn" onclick="closeAssessmentOverrideModal()">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        Continue with Other Assessments
+                    </button>
+                    <span class="payment-override-close-link" onclick="closeAssessmentOverrideModal()">Close and return to journey</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END ASSESSMENT OVERRIDE MODAL -->
+    
     <script>
         // PATIENT STATE - SINGLE SOURCE OF TRUTH
         const patientState = {
@@ -4887,6 +5388,7 @@
             'P-NEW-2': 'assessment-blocks',  // Payment pending - all locked
             'P-NEW-3': 'assessment-blocks',  // Device activation needed
             'P-NEW-4': 'assessment-blocks',  // Payment pending - doctor override available
+            'P-NEW-5': 'assessment-blocks',  // Autism - PRS assessment override available
             'P001': 'assessment-blocks',     // 2/4 done
             'P002': 'assessment-blocks',     // 4/4 done, doctor notes open
             'P003': 'assessment-blocks',     // All blocks done
@@ -5069,6 +5571,37 @@
                     { id: 'session-4', name: 'Session 4', desc: 'In-Clinic Session', status: 'pending', scheduledDate: '2026-02-05' },
                     { id: 'session-5', name: 'Session 5', desc: 'In-Clinic Session', status: 'pending', scheduledDate: '2026-02-12' }
                 ]
+            },
+            'P-NEW-5': { // Daniel Foster - 12y old with Autism Spectrum Disorder, PRS assessment override available
+                assessmentNumber: 1,
+                startDate: '2026-02-04',
+                allowAssessmentOverride: true, // Enable PRS assessment override for autism
+                blocks: [
+                    { id: 'anamnesis-1', name: 'Anamnesis', desc: 'Patient Symptoms', type: 'anamnesis', status: 'pending' },
+                    { id: 'fnon-1', name: 'FNON', desc: 'Network Analysis', type: 'fnon', status: 'pending' },
+                    { 
+                        id: 'prs-1', 
+                        name: 'PRS', 
+                        desc: 'Symptoms Assessment', 
+                        type: 'prs', 
+                        status: 'pending',
+                        allowAssessmentOverride: true, // Special flag for PRS override
+                        overrideReason: 'Patient has autism spectrum disorder - PRS assessment may be challenging',
+                        alternativeAssessment: 'Clinical observation and parent/caregiver questionnaire recommended'
+                    },
+                    { id: 'eeg-1', name: 'Brain Mapping', desc: 'EEG Imaging', type: 'brain-mapping', status: 'pending' },
+                    { id: 'ana-1', name: "Doctor's Notes", desc: 'Clinical Notes', type: 'doctor-notes', status: 'locked', lockReason: 'assessment' },
+                    { id: 'treatment-1', name: 'Treatment Plan', desc: 'Therapy Design', type: 'treatment-plan', status: 'locked', lockReason: 'assessment' },
+                    { id: 'report-1', name: 'Final Report', desc: 'Comprehensive', type: 'final-report', status: 'locked', lockReason: 'assessment' }
+                ],
+                assessmentOverride: {
+                    prs: {
+                        overridden: false,
+                        reason: '',
+                        overriddenBy: '',
+                        overriddenAt: ''
+                    }
+                }
             }
         };
 
@@ -5456,8 +5989,40 @@
 
                         // For pending blocks, show info ALWAYS VISIBLE (not in accordion)
                         if (canStart && permissions.canEditData) {
+                            // Check if assessment override is available for this block (PRS for autistic patients)
+                            if (block.allowAssessmentOverride && block.type === 'prs' && currentRole === 'doctor') {
+                                // Check if already overridden
+                                const patientData = patientStateData[selectedPatientData?.id];
+                                const isOverridden = patientData?.assessmentOverride?.prs?.overridden;
+                                
+                                if (isOverridden) {
+                                    expandedDetailsHTML = `
+                                        <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                            <span style="color: #10b981;"><i class="fa-solid fa-check-circle"></i> Assessment Not Required</span>
+                                        </div>
+                                        <div class="block-override-reason" style="margin-top: 8px; padding: 8px; background: #f0fdf4; border-left: 3px solid #10b981; font-size: 11px;">
+                                            <strong>Override Reason:</strong> ${patientData.assessmentOverride.prs.reason}
+                                            <br><small style="color: #6b7280;">Overridden by ${patientData.assessmentOverride.prs.overriddenBy} on ${patientData.assessmentOverride.prs.overriddenAt}</small>
+                                        </div>
+                                    `;
+                                } else {
+                                    expandedDetailsHTML = `
+                                        <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                            <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
+                                        </div>
+                                        <div class="block-action-buttons" style="margin-top: 12px;">
+                                            <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
+                                                <i class="fa-solid fa-play"></i> Start ${block.name}
+                                            </button>
+                                            <button class="override-assessment-btn" onclick="openAssessmentOverrideModal('${block.id}', '${block.type}')">
+                                                <i class="fa-solid fa-user-doctor"></i> Override Assessment
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+                            }
                             // Check if device activation is required for this block
-                            if (block.requiresDeviceActivation && block.type === 'brain-mapping') {
+                            else if (block.requiresDeviceActivation && block.type === 'brain-mapping') {
                                 expandedDetailsHTML = `
                                     <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
                                         <span style="color: #f59e0b;"><i class="fa-solid fa-unlock"></i> Device Activation Required</span>
@@ -5469,23 +6034,76 @@
                                     </div>
                                 `;
                             } else {
+                                // Handle PRS block for non-doctor roles when overridden
+                                if (block.type === 'prs' && block.allowAssessmentOverride) {
+                                    const patientData = patientStateData[selectedPatientData?.id];
+                                    const isOverridden = patientData?.assessmentOverride?.prs?.overridden;
+                                    
+                                    if (isOverridden) {
+                                        expandedDetailsHTML = `
+                                            <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                                <span style="color: #10b981;"><i class="fa-solid fa-check-circle"></i> Assessment Not Required</span>
+                                            </div>
+                                            <div class="block-override-reason" style="margin-top: 8px; padding: 8px; background: #f0fdf4; border-left: 3px solid #10b981; font-size: 11px;">
+                                                <strong>Override Reason:</strong> ${patientData.assessmentOverride.prs.reason}
+                                                <br><small style="color: #6b7280;">Overridden by ${patientData.assessmentOverride.prs.overriddenBy}</small>
+                                            </div>
+                                        `;
+                                    } else {
+                                        expandedDetailsHTML = `
+                                            <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                                <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
+                                            </div>
+                                            <div class="block-action-buttons" style="margin-top: 12px;">
+                                                <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
+                                                    <i class="fa-solid fa-play"></i> Start ${block.name}
+                                                </button>
+                                            </div>
+                                        `;
+                                    }
+                                } else {
+                                    expandedDetailsHTML = `
+                                        <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                            <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
+                                        </div>
+                                        <div class="block-action-buttons" style="margin-top: 12px;">
+                                            <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
+                                                <i class="fa-solid fa-play"></i> Start ${block.name}
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        } else if (waitingMessage) {
+                            // Handle PRS block showing "not required" for non-doctor roles when overridden
+                            if (block.type === 'prs' && block.allowAssessmentOverride) {
+                                const patientData = patientStateData[selectedPatientData?.id];
+                                const isOverridden = patientData?.assessmentOverride?.prs?.overridden;
+                                
+                                if (isOverridden) {
+                                    expandedDetailsHTML = `
+                                        <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                            <span style="color: #10b981;"><i class="fa-solid fa-check-circle"></i> PRS (not required)</span>
+                                        </div>
+                                        <div class="block-override-reason" style="margin-top: 8px; padding: 8px; background: #f0fdf4; border-left: 3px solid #10b981; font-size: 11px;">
+                                            <strong>Override Reason:</strong> ${patientData.assessmentOverride.prs.reason}
+                                            <br><small style="color: #6b7280;">Overridden by ${patientData.assessmentOverride.prs.overriddenBy}</small>
+                                        </div>
+                                    `;
+                                } else {
+                                    expandedDetailsHTML = `
+                                        <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
+                                            <span style="color: #64748b;"><i class="fa-solid fa-clock"></i> ${waitingMessage}</span>
+                                        </div>
+                                    `;
+                                }
+                            } else {
                                 expandedDetailsHTML = `
                                     <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                        <span style="color: #f59e0b;"><i class="fa-solid fa-circle-dot"></i> Ready to Start</span>
-                                    </div>
-                                    <div class="block-action-buttons" style="margin-top: 12px;">
-                                        <button class="block-action-btn start" onclick="startBlock('${block.id}', '${block.type}')">
-                                            <i class="fa-solid fa-play"></i> Start ${block.name}
-                                        </button>
+                                        <span style="color: #64748b;"><i class="fa-solid fa-clock"></i> ${waitingMessage}</span>
                                     </div>
                                 `;
                             }
-                        } else if (waitingMessage) {
-                            expandedDetailsHTML = `
-                                <div class="block-meta" style="margin-top: 12px; font-size: 11px;">
-                                    <span style="color: #64748b;"><i class="fa-solid fa-clock"></i> ${waitingMessage}</span>
-                                </div>
-                            `;
                         }
                     } else if (block.status === 'locked') {
                         // Determine lock message based on lock reason
@@ -7414,6 +8032,123 @@
             window.open('eeg.html', '_blank');
         }
 
+        // --- ASSESSMENT OVERRIDE FUNCTIONS ---
+        let pendingAssessmentOverrideBlockId = null;
+        let pendingAssessmentOverrideBlockType = null;
+
+        function openAssessmentOverrideModal(blockId, blockType) {
+            console.log('Opening assessment override modal for:', blockId, blockType);
+            pendingAssessmentOverrideBlockId = blockId;
+            pendingAssessmentOverrideBlockType = blockType;
+            
+            // Reset form
+            document.getElementById('assessmentOverrideConsent').checked = false;
+            document.getElementById('assessmentOverrideReason').value = '';
+            
+            // Update block name in modal
+            const blockNameElement = document.getElementById('assessmentOverrideBlockName');
+            if (blockNameElement) {
+                blockNameElement.textContent = blockType === 'prs' ? 'PRS Assessment' : blockType;
+            }
+            
+            // Show modal
+            const modal = document.getElementById('assessmentOverrideModal');
+            if (modal) {
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                
+                // Show step 1, hide step 2
+                document.getElementById('assessmentOverrideStep1').style.display = 'block';
+                document.getElementById('assessmentOverrideStep2').style.display = 'none';
+                
+                // Add event listeners for validation
+                const consentCheckbox = document.getElementById('assessmentOverrideConsent');
+                const reasonTextarea = document.getElementById('assessmentOverrideReason');
+                const confirmBtn = document.getElementById('assessmentOverrideConfirmBtn');
+                
+                const validateAssessmentOverrideForm = () => {
+                    const isValid = consentCheckbox.checked && reasonTextarea.value.trim().length > 0;
+                    confirmBtn.disabled = !isValid;
+                    if (isValid) {
+                        confirmBtn.classList.add('enabled');
+                    } else {
+                        confirmBtn.classList.remove('enabled');
+                    }
+                };
+                
+                consentCheckbox.addEventListener('change', validateAssessmentOverrideForm);
+                reasonTextarea.addEventListener('input', validateAssessmentOverrideForm);
+                
+                // Initial validation
+                validateAssessmentOverrideForm();
+            }
+        }
+
+        function closeAssessmentOverrideModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            
+            const modal = document.getElementById('assessmentOverrideModal');
+            if (modal) {
+                modal.classList.remove('open');
+                document.body.style.overflow = 'auto';
+                
+                // Reset form
+                document.getElementById('assessmentOverrideConsent').checked = false;
+                document.getElementById('assessmentOverrideReason').value = '';
+                
+                // Clear pending data
+                pendingAssessmentOverrideBlockId = null;
+                pendingAssessmentOverrideBlockType = null;
+            }
+        }
+
+        function confirmAssessmentOverride() {
+            const consentCheckbox = document.getElementById('assessmentOverrideConsent');
+            const reasonTextarea = document.getElementById('assessmentOverrideReason');
+            
+            // Validate form
+            if (!consentCheckbox.checked) {
+                alert('Please confirm your understanding by checking the consent box.');
+                return;
+            }
+            
+            if (!reasonTextarea.value.trim()) {
+                alert('Please provide a reason for the assessment override.');
+                reasonTextarea.focus();
+                return;
+            }
+            
+            // Update patient data
+            const patientId = selectedPatientData?.id;
+            if (patientId && patientStateData[patientId] && patientStateData[patientId].assessmentOverride) {
+                const override = patientStateData[patientId].assessmentOverride[pendingAssessmentOverrideBlockType];
+                if (override) {
+                    override.overridden = true;
+                    override.reason = reasonTextarea.value.trim();
+                    override.overriddenBy = 'Dr. ' + (currentRole === 'doctor' ? 'Smith' : 'Current Doctor');
+                    override.overriddenAt = new Date().toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    console.log('Assessment override completed:', override);
+                }
+            }
+            
+            // Show success step
+            document.getElementById('assessmentOverrideStep1').style.display = 'none';
+            document.getElementById('assessmentOverrideStep2').style.display = 'block';
+            
+            // Re-render the journey to show updated state
+            renderTodayView();
+            
+            // Auto-close modal after 2 seconds to show success
+            setTimeout(() => {
+                closeAssessmentOverrideModal();
+            }, 2000);
+        }
+
         function renderDoctorNotesModal(editable) {
             const body = document.getElementById('doctorNotesModalBody');
             if (!body) return;
@@ -7561,6 +8296,138 @@
             document.getElementById('qrPaymentSection').style.display = method === 'qr' ? 'block' : 'none';
             document.getElementById('bankPaymentSection').style.display = method === 'bank' ? 'block' : 'none';
         }
+
+        // Consultation Discount Functions
+        const PAYMENT_BASE_FEE = 300; // Base consultation fee in euros
+        let paymentDiscount = {
+            percentage: 0,
+            amount: 0,
+            reason: '',
+            appliedBy: '',
+            patientName: ''
+        };
+
+        function updatePaymentRole() {
+            const role = document.getElementById('paymentRoleSelector').value;
+            const discountSection = document.getElementById('doctorDiscountSection');
+            
+            if (role === 'doctor') {
+                discountSection.style.display = 'block';
+            } else {
+                discountSection.style.display = 'none';
+                // If not doctor, just show existing discount if any
+                updatePaymentSummary();
+            }
+        }
+
+        function calculatePaymentDiscount() {
+            const discountPercent = parseInt(document.getElementById('paymentDiscountSelect').value);
+            const reason = document.getElementById('paymentDiscountReason').value.trim();
+            const patientName = document.getElementById('paymentPatientName').value.trim();
+            const applyBtn = document.getElementById('applyPaymentDiscountBtn');
+            
+            // Enable button only if discount is selected, reason provided, and patient name entered
+            const canApply = discountPercent > 0 && reason.length > 0 && patientName.length > 0;
+            applyBtn.disabled = !canApply;
+            
+            if (canApply) {
+                applyBtn.style.opacity = '1';
+                applyBtn.style.cursor = 'pointer';
+            } else {
+                applyBtn.style.opacity = '0.5';
+                applyBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        function applyPaymentDiscount() {
+            const discountPercent = parseInt(document.getElementById('paymentDiscountSelect').value);
+            const reason = document.getElementById('paymentDiscountReason').value.trim();
+            const patientName = document.getElementById('paymentPatientName').value.trim();
+            
+            if (discountPercent > 0 && reason && patientName) {
+                paymentDiscount = {
+                    percentage: discountPercent,
+                    amount: (PAYMENT_BASE_FEE * discountPercent) / 100,
+                    reason: reason,
+                    appliedBy: 'Dr. Smith',
+                    patientName: patientName
+                };
+                
+                updatePaymentSummary();
+                
+                // Show success message
+                alert(`Discount of ${discountPercent}% applied successfully for ${patientName}!`);
+                
+                // Switch to patient view to show the result
+                document.getElementById('paymentRoleSelector').value = 'patient';
+                updatePaymentRole();
+            }
+        }
+
+        function updatePaymentSummary() {
+            const originalRow = document.getElementById('originalFeeRow');
+            const discountRow = document.getElementById('discountRow');
+            const finalAmountRow = document.getElementById('finalAmountRow');
+            const discountInfo = document.getElementById('discountInfo');
+            const paymentButton = document.querySelector('button[onclick="processPayment()"] .payment-amount');
+            
+            if (paymentDiscount.percentage > 0) {
+                const finalAmount = PAYMENT_BASE_FEE - paymentDiscount.amount;
+                
+                // Update original fee row styling
+                originalRow.querySelector('.payment-amount').style.textDecoration = 'line-through';
+                originalRow.querySelector('.payment-amount').style.color = '#6b7280';
+                originalRow.querySelector('.payment-amount').style.fontSize = '20px';
+                
+                // Show and update discount row
+                discountRow.style.display = 'flex';
+                document.getElementById('discountPercentDisplay').textContent = paymentDiscount.percentage;
+                document.getElementById('discountAmountDisplay').textContent = `-€${paymentDiscount.amount.toFixed(0)}`;
+                
+                // Show and update final amount
+                finalAmountRow.style.display = 'flex';
+                document.getElementById('finalAmountDisplay').textContent = `€${finalAmount.toFixed(0)}`;
+                
+                // Show discount info
+                discountInfo.style.display = 'block';
+                document.getElementById('discountReasonDisplay').textContent = paymentDiscount.reason;
+                document.getElementById('discountAppliedByDisplay').textContent = paymentDiscount.appliedBy;
+                
+                // Update main payment button amount
+                if (paymentButton) {
+                    paymentButton.textContent = `€${finalAmount.toFixed(0)}`;
+                    paymentButton.style.textDecoration = 'none';
+                }
+                
+            } else {
+                // Reset to original state
+                originalRow.querySelector('.payment-amount').style.textDecoration = 'none';
+                originalRow.querySelector('.payment-amount').style.color = '#0f172a';
+                originalRow.querySelector('.payment-amount').style.fontSize = '24px';
+                
+                discountRow.style.display = 'none';
+                finalAmountRow.style.display = 'none';
+                discountInfo.style.display = 'none';
+                
+                // Reset main payment button amount
+                if (paymentButton) {
+                    paymentButton.textContent = `€${PAYMENT_BASE_FEE}`;
+                }
+            }
+        }
+
+        // Add event listeners for discount form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const discountSelect = document.getElementById('paymentDiscountSelect');
+            const reasonTextarea = document.getElementById('paymentDiscountReason');
+            const patientInput = document.getElementById('paymentPatientName');
+            
+            if (discountSelect && reasonTextarea && patientInput) {
+                discountSelect.addEventListener('change', calculatePaymentDiscount);
+                reasonTextarea.addEventListener('input', calculatePaymentDiscount);
+                patientInput.addEventListener('input', calculatePaymentDiscount);
+            }
+        });
 
         // Card Type Detection
         function detectCardType(cardNumber) {
@@ -7978,6 +8845,18 @@
                 status: 'new',
                 nextAppointment: '2026-02-10',
                 stateLabel: '🔴 Payment Pending - Override Available'
+            },
+            {
+                id: 'P-NEW-5',
+                firstName: 'Daniel',
+                lastName: 'Foster',
+                age: 12,
+                gender: 'Male',
+                condition: 'Autism Spectrum Disorder',
+                lastVisit: 'Today',
+                status: 'new',
+                nextAppointment: '2026-02-11',
+                stateLabel: '🧩 Autism - PRS Override Available'
             },
             {
                 id: 'P001',
