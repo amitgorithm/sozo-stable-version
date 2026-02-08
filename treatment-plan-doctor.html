@@ -151,7 +151,11 @@ let treatmentPlanState = {
   // Sub-tab inside Treatment Plan (either 'devices' or 'parameters')
   activeTreatmentSubTab: 'devices',
   // Main tabs for the Treatment Plan page: 'devices' or 'parameters' (full tab)
-  activeTreatmentMainTab: 'devices'
+  activeTreatmentMainTab: 'devices',
+  // Global device selections (for pre-selection pricing table)
+  selectedDevices: {},
+  // Global device discounts (for pre-selection pricing table)
+  deviceDiscounts: {}
 };
 
 // Persistence Logic
@@ -267,6 +271,161 @@ function updateDeviceSelection(deviceIndex, deviceType, isSelected) {
   saveTreatmentPlanState();
 }
 
+// Device Discount Management
+function updateDeviceDiscount(deviceIndex, deviceType, discountValue) {
+  // Ensure deviceIndex is a number
+  deviceIndex = parseInt(deviceIndex);
+  
+  // Ensure discount is a valid number between 0 and 100
+  let discount = parseInt(discountValue) || 0;
+  discount = Math.max(0, Math.min(100, discount));
+  
+  // Initialize device discounts if not exists
+  if (!treatmentPlanState || !treatmentPlanState.devices || !treatmentPlanState.devices[deviceIndex]) {
+    console.error('Device not found at index:', deviceIndex);
+    return;
+  }
+
+  if (!treatmentPlanState.devices[deviceIndex].deviceDiscounts) {
+    treatmentPlanState.devices[deviceIndex].deviceDiscounts = {};
+  }
+
+  // Update device discount
+  treatmentPlanState.devices[deviceIndex].deviceDiscounts[deviceType] = discount;
+
+  // Update summary display
+  updateDevicesSummary(deviceIndex);
+  
+  // Save state
+  saveTreatmentPlanState();
+}
+
+// Global Device Selection Management (for pre-selection pricing table)
+function updateGlobalDeviceSelection(deviceType, isSelected) {
+  // Initialize global device selections if not exists
+  if (!treatmentPlanState.selectedDevices) {
+    treatmentPlanState.selectedDevices = {};
+  }
+
+  // Update device selection
+  treatmentPlanState.selectedDevices[deviceType] = isSelected;
+
+  // Update summary display
+  updateGlobalDevicesSummary();
+  
+  // Save state
+  saveTreatmentPlanState();
+}
+
+// Global Device Discount Management (for pre-selection pricing table)
+function updateGlobalDeviceDiscount(deviceType, discountValue) {
+  // Ensure discount is a valid number between 0 and 100
+  let discount = parseInt(discountValue) || 0;
+  discount = Math.max(0, Math.min(100, discount));
+  
+  // Initialize global device discounts if not exists
+  if (!treatmentPlanState.deviceDiscounts) {
+    treatmentPlanState.deviceDiscounts = {};
+  }
+
+  // Update device discount
+  treatmentPlanState.deviceDiscounts[deviceType] = discount;
+
+  // Update summary display
+  updateGlobalDevicesSummary();
+  
+  // Save state
+  saveTreatmentPlanState();
+}
+
+// Update Global Devices Summary (for pre-selection pricing table)
+function updateGlobalDevicesSummary() {
+  const summaryContainer = document.getElementById('globalSelectedDevicesSummary');
+  const listContainer = document.getElementById('globalSelectedDevicesList');
+  const totalCostContainer = document.getElementById('globalTotalCost');
+
+  if (!summaryContainer || !listContainer || !totalCostContainer) {
+    console.warn('Global summary containers not found');
+    return;
+  }
+
+  // Device pricing map
+  const devicePricing = {
+    hdtdcs: { name: 'HD-tDCS', price: 3000 },
+    tdcs1200: { name: 'tDCS (Premium)', price: 1200 },
+    tdcs650: { name: 'tDCS (Standard)', price: 650 },
+    ces: { name: 'CES', price: 900 },
+    met: { name: 'MET', price: 1400 },
+    rehab_glove: { name: 'Rehabilitation Glove', price: 200 },
+    tps: { name: 'TPS', price: 850 }
+  };
+
+  const selectedDevices = Object.keys(treatmentPlanState.selectedDevices || {})
+    .filter(deviceType => treatmentPlanState.selectedDevices[deviceType])
+    .map(deviceType => {
+      const baseInfo = devicePricing[deviceType] || { name: deviceType, price: 0 };
+      const discount = treatmentPlanState.deviceDiscounts?.[deviceType] || 0;
+      const discountedPrice = baseInfo.price * (1 - discount / 100);
+      return {
+        type: deviceType,
+        name: baseInfo.name,
+        originalPrice: baseInfo.price,
+        discount: discount,
+        price: discountedPrice
+      };
+    });
+
+  if (selectedDevices.length === 0) {
+    summaryContainer.classList.add('hidden');
+    return;
+  }
+
+  // Show summary
+  summaryContainer.classList.remove('hidden');
+
+  // Update list with discount info
+  listContainer.innerHTML = selectedDevices.map(dev => `
+    <div class="flex items-center justify-between">
+      <span><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>${dev.name}</span>
+      <span class="font-bold">
+        ${dev.discount > 0 ? `<span class="text-red-500 line-through text-xs mr-1">€${dev.originalPrice}</span>` : ''}
+        €${Math.round(dev.price)}
+        ${dev.discount > 0 ? `<span class="text-green-600 text-xs ml-1">(-${dev.discount}%)</span>` : ''}
+      </span>
+    </div>
+  `).join('');
+
+  // Calculate totals
+  const originalTotal = selectedDevices.reduce((sum, dev) => sum + dev.originalPrice, 0);
+  const discountedTotal = selectedDevices.reduce((sum, dev) => sum + dev.price, 0);
+  const totalSavings = originalTotal - discountedTotal;
+  const assessmentCost = 300; // Brain Function Assessment Session
+  const grandTotal = Math.round(discountedTotal + assessmentCost);
+
+  totalCostContainer.innerHTML = `
+    <div class="space-y-1">
+      <div class="flex justify-between text-sm">
+        <span>Assessment Session:</span>
+        <span>€${assessmentCost}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span>Selected Devices:</span>
+        <span>€${Math.round(discountedTotal)}</span>
+      </div>
+      ${totalSavings > 0 ? `
+      <div class="flex justify-between text-sm text-green-600">
+        <span><i class="fa-solid fa-tag mr-1"></i>Total Savings:</span>
+        <span>-€${Math.round(totalSavings)}</span>
+      </div>
+      ` : ''}
+      <div class="flex justify-between font-bold text-lg border-t border-green-400 pt-1">
+        <span>Total Cost:</span>
+        <span>€${grandTotal}</span>
+      </div>
+    </div>
+  `;
+}
+
 function updateDevicesSummary(deviceIndex) {
   // Ensure deviceIndex is a number
   deviceIndex = parseInt(deviceIndex);
@@ -279,6 +438,9 @@ function updateDevicesSummary(deviceIndex) {
   const device = treatmentPlanState.devices[deviceIndex];
   if (!device.selectedDevices) {
     device.selectedDevices = {};
+  }
+  if (!device.deviceDiscounts) {
+    device.deviceDiscounts = {};
   }
 
   const summaryContainer = document.getElementById(`selectedDevicesSummary_${deviceIndex}`);
@@ -303,10 +465,18 @@ function updateDevicesSummary(deviceIndex) {
 
   const selectedDevices = Object.keys(device.selectedDevices)
     .filter(deviceType => device.selectedDevices[deviceType])
-    .map(deviceType => ({
-      type: deviceType,
-      ...(devicePricing[deviceType] || { name: deviceType, price: 0 })
-    }));
+    .map(deviceType => {
+      const baseInfo = devicePricing[deviceType] || { name: deviceType, price: 0 };
+      const discount = device.deviceDiscounts[deviceType] || 0;
+      const discountedPrice = baseInfo.price * (1 - discount / 100);
+      return {
+        type: deviceType,
+        name: baseInfo.name,
+        originalPrice: baseInfo.price,
+        discount: discount,
+        price: discountedPrice
+      };
+    });
 
   if (selectedDevices.length === 0) {
     summaryContainer.classList.add('hidden');
@@ -316,18 +486,24 @@ function updateDevicesSummary(deviceIndex) {
   // Show summary
   summaryContainer.classList.remove('hidden');
 
-  // Update list
+  // Update list with discount info
   listContainer.innerHTML = selectedDevices.map(dev => `
     <div class="flex items-center justify-between">
       <span><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>${dev.name}</span>
-      <span class="font-bold">€${dev.price}</span>
+      <span class="font-bold">
+        ${dev.discount > 0 ? `<span class="text-red-500 line-through text-xs mr-1">€${dev.originalPrice}</span>` : ''}
+        €${Math.round(dev.price)}
+        ${dev.discount > 0 ? `<span class="text-green-600 text-xs ml-1">(-${dev.discount}%)</span>` : ''}
+      </span>
     </div>
   `).join('');
 
-  // Calculate total
-  const totalCost = selectedDevices.reduce((sum, dev) => sum + dev.price, 0);
+  // Calculate totals
+  const originalTotal = selectedDevices.reduce((sum, dev) => sum + dev.originalPrice, 0);
+  const discountedTotal = selectedDevices.reduce((sum, dev) => sum + dev.price, 0);
+  const totalSavings = originalTotal - discountedTotal;
   const assessmentCost = 300; // Brain Function Assessment Session
-  const grandTotal = totalCost + assessmentCost;
+  const grandTotal = Math.round(discountedTotal + assessmentCost);
 
   totalCostContainer.innerHTML = `
     <div class="space-y-1">
@@ -337,8 +513,14 @@ function updateDevicesSummary(deviceIndex) {
       </div>
       <div class="flex justify-between text-sm">
         <span>Selected Devices:</span>
-        <span>€${totalCost}</span>
+        <span>€${Math.round(discountedTotal)}</span>
       </div>
+      ${totalSavings > 0 ? `
+      <div class="flex justify-between text-sm text-green-600">
+        <span><i class="fa-solid fa-tag mr-1"></i>Total Savings:</span>
+        <span>-€${Math.round(totalSavings)}</span>
+      </div>
+      ` : ''}
       <div class="flex justify-between font-bold text-lg border-t border-green-400 pt-1">
         <span>Total Cost:</span>
         <span>€${grandTotal}</span>
@@ -361,12 +543,18 @@ function restoreDeviceSelectionStates(deviceIndex) {
     return;
   }
   
-  // Restore checkbox states
+  // Restore checkbox states and discount values
   const deviceTypes = ['hdtdcs', 'tdcs1200', 'tdcs650', 'ces', 'met', 'rehab_glove', 'tps'];
   deviceTypes.forEach(deviceType => {
     const checkbox = document.getElementById(`device_${deviceType}_${deviceIndex}`);
     if (checkbox) {
       checkbox.checked = device.selectedDevices[deviceType] || false;
+    }
+    
+    // Restore discount values
+    const discountInput = document.getElementById(`discount_${deviceType}_${deviceIndex}`);
+    if (discountInput && device.deviceDiscounts) {
+      discountInput.value = device.deviceDiscounts[deviceType] || 0;
     }
   });
   
@@ -867,6 +1055,197 @@ function renderTreatmentPlan() {
       </div>
     </div>
     ` : ''}
+
+    <!-- Neuromodulation Devices & Pricing Section -->
+    <div class="mb-6 bg-white p-6 rounded-2xl border-2 border-orange-300 shadow-lg">
+      <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center">
+          <i class="fa-solid fa-table"></i>
+        </div>
+        Neuromodulation Devices & Pricing
+      </h3>
+      
+      <!-- Brain Function Assessment -->
+      <div class="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+              <h5 class="font-bold text-blue-900">Brain Function Assessment Session</h5>
+              <p class="text-xs text-blue-700">Comprehensive neurological evaluation</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-bold text-blue-900">€300</div>
+            <div class="text-xs text-blue-600">Per session</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Neuromodulation Techniques Table -->
+      <div class="w-full bg-white rounded-lg border border-gray-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3">
+          <div class="grid grid-cols-5 gap-4 font-bold text-sm">
+            <div>Technique</div>
+            <div class="text-center">Device</div>
+            <div class="text-center">Price</div>
+            <div class="text-center">Discount (%)</div>
+            <div class="text-center">Select</div>
+          </div>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+          <!-- HD-tDCS -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-purple-600"></i>
+                <span class="font-semibold text-gray-900">HD-tDCS</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-desktop text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€3000</div>
+              <div class="text-center">
+                <input type="number" id="discount_hdtdcs" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.hdtdcs || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('hdtdcs', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_hdtdcs" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.hdtdcs ? 'checked' : ''} onchange="updateGlobalDeviceSelection('hdtdcs', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- tDCS 1200 -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-blue-600"></i>
+                <span class="font-semibold text-gray-900">tDCS (Premium)</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-circle text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€1200</div>
+              <div class="text-center">
+                <input type="number" id="discount_tdcs1200" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.tdcs1200 || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('tdcs1200', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_tdcs1200" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.tdcs1200 ? 'checked' : ''} onchange="updateGlobalDeviceSelection('tdcs1200', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- tDCS 650 -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-zap text-green-600"></i>
+                <span class="font-semibold text-gray-900">tDCS (Standard)</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-circle-dot text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€650</div>
+              <div class="text-center">
+                <input type="number" id="discount_tdcs650" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.tdcs650 || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('tdcs650', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_tdcs650" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.tdcs650 ? 'checked' : ''} onchange="updateGlobalDeviceSelection('tdcs650', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- CES -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-wave-square text-indigo-600"></i>
+                <span class="font-semibold text-gray-900">CES</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-mobile-alt text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€900</div>
+              <div class="text-center">
+                <input type="number" id="discount_ces" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.ces || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('ces', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_ces" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.ces ? 'checked' : ''} onchange="updateGlobalDeviceSelection('ces', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- MET -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-signal text-teal-600"></i>
+                <span class="font-semibold text-gray-900">MET</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-tablet text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€1400</div>
+              <div class="text-center">
+                <input type="number" id="discount_met" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.met || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('met', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_met" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.met ? 'checked' : ''} onchange="updateGlobalDeviceSelection('met', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Rehabilitation Glove -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-hand text-pink-600"></i>
+                <span class="font-semibold text-gray-900">Rehabilitation Glove</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-hand-paper text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€200</div>
+              <div class="text-center">
+                <input type="number" id="discount_rehab_glove" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.rehab_glove || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('rehab_glove', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_rehab_glove" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.rehab_glove ? 'checked' : ''} onchange="updateGlobalDeviceSelection('rehab_glove', this.checked)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- TPS -->
+          <div class="px-4 py-3 hover:bg-gray-50">
+            <div class="grid grid-cols-5 gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-pulse text-red-600"></i>
+                <span class="font-semibold text-gray-900">TPS</span>
+              </div>
+              <div class="text-center">
+                <i class="fa-solid fa-waveform text-gray-600"></i>
+              </div>
+              <div class="text-center font-bold text-gray-900">€850</div>
+              <div class="text-center">
+                <input type="number" id="discount_tps" min="0" max="100" value="${treatmentPlanState.deviceDiscounts?.tps || 0}" class="w-16 text-center text-sm p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateGlobalDeviceDiscount('tps', this.value)">
+              </div>
+              <div class="text-center">
+                <input type="checkbox" id="device_tps" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" ${treatmentPlanState.selectedDevices?.tps ? 'checked' : ''} onchange="updateGlobalDeviceSelection('tps', this.checked)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Selected Devices Summary -->
+      <div id="globalSelectedDevicesSummary" class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg ${Object.keys(treatmentPlanState.selectedDevices || {}).filter(k => treatmentPlanState.selectedDevices[k]).length === 0 ? 'hidden' : ''}">
+        <h5 class="font-bold text-green-900 mb-2">Selected Devices Summary</h5>
+        <div id="globalSelectedDevicesList" class="space-y-1 text-sm text-green-800"></div>
+        <div id="globalTotalCost" class="mt-3 pt-3 border-t border-green-300 font-bold text-green-900"></div>
+      </div>
+    </div>
 
     <!-- Treatment Plan Main Tabs -->
       <div class="mb-4 flex gap-2 items-center">
@@ -3164,173 +3543,6 @@ function renderDeviceJourney(device, deviceIndex) {
           </div>
         </div>
         ` : ''}
-      </div>
-      
-      <!-- Device Table Section -->
-      <div class="bg-white p-6 rounded-xl border-2 border-orange-300 shadow-lg mt-6">
-        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-table text-orange-600"></i>
-          Neuromodulation Devices & Pricing
-        </h4>
-        
-        <!-- Brain Function Assessment -->
-        <div class="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-300">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-brain"></i>
-              </div>
-              <div>
-                <h5 class="font-bold text-blue-900">Brain Function Assessment Session</h5>
-                <p class="text-xs text-blue-700">Comprehensive neurological evaluation</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-lg font-bold text-blue-900">€300</div>
-              <div class="text-xs text-blue-600">Per session</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Neuromodulation Techniques Table -->
-        <div class="w-full bg-white rounded-lg border border-gray-300 overflow-hidden">
-          <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3">
-            <div class="grid grid-cols-4 gap-4 font-bold text-sm">
-              <div>Technique</div>
-              <div class="text-center">Device</div>
-              <div class="text-center">Price</div>
-              <div class="text-center">Select</div>
-            </div>
-          </div>
-          
-          <div class="divide-y divide-gray-200">
-            <!-- HD-tDCS -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-microchip text-purple-600"></i>
-                  <span class="font-semibold text-gray-900">HD-tDCS</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-desktop text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€3000</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_hdtdcs_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'hdtdcs', this.checked)">
-                </div>
-              </div>
-            </div>
-            
-            <!-- tDCS 1200 -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-bolt text-blue-600"></i>
-                  <span class="font-semibold text-gray-900">tDCS</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-circle text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€1200</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_tdcs1200_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'tdcs1200', this.checked)" checked>
-                </div>
-              </div>
-            </div>
-            
-            <!-- tDCS 650 -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-zap text-green-600"></i>
-                  <span class="font-semibold text-gray-900">tDCS</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-circle-dot text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€650</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_tdcs650_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'tdcs650', this.checked)">
-                </div>
-              </div>
-            </div>
-            
-            <!-- CES -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-wave-square text-indigo-600"></i>
-                  <span class="font-semibold text-gray-900">CES</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-mobile-alt text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€900</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_ces_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'ces', this.checked)" checked>
-                </div>
-              </div>
-            </div>
-            
-            <!-- MET -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-signal text-teal-600"></i>
-                  <span class="font-semibold text-gray-900">MET</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-tablet text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€1400</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_met_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'met', this.checked)">
-                </div>
-              </div>
-            </div>
-            
-            <!-- Rehabilitation Glove -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-hand text-pink-600"></i>
-                  <span class="font-semibold text-gray-900">Rehabilitation Glove</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-hand-paper text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€200</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_rehab_glove_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'rehab_glove', this.checked)">
-                </div>
-              </div>
-            </div>
-            
-            <!-- TPS -->
-            <div class="px-4 py-3 hover:bg-gray-50">
-              <div class="grid grid-cols-4 gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-pulse text-red-600"></i>
-                  <span class="font-semibold text-gray-900">TPS</span>
-                </div>
-                <div class="text-center">
-                  <i class="fa-solid fa-waveform text-gray-600"></i>
-                </div>
-                <div class="text-center font-bold text-gray-900">€850</div>
-                <div class="text-center">
-                  <input type="checkbox" id="device_tps_${deviceIndex}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="updateDeviceSelection(${deviceIndex}, 'tps', this.checked)">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Selected Devices Summary -->
-        <div id="selectedDevicesSummary_${deviceIndex}" class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg hidden">
-          <h5 class="font-bold text-green-900 mb-2">Selected Devices Summary</h5>
-          <div id="selectedDevicesList_${deviceIndex}" class="space-y-1 text-sm text-green-800"></div>
-          <div id="totalCost_${deviceIndex}" class="mt-3 pt-3 border-t border-green-300 font-bold text-green-900"></div>
-        </div>
       </div>
     </div>
     
