@@ -155,7 +155,13 @@ let treatmentPlanState = {
   // Global device selections (for pre-selection pricing table)
   selectedDevices: {},
   // Global device discounts (for pre-selection pricing table)
-  deviceDiscounts: {}
+  deviceDiscounts: {},
+  // Sessions configuration
+  sessions: {
+    count: 0,
+    pricePerSession: 100,
+    discount: 0
+  }
 };
 
 // Persistence Logic
@@ -338,6 +344,81 @@ function updateGlobalDeviceDiscount(deviceType, discountValue) {
   saveTreatmentPlanState();
 }
 
+// Sessions Management Functions
+function updateSessionsCount(count) {
+  let sessionCount = parseInt(count) || 0;
+  sessionCount = Math.max(0, Math.min(30, sessionCount));
+  
+  // Initialize sessions if not exists
+  if (!treatmentPlanState.sessions) {
+    treatmentPlanState.sessions = { count: 0, pricePerSession: 100, discount: 0 };
+  }
+  
+  treatmentPlanState.sessions.count = sessionCount;
+  updateSessionTotalDisplay();
+  updateGlobalDevicesSummary();
+  saveTreatmentPlanState();
+}
+
+function updateSessionPrice(price) {
+  let sessionPrice = parseInt(price) || 0;
+  sessionPrice = Math.max(0, sessionPrice);
+  
+  // Initialize sessions if not exists
+  if (!treatmentPlanState.sessions) {
+    treatmentPlanState.sessions = { count: 0, pricePerSession: 100, discount: 0 };
+  }
+  
+  treatmentPlanState.sessions.pricePerSession = sessionPrice;
+  updateSessionTotalDisplay();
+  updateGlobalDevicesSummary();
+  saveTreatmentPlanState();
+}
+
+function updateSessionDiscount(discount) {
+  let sessionDiscount = parseInt(discount) || 0;
+  sessionDiscount = Math.max(0, Math.min(100, sessionDiscount));
+  
+  // Initialize sessions if not exists
+  if (!treatmentPlanState.sessions) {
+    treatmentPlanState.sessions = { count: 0, pricePerSession: 100, discount: 0 };
+  }
+  
+  treatmentPlanState.sessions.discount = sessionDiscount;
+  updateSessionTotalDisplay();
+  updateGlobalDevicesSummary();
+  saveTreatmentPlanState();
+}
+
+function updateSessionTotalDisplay() {
+  const sessions = treatmentPlanState.sessions || { count: 0, pricePerSession: 100, discount: 0 };
+  const sessionOriginalCost = sessions.count * sessions.pricePerSession;
+  const sessionDiscount = (sessionOriginalCost * sessions.discount) / 100;
+  const sessionFinalCost = Math.round(sessionOriginalCost - sessionDiscount);
+  
+  const totalDisplay = document.getElementById('sessionTotalCost');
+  if (totalDisplay) {
+    totalDisplay.textContent = `€${sessionFinalCost}`;
+  }
+}
+
+// Function to restore sessions values from saved state
+function restoreSessionsValues() {
+  const sessions = treatmentPlanState.sessions || { count: 0, pricePerSession: 100, discount: 0 };
+  
+  const sessionsCountInput = document.getElementById('numberOfSessions');
+  const sessionsPriceInput = document.getElementById('pricePerSession');
+  const sessionsDiscountInput = document.getElementById('sessionDiscount');
+  
+  if (sessionsCountInput) sessionsCountInput.value = sessions.count;
+  if (sessionsPriceInput) sessionsPriceInput.value = sessions.pricePerSession;
+  if (sessionsDiscountInput) sessionsDiscountInput.value = sessions.discount;
+  
+  // Update displays
+  updateSessionTotalDisplay();
+  updateGlobalDevicesSummary();
+}
+
 // Update Global Devices Summary (for pre-selection pricing table)
 function updateGlobalDevicesSummary() {
   const summaryContainer = document.getElementById('globalSelectedDevicesSummary');
@@ -400,7 +481,14 @@ function updateGlobalDevicesSummary() {
   const discountedTotal = selectedDevices.reduce((sum, dev) => sum + dev.price, 0);
   const totalSavings = originalTotal - discountedTotal;
   const assessmentCost = 300; // Brain Function Assessment Session
-  const grandTotal = Math.round(discountedTotal + assessmentCost);
+  
+  // Calculate sessions cost
+  const sessions = treatmentPlanState.sessions || { count: 0, pricePerSession: 100, discount: 0 };
+  const sessionOriginalCost = sessions.count * sessions.pricePerSession;
+  const sessionDiscount = (sessionOriginalCost * sessions.discount) / 100;
+  const sessionFinalCost = Math.round(sessionOriginalCost - sessionDiscount);
+  
+  const grandTotal = Math.round(discountedTotal + assessmentCost + sessionFinalCost);
 
   totalCostContainer.innerHTML = `
     <div class="space-y-1">
@@ -412,10 +500,15 @@ function updateGlobalDevicesSummary() {
         <span>Selected Devices:</span>
         <span>€${Math.round(discountedTotal)}</span>
       </div>
-      ${totalSavings > 0 ? `
+      ${sessions.count > 0 ? `
+      <div class="flex justify-between text-sm">
+        <span>Treatment Sessions (${sessions.count} × €${sessions.pricePerSession}${sessions.discount > 0 ? ` -${sessions.discount}%` : ''}):</span>
+        <span>€${sessionFinalCost}</span>
+      </div>` : ''}
+      ${totalSavings > 0 || sessionDiscount > 0 ? `
       <div class="flex justify-between text-sm text-green-600">
         <span><i class="fa-solid fa-tag mr-1"></i>Total Savings:</span>
-        <span>-€${Math.round(totalSavings)}</span>
+        <span>-€${Math.round(totalSavings + sessionDiscount)}</span>
       </div>
       ` : ''}
       <div class="flex justify-between font-bold text-lg border-t border-green-400 pt-1">
@@ -1080,6 +1173,43 @@ function renderTreatmentPlan() {
           <div class="text-right">
             <div class="text-lg font-bold text-blue-900">€300</div>
             <div class="text-xs text-blue-600">Per session</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Number of Sessions -->
+      <div class="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div>
+              <h5 class="font-bold text-blue-900">Number of Sessions</h5>
+              <p class="text-xs text-blue-700">Treatment sessions required</p>
+            </div>
+          </div>
+          <div class="flex-1 mx-6">
+            <div class="grid grid-cols-4 gap-8 font-bold text-sm text-blue-900 mb-3">
+              <div class="text-center">Enter Number Of Sessions</div>
+              <div class="text-center">Price per session</div>
+              <div class="text-center">Discount (%)</div>
+              <div class="text-center">Total Cost</div>
+            </div>
+            <div class="grid grid-cols-4 gap-8 items-center">
+              <div class="text-center">
+                <input type="number" id="numberOfSessions" min="0" max="30" value="0" class="w-20 text-center text-sm p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateSessionsCount(this.value)">
+              </div>
+              <div class="text-center">
+                <input type="number" id="pricePerSession" min="0" value="100" class="w-20 text-center text-sm p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateSessionPrice(this.value)">
+              </div>
+              <div class="text-center">
+                <input type="number" id="sessionDiscount" min="0" max="100" value="0" class="w-16 text-center text-sm p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateSessionDiscount(this.value)">
+              </div>
+              <div class="text-center">
+                <span id="sessionTotalCost" class="font-bold text-blue-900">€0</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -5123,6 +5253,11 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTreatmentPlanState();
     loadCustomMontages();
     renderTreatmentPlan();
+    
+    // Restore sessions values after rendering
+    setTimeout(() => {
+        restoreSessionsValues();
+    }, 500);
 });
     </script>
 </body>
